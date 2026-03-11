@@ -1,0 +1,44 @@
+/* Typography primitives from Figma Font Family.json + Font Size.json */
+/* Regenerate with: npm run tokens:typography */
+
+:root {
+  --font-headline: "Saira", sans-serif;
+  --font-body: "Saira", sans-serif;
+  --font-code: "JetBrains Mono", monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --leading-5: 20px;
+  --leading-6: 24px;
+  --leading-7: 28px;
+  --tracking-tighter: -0.80px;
+  --tracking-tight: -0.40px;
+  --tracking-normal: 0.00px;
+  --tracking-wide: 0.40px;
+  --tracking-wider: 0.80px;
+  --tracking-widest: 1.60px;
+}
+
+@media (max-width: 768px) {
+  :root {
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+  --text-4xl: 30px;
+  --text-5xl: 36px;
+  --text-6xl: 48px;
+  --leading-7: 24px;
+  }
+}
