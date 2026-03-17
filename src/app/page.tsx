@@ -29,9 +29,12 @@ import {
   Radio,
   Zap,
   Package,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 import { CampaignWizard } from "@/components/campaigns/campaign-wizard";
+import { GeofenceSettingsPage } from "@/components/geofences/geofence-settings-page";
+import { GeofenceProvider } from "@/lib/geofences/geofence-store";
 
 const products: SidebarProductConfig[] = [
   { id: "inventory", label: "Inventory Management", icon: Package },
@@ -107,10 +110,13 @@ export default function ProductPage() {
     setSelectedCampaignId(null);
   }, []);
 
+  const [isCreatingGeofence, setIsCreatingGeofence] = useState(false);
+
   const handleNavItemClick = useCallback((label: string) => {
     setActiveItem(label);
     setSelectedCampaignId(null);
     setIsCreatingCampaign(false);
+    setIsCreatingGeofence(false);
   }, []);
 
   const handleViewCampaign = useCallback((campaignId: string) => {
@@ -132,12 +138,12 @@ export default function ProductPage() {
 
   const isCampaignsView =
     activeProduct === "marketing" && activeItem === "Campaigns";
+  const isGeofencesView =
+    activeProduct === "inventory" && activeItem === "Geofences";
   const selectedCampaign = selectedCampaignId
     ? getCampaignById(selectedCampaignId)
     : undefined;
 
-  // Page title, description, and primary CTA live in main content below the top bar, not in the TopBar.
-  // Top bar is left empty when viewing campaign details; campaign name lives in the detail view only.
   const topBarTitle =
     isCampaignsView && isCreatingCampaign
       ? "Create Campaign"
@@ -147,43 +153,60 @@ export default function ProductPage() {
           ? undefined
           : activeItem;
   const topBarSubtitle = undefined;
-  const topBarRight = null;
+  const topBarRight = isGeofencesView ? (
+    <Button
+      size="sm"
+      className="min-w-[104px] gap-1.5"
+      onClick={() => setIsCreatingGeofence(true)}
+    >
+      <Plus className="size-4 shrink-0" />
+      Create Geofence
+    </Button>
+  ) : null;
 
   return (
-    <div className="flex h-screen bg-background font-sans">
-      <Sidebar
-        products={products}
-        activeProductId={activeProduct}
-        onProductChange={handleProductChange}
-        mainSections={mainSections}
-        settingsSections={settingsSections}
-        onNavItemClick={handleNavItemClick}
-      />
-      <div className="flex flex-1 flex-col min-w-0">
-        <TopBar
-          title={topBarTitle}
-          subtitle={topBarSubtitle}
-          right={topBarRight}
+    <GeofenceProvider>
+      <div className="flex h-screen bg-background font-sans">
+        <Sidebar
+          products={products}
+          activeProductId={activeProduct}
+          onProductChange={handleProductChange}
+          mainSections={mainSections}
+          settingsSections={settingsSections}
+          onNavItemClick={handleNavItemClick}
         />
-        <main className="flex flex-1 flex-col overflow-hidden">
-          {isCampaignsView && isCreatingCampaign ? (
-            <CampaignWizard
-              onCancel={() => setIsCreatingCampaign(false)}
-              onComplete={() => setIsCreatingCampaign(false)}
-            />
-          ) : isCampaignsView && selectedCampaign ? (
-            <CampaignDetail
-              campaign={selectedCampaign}
-              onBack={handleCampaignBack}
-            />
-          ) : isCampaignsView ? (
-            <CampaignDashboard
-              onCreateCampaign={() => setIsCreatingCampaign(true)}
-              onViewCampaign={handleViewCampaign}
-            />
-          ) : null}
-        </main>
+        <div className="flex flex-1 flex-col min-w-0">
+          <TopBar
+            title={topBarTitle}
+            subtitle={topBarSubtitle}
+            right={topBarRight}
+          />
+          <main className="flex flex-1 flex-col overflow-hidden">
+            {isGeofencesView ? (
+              <GeofenceSettingsPage
+                isCreating={isCreatingGeofence}
+                onCloseCreate={() => setIsCreatingGeofence(false)}
+                onCreateClick={() => setIsCreatingGeofence(true)}
+              />
+            ) : isCampaignsView && isCreatingCampaign ? (
+              <CampaignWizard
+                onCancel={() => setIsCreatingCampaign(false)}
+                onComplete={() => setIsCreatingCampaign(false)}
+              />
+            ) : isCampaignsView && selectedCampaign ? (
+              <CampaignDetail
+                campaign={selectedCampaign}
+                onBack={handleCampaignBack}
+              />
+            ) : isCampaignsView ? (
+              <CampaignDashboard
+                onCreateCampaign={() => setIsCreatingCampaign(true)}
+                onViewCampaign={handleViewCampaign}
+              />
+            ) : null}
+          </main>
+        </div>
       </div>
-    </div>
+    </GeofenceProvider>
   );
 }

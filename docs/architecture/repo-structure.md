@@ -12,8 +12,11 @@
 |------|--------|
 | `src/app/` | App Router routes (layout, page, globals.css). Root page (`/`) is the product app shell with sidebar navigation. |
 | `src/app/design-system/page.tsx` | Design system showcase: foundation tokens + UI components |
-| `src/components/ui/` | shadcn components (button, card, badge, input, sidebar, table, tabs, dialog, select, dropdown-menu, textarea, switch, radio-group, checkbox, separator, tooltip, progress, avatar, skeleton, sheet, label, popover, scroll-area) |
+| `src/components/ui/` | shadcn components (button, card, badge, input, sidebar, table, tabs, dialog, select, dropdown-menu, textarea, switch, radio-group, checkbox, separator, tooltip, progress, avatar, skeleton, sheet, label, popover, scroll-area, empty-state, mapbox-map) |
 | `src/components/app/` | App shell: TopBar (page header with optional title, subtitle, right slot). Design system showcases TopBar and main content area pattern at `/design-system`. |
+| `src/components/geofences/` | Geofence management: GeofenceSettingsPage (list + map), GeofenceWizard (2-step: draw then name/address), GeofenceDrawStep (polygon/circle tools, undo/redo, reset, move via simple_select), GeofenceDetailsStep (name + optional address), GeofenceListPanel, GeofenceDrawingToolbar. |
+| `src/lib/geofences/geofence-store.tsx` | GeofenceProvider and useGeofences: in-memory FeatureCollection, addGeofence, removeGeofence. Initial features from dealership main lot. |
+| `src/lib/inventory/dealership-geofences.ts` | GeofenceProperties, MainLotProperties, DEALERSHIP_CENTER, mainLotGeoJSON (single main lot polygon). |
 | `src/lib/utils.ts` | `cn()` and shared utilities |
 | `src/lib/design-tokens.ts` | Token definitions for the design system page (colors, radius) |
 | `src/lib/campaigns/types.ts` | Campaign domain types (Campaign, CampaignStatus, AudienceSegment, CampaignTrigger, CampaignMessage, ChannelConfig, CampaignMetrics, CampaignTemplate, DashboardMetrics, PersonalizationVariable, WizardMessage, ImageAttachment with optional kind `image`/`video` and gifPreviewUrl for video) |
