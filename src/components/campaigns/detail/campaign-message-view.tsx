@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import type { CampaignMessage, ChannelConfig, Channel } from "@/lib/campaigns/types";
+import { CouponCardPreview } from "@/components/campaigns/coupon-builder";
+import type {
+  CampaignMessage,
+  ChannelConfig,
+  Channel,
+  CampaignOffer,
+} from "@/lib/campaigns/types";
 
 const CHANNEL_META: Record<Channel, { label: string; icon: typeof Mail }> = {
   email: { label: "Email", icon: Mail },
@@ -54,10 +60,16 @@ function highlightVariables(text: string): React.ReactNode[] {
 interface CampaignMessageViewProps {
   messages: CampaignMessage[];
   channels: ChannelConfig[];
+  offers?: CampaignOffer[];
 }
 
-export function CampaignMessageView({ messages, channels }: CampaignMessageViewProps) {
+export function CampaignMessageView({
+  messages,
+  channels,
+  offers = [],
+}: CampaignMessageViewProps) {
   const enabledChannels = channels.filter((ch) => ch.isEnabled);
+  const hasSequence = messages.some((m) => m.delayDays != null);
 
   const allVariables = new Set<string>();
   for (const msg of messages) {
@@ -77,7 +89,7 @@ export function CampaignMessageView({ messages, channels }: CampaignMessageViewP
     <div className="space-y-6 pt-4">
       {/* Personalization variables */}
       {variableList.length > 0 && (
-        <Card size="sm">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
               <Tag className="size-4 text-muted-foreground" />
@@ -98,9 +110,83 @@ export function CampaignMessageView({ messages, channels }: CampaignMessageViewP
 
       <Separator />
 
-      {/* Channel message previews */}
+      {/* Message sequence (when messages have delayDays) */}
+      {hasSequence && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium">Message Sequence</h3>
+          <div className="space-y-3">
+            {messages.map((msg, idx) => {
+              const meta = CHANNEL_META[msg.channel];
+              const Icon = meta.icon;
+              const delayLabel =
+                msg.delayDays != null
+                  ? `Day ${msg.delayDays}`
+                  : `Message ${idx + 1}`;
+              return (
+                <Card key={idx}>
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="flex items-center gap-2 text-sm font-medium">
+                        <Icon className="size-4 text-muted-foreground" />
+                        {meta.label}
+                      </span>
+                      <Badge variant="secondary" className="text-xs">
+                        {delayLabel}
+                      </Badge>
+                      {msg.isAlternateVersion && (
+                        <Badge variant="outline" className="text-xs">
+                          Alternate message
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {msg.subject && msg.channel === "email" && (
+                        <div>
+                          <p className="mb-0.5 text-xs text-muted-foreground">Subject</p>
+                          <p className="text-sm font-medium">{msg.subject}</p>
+                        </div>
+                      )}
+                      <ChannelPreviewFrame channelType={msg.channel}>
+                        <p className="text-sm leading-relaxed">
+                          {highlightVariables(msg.body)}
+                        </p>
+                      </ChannelPreviewFrame>
+                      {msg.offerId ? (
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground">Coupon</p>
+                          {offers.find((o) => o.id === msg.offerId) ? (
+                            <div className="max-w-[280px]">
+                              <CouponCardPreview
+                                offer={
+                                  offers.find((o) => o.id === msg.offerId)!
+                                }
+                                compact
+                              />
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Offer attached: selected offer
+                            </p>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+          <Separator />
+        </div>
+      )}
+
+      {/* Channel message previews (single message per channel when not a sequence) */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium">Channel Previews</h3>
+        <h3 className="text-sm font-medium">
+          {hasSequence ? "Channel summary" : "Channel Previews"}
+        </h3>
 
         {enabledChannels.length === 0 ? (
           <p className="text-sm text-muted-foreground">No channels enabled for this campaign.</p>
@@ -156,6 +242,31 @@ export function CampaignMessageView({ messages, channels }: CampaignMessageViewP
                           {highlightVariables(channelMessage.body)}
                         </p>
                       </ChannelPreviewFrame>
+                      <div className="flex flex-wrap gap-2">
+                        {channelMessage.isAlternateVersion && (
+                          <Badge variant="outline" className="text-xs">
+                            Alternate message
+                          </Badge>
+                        )}
+                        {channelMessage.offerId && (
+                          <Badge variant="secondary" className="text-xs">
+                            Offer:{" "}
+                            {offers.find((offer) => offer.id === channelMessage.offerId)?.title ??
+                              "Selected offer"}
+                          </Badge>
+                        )}
+                      </div>
+                      {channelMessage.offerId &&
+                      offers.find((o) => o.id === channelMessage.offerId) ? (
+                        <div className="max-w-[280px]">
+                          <CouponCardPreview
+                            offer={
+                              offers.find((o) => o.id === channelMessage.offerId)!
+                            }
+                            compact
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   </CardContent>
                 </Card>

@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
+  BookUser,
   Home,
   LayoutDashboard,
-  Users,
   CreditCard,
   FileText,
   UserCog,
   Settings,
-  MapPin,
   Bell,
   Megaphone,
   Settings2,
@@ -19,19 +18,30 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { BoundaryIcon } from "@/components/icons/boundary-icon";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { cn } from "@/lib/utils";
 
 /* Sidebar uses design tokens: --sidebar, --sidebar-foreground, --sidebar-accent,
    --sidebar-border, --spacing-*, --radius-sm, --text-sm, --leading-5, theme text/background. */
 
 const SIDEBAR_WIDTH = 280;
+const SIDEBAR_COLLAPSED_WIDTH = 72;
 
-export interface SidebarNavItemConfig {
-  label: string;
-  icon: LucideIcon;
-  isActive?: boolean;
-  href?: string;
-}
+/** Nav row: either a Lucide glyph or a static asset from `public/` (`iconSrc`, e.g. Geofences → `/boundary.svg`). */
+export type SidebarNavItemConfig =
+  | {
+      label: string;
+      icon: LucideIcon;
+      isActive?: boolean;
+      href?: string;
+    }
+  | {
+      label: string;
+      iconSrc: string;
+      isActive?: boolean;
+      href?: string;
+    };
 
 export interface SidebarNavSectionConfig {
   title?: string;
@@ -58,11 +68,25 @@ export interface SidebarProps {
   products?: SidebarProductConfig[];
   activeProductId?: string;
   onProductChange?: (productId: string) => void;
+  showTopProductSwitcher?: boolean;
+  showFooterProductToggle?: boolean;
   mainSections?: SidebarNavSectionConfig[];
   settingsSections?: SidebarNavSectionConfig[];
   onNavItemClick?: (label: string) => void;
   onFold?: () => void;
   onLogOut?: () => void;
+  /** Enables collapse/expand behavior. Defaults to false to preserve current behavior. */
+  collapsible?: boolean;
+  /** Controlled collapsed state. */
+  collapsed?: boolean;
+  /** Uncontrolled initial collapsed state. */
+  defaultCollapsed?: boolean;
+  /** Called whenever collapse state toggles. */
+  onCollapsedChange?: (collapsed: boolean) => void;
+  /** Expanded width in px. */
+  expandedWidth?: number;
+  /** Collapsed width in px (icon rail). */
+  collapsedWidth?: number;
 }
 
 function ToolboxLogoMark({ className }: { className?: string }) {
@@ -98,59 +122,116 @@ function SidebarLogo({ children }: { children?: React.ReactNode }) {
 }
 
 function SidebarFoldButton({
-  onClick,
+  collapsible,
+  collapsed,
+  onToggle,
   className,
 }: {
-  onClick?: () => void;
+  collapsible: boolean;
+  collapsed: boolean;
+  onToggle?: () => void;
   className?: string;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      aria-label="Collapse sidebar"
+      onClick={onToggle}
+      aria-label={
+        collapsible
+          ? collapsed
+            ? "Expand sidebar"
+            : "Collapse sidebar"
+          : "Collapse sidebar"
+      }
+      aria-expanded={collapsible ? !collapsed : undefined}
       className={cn(
         "flex size-6 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         className
       )}
     >
-      <PanelLeftClose className="size-4" aria-hidden />
+      <PanelLeftClose
+        className={cn(
+          "size-4 transition-transform duration-200 motion-reduce:transition-none",
+          collapsed && "rotate-180"
+        )}
+        aria-hidden
+      />
     </button>
   );
 }
 
 function SidebarHeader({
   logo,
-  onFold,
+  collapsed,
+  showFoldButton,
+  collapsible,
+  onToggleCollapse,
 }: {
   logo?: React.ReactNode;
-  onFold?: () => void;
+  collapsed: boolean;
+  showFoldButton: boolean;
+  collapsible: boolean;
+  onToggleCollapse?: () => void;
 }) {
   return (
     <div
-      className="flex w-full shrink-0 items-center justify-between"
+      className={cn(
+        "relative flex w-full shrink-0 items-center",
+        collapsed ? "justify-center" : "justify-between"
+      )}
       style={{
         paddingBottom: "var(--spacing-16)",
-        paddingLeft: "var(--spacing-12)",
-        paddingRight: "var(--spacing-16)",
+        paddingLeft: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
+        paddingRight: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
         paddingTop: "var(--spacing-24)",
       }}
     >
-      <SidebarLogo>{logo}</SidebarLogo>
-      <SidebarFoldButton onClick={onFold} />
+      <SidebarLogo>
+        {logo ?? (
+          <ToolboxLogoMark
+            className={cn(
+              "w-auto text-primary transition-[height] duration-200 motion-reduce:transition-none",
+              collapsed ? "h-7" : "h-10"
+            )}
+          />
+        )}
+      </SidebarLogo>
+      {showFoldButton ? (
+        <SidebarFoldButton
+          collapsible={collapsible}
+          collapsed={collapsed}
+          onToggle={onToggleCollapse}
+          className={collapsed ? "absolute right-[var(--spacing-8)] top-[var(--spacing-24)]" : undefined}
+        />
+      ) : null}
     </div>
   );
 }
 
-function SidebarUserBar({ user }: { user: SidebarUserConfig }) {
+function SidebarUserBar({
+  user,
+  collapsed,
+}: {
+  user: SidebarUserConfig;
+  collapsed: boolean;
+}) {
+  const initials = user.initials ?? user.primaryText.slice(0, 2).toUpperCase();
+
   return (
     <div
-      className="w-full px-[var(--spacing-12)]"
-      style={{ paddingTop: 0, paddingBottom: "var(--spacing-16)" }}
+      className={cn(
+        "w-full",
+        collapsed ? "px-[var(--spacing-8)]" : "px-[var(--spacing-16)]"
+      )}
+      style={{ paddingTop: 0, paddingBottom: "var(--spacing-8)" }}
     >
       <button
         type="button"
-        className="flex h-[52px] w-full cursor-pointer items-center gap-[var(--spacing-8)] rounded-[var(--radius-sm)] border border-border p-[var(--spacing-8)] transition-colors hover:bg-muted"
+        title={collapsed ? user.primaryText : undefined}
+        className={cn(
+          "flex h-[52px] w-full cursor-pointer items-center gap-[var(--spacing-8)] rounded-[var(--radius-sm)] border border-border p-[var(--spacing-8)] transition-colors hover:bg-muted",
+          collapsed && "justify-center"
+        )}
         style={{ minHeight: 52, backgroundColor: "var(--theme-background-account-selector)" }}
       >
         <div
@@ -165,33 +246,37 @@ function SidebarUserBar({ user }: { user: SidebarUserConfig }) {
               className="size-full object-contain"
             />
           ) : (
-            user.initials ?? user.primaryText.slice(0, 2).toUpperCase()
+            initials
           )}
         </div>
-        <div className="min-w-0 flex-1 text-left">
-          <p
-            className="truncate font-medium leading-[var(--leading-5)]"
-            style={{
-              color: "var(--theme-text-primary)",
-              fontSize: "var(--text-xs)",
-            }}
-          >
-            {user.primaryText}
-          </p>
-          <p
-            className="truncate font-normal"
-            style={{
-              color: "var(--theme-text-secondary)",
-              fontSize: "var(--text-xs)",
-            }}
-          >
-            {user.secondaryText}
-          </p>
-        </div>
-        <ChevronDown
-          className="size-4 shrink-0 text-muted-foreground"
-          aria-hidden
-        />
+        {!collapsed ? (
+          <>
+            <div className="min-w-0 flex-1 text-left">
+              <p
+                className="truncate font-medium leading-[var(--leading-5)]"
+                style={{
+                  color: "var(--theme-text-primary)",
+                  fontSize: "var(--text-xs)",
+                }}
+              >
+                {user.primaryText}
+              </p>
+              <p
+                className="truncate font-normal"
+                style={{
+                  color: "var(--theme-text-secondary)",
+                  fontSize: "var(--text-xs)",
+                }}
+              >
+                {user.secondaryText}
+              </p>
+            </div>
+            <ChevronDown
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+          </>
+        ) : null}
       </button>
     </div>
   );
@@ -201,10 +286,12 @@ function SidebarProductSwitcher({
   products,
   activeProductId,
   onProductChange,
+  collapsed,
 }: {
   products: SidebarProductConfig[];
   activeProductId: string;
   onProductChange?: (productId: string) => void;
+  collapsed: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -232,15 +319,22 @@ function SidebarProductSwitcher({
       ref={containerRef}
       className="relative w-full"
       style={{
-        paddingLeft: "var(--spacing-12)",
-        paddingRight: "var(--spacing-12)",
+        paddingLeft: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
+        paddingRight: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
         paddingBottom: "var(--spacing-4)",
       }}
     >
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex h-9 w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] px-[var(--spacing-6)] transition-colors hover:bg-muted"
+        title={collapsed ? activeProduct.label : undefined}
+        onClick={() => {
+          if (collapsed) return;
+          setIsOpen(!isOpen);
+        }}
+        className={cn(
+          "flex h-9 w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] px-[var(--spacing-6)] transition-colors hover:bg-muted",
+          collapsed && "justify-center px-0"
+        )}
       >
         <span
           className="flex size-5 shrink-0 items-center justify-center"
@@ -248,26 +342,30 @@ function SidebarProductSwitcher({
         >
           <ActiveIcon className="size-[18px]" aria-hidden />
         </span>
-        <span
-          className="min-w-0 flex-1 truncate text-left font-semibold"
-          style={{
-            fontSize: "var(--text-sm)",
-            lineHeight: "var(--leading-5)",
-            color: "var(--theme-text-primary)",
-          }}
-        >
-          {activeProduct.label}
-        </span>
-        <ChevronDown
-          className={cn(
-            "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
-            isOpen && "rotate-180"
-          )}
-          aria-hidden
-        />
+        {!collapsed ? (
+          <>
+            <span
+              className="min-w-0 flex-1 truncate text-left font-semibold"
+              style={{
+                fontSize: "var(--text-sm)",
+                lineHeight: "var(--leading-5)",
+                color: "var(--theme-text-primary)",
+              }}
+            >
+              {activeProduct.label}
+            </span>
+            <ChevronDown
+              className={cn(
+                "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                isOpen && "rotate-180"
+              )}
+              aria-hidden
+            />
+          </>
+        ) : null}
       </button>
-      {isOpen && (
-        <div className="absolute left-[var(--spacing-12)] right-[var(--spacing-12)] top-full z-50 mt-1 overflow-hidden rounded-[var(--radius-sm)] border border-border bg-card shadow-lg">
+      {isOpen && !collapsed && (
+        <div className="absolute left-[var(--spacing-16)] right-[var(--spacing-16)] top-full z-50 mt-1 overflow-hidden rounded-[var(--radius-sm)] border border-border bg-card shadow-lg">
           {products.map((product) => {
             const Icon = product.icon;
             const isActive = product.id === activeProductId;
@@ -314,47 +412,64 @@ function SidebarProductSwitcher({
   );
 }
 
+function SidebarNavStaticIcon({ src }: { src: string }) {
+  if (src === "/boundary.svg") {
+    return <BoundaryIcon className="size-[18px]" />;
+  }
+  return (
+    <img
+      src={src}
+      alt=""
+      className="size-[18px] shrink-0 object-contain opacity-90"
+      aria-hidden
+    />
+  );
+}
+
+function SidebarNavPrimaryIcon({ item }: { item: SidebarNavItemConfig }) {
+  if ("iconSrc" in item) {
+    return <SidebarNavStaticIcon src={item.iconSrc} />;
+  }
+  const Icon = item.icon;
+  return <Icon className="size-[18px]" aria-hidden />;
+}
+
 function SidebarNavItem({
   item,
   onClick,
+  collapsed,
 }: {
   item: SidebarNavItemConfig;
   onClick?: () => void;
+  collapsed: boolean;
 }) {
-  const Icon = item.icon;
   const isActive = item.isActive ?? false;
   const content = (
     <>
-      <span
-        className="flex size-5 shrink-0 items-center justify-center"
-        style={{
-          color: isActive
-            ? "var(--theme-icon-interactive)"
-            : "var(--theme-text-secondary)",
-        }}
-      >
-        <Icon className="size-[18px]" aria-hidden />
+      <span className="flex size-5 shrink-0 items-center justify-center">
+        <SidebarNavPrimaryIcon item={item} />
       </span>
-      <span
-        className="min-w-0 truncate font-medium"
-        style={{
-          fontSize: "var(--text-sm)",
-          lineHeight: "var(--leading-5)",
-          color: isActive
-            ? "var(--theme-text-primary)"
-            : "var(--theme-text-secondary)",
-        }}
-      >
-        {item.label}
-      </span>
+      {!collapsed ? (
+        <span
+          className="min-w-0 truncate font-medium"
+          style={{
+            fontSize: "var(--text-sm)",
+            lineHeight: "var(--leading-5)",
+          }}
+        >
+          {item.label}
+        </span>
+      ) : null}
     </>
   );
 
   const baseClasses =
-    "flex w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-6)] h-8 transition-colors";
-  const activeClasses = "bg-[var(--primary-hover)]/10 text-foreground font-medium";
+    "flex w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-8)] h-9 transition-colors";
+  /** Active row: sidebar accent surface + matching foreground (dark text in light mode, light text in dark). */
+  const activeClasses =
+    "bg-sidebar-accent font-medium text-sidebar-accent-foreground";
   const inactiveClasses =
-    "bg-transparent text-muted-foreground hover:bg-[var(--primary-hover)]/5 hover:text-foreground";
+    "bg-transparent text-[color:var(--theme-text-secondary)] hover:bg-[color:var(--sidebar-nav-item-hover-bg)] hover:text-foreground";
 
   if (item.href) {
     return (
@@ -362,8 +477,10 @@ function SidebarNavItem({
         href={item.href}
         className={cn(
           baseClasses,
+          collapsed && "justify-center gap-0 px-0",
           isActive ? activeClasses : inactiveClasses
         )}
+        title={collapsed ? item.label : undefined}
         aria-current={isActive ? "page" : undefined}
       >
         {content}
@@ -377,8 +494,10 @@ function SidebarNavItem({
       onClick={onClick}
       className={cn(
         baseClasses,
+        collapsed && "justify-center gap-0 px-0",
         isActive ? activeClasses : inactiveClasses
       )}
+      title={collapsed ? item.label : undefined}
       aria-current={isActive ? "page" : undefined}
     >
       {content}
@@ -389,21 +508,27 @@ function SidebarNavItem({
 function SidebarNavSection({
   section,
   onItemClick,
+  collapsed,
+  paddingTop: paddingTopOverride,
+  paddingBottom: paddingBottomOverride,
 }: {
   section: SidebarNavSectionConfig;
   onItemClick?: (label: string) => void;
+  collapsed: boolean;
+  paddingTop?: string;
+  paddingBottom?: string;
 }) {
   return (
     <div
       className="flex w-full flex-col gap-[2px]"
       style={{
-        paddingLeft: "var(--spacing-12)",
-        paddingRight: "var(--spacing-12)",
-        paddingTop: "var(--spacing-12)",
-        paddingBottom: "var(--spacing-12)",
+        paddingLeft: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
+        paddingRight: collapsed ? "var(--spacing-8)" : "var(--spacing-16)",
+        paddingTop: paddingTopOverride ?? "var(--spacing-16)",
+        paddingBottom: paddingBottomOverride ?? "var(--spacing-16)",
       }}
     >
-      {section.title && (
+      {section.title && !collapsed && (
         <div
           className="px-[var(--spacing-8)] py-[var(--spacing-4)] font-medium"
           style={{
@@ -420,6 +545,7 @@ function SidebarNavSection({
           <SidebarNavItem
             key={item.label}
             item={item}
+            collapsed={collapsed}
             onClick={() => onItemClick?.(item.label)}
           />
         ))}
@@ -430,15 +556,17 @@ function SidebarNavSection({
 
 function SidebarFooter({
   onLogOut,
+  collapsed,
 }: {
   onLogOut?: () => void;
+  collapsed: boolean;
 }) {
   return (
     <div
       className="flex w-full shrink-0 items-center gap-[var(--spacing-8)]"
       style={{
-        paddingLeft: "var(--spacing-12)",
-        paddingRight: "var(--spacing-12)",
+        paddingLeft: "var(--spacing-16)",
+        paddingRight: "var(--spacing-16)",
         paddingTop: "var(--spacing-8)",
         paddingBottom: "var(--spacing-8)",
       }}
@@ -446,7 +574,11 @@ function SidebarFooter({
       <button
         type="button"
         onClick={onLogOut}
-        className="flex flex-1 items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-6)] transition-colors hover:bg-muted"
+        title={collapsed ? "Log out" : undefined}
+        className={cn(
+          "flex flex-1 items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-6)] transition-colors hover:bg-muted",
+          collapsed && "justify-center"
+        )}
         style={{
           fontSize: "var(--text-sm)",
           lineHeight: "var(--leading-5)",
@@ -456,8 +588,57 @@ function SidebarFooter({
         <span className="flex size-5 shrink-0 items-center justify-center">
           <LogOut className="size-[18px]" aria-hidden />
         </span>
-        <span className="font-medium">Log out</span>
+        {!collapsed ? <span className="font-medium">Log out</span> : null}
       </button>
+    </div>
+  );
+}
+
+function SidebarProductFooterToggle({
+  products,
+  activeProductId,
+  onProductChange,
+}: {
+  products: SidebarProductConfig[];
+  activeProductId: string;
+  onProductChange?: (productId: string) => void;
+}) {
+  if (products.length !== 2) return null;
+  const [left, right] = products;
+  const LeftIcon = left.icon;
+  const RightIcon = right.icon;
+
+  return (
+    <div
+      className="flex w-full justify-center"
+      style={{
+        paddingTop: "var(--spacing-8)",
+        paddingBottom: "var(--spacing-4)",
+      }}
+    >
+      <ToggleSwitch
+        aria-label="Active app module"
+        size="default"
+        className={cn(
+          "inline-flex h-12 rounded-[12px] bg-[#D7D7D7] p-1",
+          "[&_[role=radio]]:h-10 [&_[role=radio]]:min-w-10 [&_[role=radio]]:px-0",
+          "[&_[role=radio]]:text-[#6E6E6E] [&_[role=radio][data-active]]:text-[#2E2E2E]"
+        )}
+        value={activeProductId}
+        onValueChange={(value) => onProductChange?.(value)}
+        options={[
+          {
+            value: left.id,
+            label: left.label,
+            icon: <LeftIcon className="size-[18px]" aria-hidden />,
+          },
+          {
+            value: right.id,
+            label: right.label,
+            icon: <RightIcon className="size-[18px]" aria-hidden />,
+          },
+        ]}
+      />
     </div>
   );
 }
@@ -467,7 +648,7 @@ const defaultMainSections: SidebarNavSectionConfig[] = [
     items: [
       { label: "Home", icon: Home },
       { label: "Dashboard", icon: LayoutDashboard },
-      { label: "Customers", icon: Users },
+      { label: "Customers", icon: BookUser },
       { label: "Billing", icon: CreditCard, isActive: true },
       { label: "Reports", icon: FileText },
       { label: "Staff", icon: UserCog },
@@ -480,7 +661,6 @@ const defaultSettingsSections: SidebarNavSectionConfig[] = [
     title: "Settings",
     items: [
       { label: "General", icon: Settings },
-      { label: "Geofences", icon: MapPin },
       { label: "Alerts", icon: Bell },
       { label: "Marketing", icon: Megaphone },
       { label: "Configurations", icon: Settings2 },
@@ -489,8 +669,8 @@ const defaultSettingsSections: SidebarNavSectionConfig[] = [
 ];
 
 const defaultUser: SidebarUserConfig = {
-  primaryText: "BMW Advantage Houston",
-  secondaryText: "Group One Automotive",
+  primaryText: "BMW ACME Dealership",
+  secondaryText: "Automobile Group",
   logoSrc: "/account-logo-placeholder.png",
 };
 
@@ -501,47 +681,96 @@ export function Sidebar({
   products,
   activeProductId,
   onProductChange,
+  showTopProductSwitcher = true,
+  showFooterProductToggle = true,
   mainSections = defaultMainSections,
   settingsSections = defaultSettingsSections,
   onNavItemClick,
   onFold,
   onLogOut,
+  collapsible = false,
+  collapsed,
+  defaultCollapsed = false,
+  onCollapsedChange,
+  expandedWidth = SIDEBAR_WIDTH,
+  collapsedWidth = SIDEBAR_COLLAPSED_WIDTH,
 }: SidebarProps) {
+  const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
+  const isCollapsed = collapsed ?? internalCollapsed;
+  const showFoldButton = true;
+
+  function handleToggleCollapse() {
+    if (!collapsible) {
+      onFold?.();
+      return;
+    }
+    const next = !isCollapsed;
+    if (collapsed == null) {
+      setInternalCollapsed(next);
+    }
+    onCollapsedChange?.(next);
+    onFold?.();
+  }
+
   return (
     <aside
       className={cn(
-        "flex h-full flex-col bg-sidebar isolate",
+        "flex h-full flex-col border-r border-border bg-sidebar isolate",
+        "transition-[width] duration-300 ease-out motion-reduce:transition-none",
         className
       )}
-      style={{ width: SIDEBAR_WIDTH }}
+      style={{ width: isCollapsed ? collapsedWidth : expandedWidth }}
       aria-label="Main navigation"
     >
-      <SidebarHeader logo={logo} onFold={onFold} />
+      <SidebarHeader
+        logo={logo}
+        collapsed={isCollapsed}
+        showFoldButton={showFoldButton}
+        collapsible={collapsible}
+        onToggleCollapse={handleToggleCollapse}
+      />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <SidebarUserBar user={user} />
-        {products && activeProductId && (
+        <SidebarUserBar user={user} collapsed={isCollapsed} />
+        {showTopProductSwitcher && products && activeProductId && (
           <SidebarProductSwitcher
             products={products}
             activeProductId={activeProductId}
             onProductChange={onProductChange}
+            collapsed={isCollapsed}
           />
         )}
         {mainSections.map((section, index) => (
           <SidebarNavSection
             key={section.title ?? `main-${index}`}
             section={section}
+            collapsed={isCollapsed}
             onItemClick={onNavItemClick}
+            paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
+            paddingBottom={
+              index === mainSections.length - 1
+                ? "var(--spacing-8)"
+                : undefined
+            }
           />
         ))}
         {settingsSections.map((section, index) => (
           <SidebarNavSection
             key={section.title ?? `settings-${index}`}
             section={section}
+            collapsed={isCollapsed}
             onItemClick={onNavItemClick}
+            paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
           />
         ))}
       </div>
-      <SidebarFooter onLogOut={onLogOut} />
+      {showFooterProductToggle && products && activeProductId && !isCollapsed ? (
+        <SidebarProductFooterToggle
+          products={products}
+          activeProductId={activeProductId}
+          onProductChange={onProductChange}
+        />
+      ) : null}
+      <SidebarFooter onLogOut={onLogOut} collapsed={isCollapsed} />
     </aside>
   );
 }

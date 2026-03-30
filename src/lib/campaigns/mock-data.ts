@@ -1,4 +1,5 @@
 import type {
+  AudienceSegment,
   Campaign,
   CampaignTemplate,
   CampaignTrigger,
@@ -6,6 +7,7 @@ import type {
   Channel,
   DashboardMetrics,
 } from "./types";
+import type { CapacityHint } from "./types";
 import { VEHICLE_MAKES } from "./vehicle-data";
 
 // ---------------------------------------------------------------------------
@@ -57,6 +59,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     createdAt: "2025-12-15T10:00:00Z",
     updatedAt: "2026-03-01T14:30:00Z",
     launchedAt: "2026-01-02T09:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-001",
   },
   {
     id: "camp-002",
@@ -97,6 +100,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     createdAt: "2026-01-10T08:00:00Z",
     updatedAt: "2026-03-05T11:00:00Z",
     launchedAt: "2026-01-15T09:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-004",
   },
   {
     id: "camp-003",
@@ -188,6 +192,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     createdAt: "2026-03-01T10:00:00Z",
     updatedAt: "2026-03-08T10:00:00Z",
     scheduledAt: "2026-04-01T09:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-016",
   },
   {
     id: "camp-005",
@@ -229,6 +234,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     createdAt: "2026-03-05T14:00:00Z",
     updatedAt: "2026-03-07T10:00:00Z",
     scheduledAt: "2026-03-20T09:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-008",
   },
   {
     id: "camp-006",
@@ -271,6 +277,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     updatedAt: "2026-01-15T10:00:00Z",
     launchedAt: "2025-11-01T09:00:00Z",
     completedAt: "2026-01-15T00:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-006",
   },
   {
     id: "camp-007",
@@ -309,6 +316,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     updatedAt: "2025-12-31T10:00:00Z",
     launchedAt: "2025-10-01T09:00:00Z",
     completedAt: "2025-12-31T00:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-014",
   },
   {
     id: "camp-008",
@@ -381,6 +389,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     },
     createdAt: "2026-03-08T15:00:00Z",
     updatedAt: "2026-03-08T15:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-023",
   },
   {
     id: "camp-010",
@@ -426,6 +435,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
     createdAt: "2026-02-10T10:00:00Z",
     updatedAt: "2026-03-02T10:00:00Z",
     launchedAt: "2026-02-15T09:00:00Z",
+    marketingLibraryTemplateId: "tpl-library-008",
   },
 ];
 
@@ -436,6 +446,7 @@ export const MOCK_CAMPAIGNS: Campaign[] = [
 export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "tpl-001",
+    marketingLibraryTemplateId: "tpl-library-001",
     name: "New Owner Onboarding",
     description:
       "Welcome new vehicle purchasers and drive first-service bookings.",
@@ -452,13 +463,24 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
       trigger: {
         type: "time-based",
         isRecurring: false,
-        config: { delayDays: 3 },
+        config: { delayDays: 1 },
       },
       messages: [
         {
-          subject: "Welcome to the {{dealership_name}} family!",
-          body: "Hi {{customer_name}}, congratulations on your new {{vehicle_year}} {{vehicle_make}} {{vehicle_model}}! We're excited to have you as part of our family.\n\nAs a valued customer, you're eligible for a complimentary first service. Our certified technicians will ensure your new vehicle is performing at its best.\n\nSchedule your complimentary first service today!",
-          channel: "email",
+          subject: "Welcome to {{dealership_name}} — your service team",
+          body: "Hi {{customer_name}}, I'm {{service_director_name}}, your service director at {{dealership_name}}. Congratulations on your new {{vehicle_year}} {{vehicle_make}} {{vehicle_model}} {{vehicle_trim}}. If you have any questions, save my contact and reach out anytime.",
+          channel: "sms",
+          delayDays: 1,
+        },
+        {
+          body: "Hi {{customer_name}}, hope you're doing well and enjoying your new {{vehicle_model}}. If anything comes up, we're here for you.",
+          channel: "sms",
+          delayDays: 7,
+        },
+        {
+          body: "Hi {{customer_name}}, we wanted to check in. If you have any questions or want to make sure your {{vehicle_model}} is running great, stop by {{dealership_name}} or give us a call. We're here to help.",
+          channel: "sms",
+          delayDays: 30,
         },
       ],
       channels: [
@@ -469,6 +491,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   },
   {
     id: "tpl-002",
+    marketingLibraryTemplateId: "tpl-library-004",
     name: "Service Reminder",
     description:
       "Automated reminders for upcoming scheduled service intervals.",
@@ -485,6 +508,11 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
           body: "Hi {{customer_name}}, your {{vehicle_year}} {{vehicle_make}} {{vehicle_model}} is approaching its next scheduled service at {{mileage}} miles.\n\nStaying on schedule keeps your vehicle running smoothly and protects your warranty. Our certified technicians are ready to help.\n\nBook your appointment today and keep your vehicle in peak condition!",
           channel: "sms",
         },
+        {
+          body: "Hi {{customer_name}}, quick reminder: your {{vehicle_model}} is due for service. Book at {{dealership_name}} and save 15% when you schedule this week. Reply YES to confirm.",
+          channel: "sms",
+          delayDays: 7,
+        },
       ],
       channels: [
         { channel: "sms", isEnabled: true, estimatedReach: 395 },
@@ -494,65 +522,91 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   },
   {
     id: "tpl-003",
-    name: "Oil Change Reminder",
+    marketingLibraryTemplateId: "tpl-library-010",
+    name: "Lease Renewal",
     description:
-      "Target customers approaching their next oil change interval.",
-    category: "oil-change",
+      "Re-engage lessees approaching end of term with renewal or purchase options.",
+    category: "lease-renewal",
     defaults: {
       audienceSegments: [
         {
           id: "tpl-seg-3",
-          field: "Last Oil Change",
-          operator: "more than",
-          value: "5000 miles ago",
+          field: "Lease End Date",
+          operator: "within",
+          value: "90 days",
         },
       ],
       trigger: {
-        type: "mileage",
-        isRecurring: true,
-        config: { intervalMiles: 5000 },
+        type: "time-based",
+        isRecurring: false,
+        config: { daysBeforeExpiry: 90 },
       },
       messages: [
         {
-          subject: "Time for an oil change, {{customer_name}}",
-          body: "Hi {{customer_name}}, it's been a while since your last oil change. Your {{vehicle_year}} {{vehicle_model}} is due for fresh oil to keep your engine protected and running smoothly.\n\nDon't wait — regular oil changes extend your engine's life and improve fuel efficiency.\n\nSchedule your oil change today and get a free multi-point inspection!",
+          subject: "Your lease is ending soon — options for your {{vehicle_model}}",
+          body: "Hi {{customer_name}}, your lease on your {{vehicle_year}} {{vehicle_make}} {{vehicle_model}} is ending soon. We'd love to help you choose your next step: renew your lease, purchase this vehicle, or find a new one.\n\nSchedule a quick conversation with our team to explore your options and any current incentives.",
+          channel: "email",
+        },
+        {
+          subject: "60 days left on your lease — let's talk",
+          body: "Hi {{customer_name}}, your lease ends in about 60 days. Have you thought about your next vehicle? We have special lease-end offers and trade-in values for your {{vehicle_model}}. Reply OPTIONS to learn more.",
+          channel: "email",
+          delayDays: 30,
+        },
+        {
+          body: "Hi {{customer_name}}, your lease on your {{vehicle_model}} is up in ~30 days. Reply RENEW to extend, TRADE for a new vehicle, or call us to discuss. {{dealership_name}}",
           channel: "sms",
+          delayDays: 60,
         },
       ],
       channels: [
-        { channel: "sms", isEnabled: true, estimatedReach: 820 },
-        { channel: "email", isEnabled: true, estimatedReach: 1450 },
+        { channel: "email", isEnabled: true, estimatedReach: 380 },
+        { channel: "sms", isEnabled: true, estimatedReach: 310 },
       ],
     },
   },
   {
     id: "tpl-004",
-    name: "Battery Health Alert",
+    marketingLibraryTemplateId: "tpl-library-011",
+    name: "Vehicle Trade-In",
     description:
-      "Proactively reach owners with declining battery diagnostics.",
-    category: "battery-health",
+      "Reach owners with equity or older vehicles to drive trade-in and sales.",
+    category: "vehicle-trade-in",
     defaults: {
+      audienceSegments: [
+        {
+          id: "tpl-seg-4",
+          field: "Vehicle Age",
+          operator: "greater than",
+          value: "5 years",
+        },
+      ],
       trigger: {
-        type: "diagnostic",
-        isRecurring: true,
-        config: { healthThreshold: 40 },
+        type: "time-based",
+        isRecurring: false,
+        config: { delayDays: 1 },
       },
       messages: [
         {
-          subject: "Battery alert for your {{vehicle_model}}",
-          body: "Hi {{customer_name}}, our diagnostics show that your {{vehicle_year}} {{vehicle_model}}'s battery health has dropped to {{battery_health}}%. A declining battery can leave you stranded.\n\nWe recommend scheduling a free battery inspection at your earliest convenience. Our technicians can test your battery and recommend the best course of action.\n\nBook your free battery inspection today!",
-          channel: "email",
+          subject: "Get more for your {{vehicle_model}} — trade-in value has never been better",
+          body: "Hi {{customer_name}}, the value of your {{vehicle_year}} {{vehicle_make}} {{vehicle_model}} may be higher than you think. Get a free, no-obligation trade-in quote and see how much you could put toward your next vehicle.\n\nReply TRADE to get your personalized estimate or stop by {{dealership_name}} for a quick appraisal.",
+          channel: "sms",
+        },
+        {
+          body: "Hi {{customer_name}}, still thinking about trading your {{vehicle_model}}? Our offer is valid for 7 more days. Reply TRADE for your updated quote or visit {{dealership_name}}.",
+          channel: "sms",
+          delayDays: 7,
         },
       ],
       channels: [
-        { channel: "sms", isEnabled: true, estimatedReach: 160 },
-        { channel: "email", isEnabled: true, estimatedReach: 170 },
-        { channel: "push", isEnabled: true, estimatedReach: 120 },
+        { channel: "sms", isEnabled: true, estimatedReach: 520 },
+        { channel: "email", isEnabled: true, estimatedReach: 680 },
       ],
     },
   },
   {
     id: "tpl-005",
+    marketingLibraryTemplateId: "tpl-library-008",
     name: "Warranty Expiration",
     description:
       "Notify owners before factory warranty expires to upsell extended plans.",
@@ -576,6 +630,13 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
           subject: "Your {{vehicle_model}} warranty expires soon",
           body: "Hi {{customer_name}}, your factory warranty on your {{vehicle_year}} {{vehicle_make}} {{vehicle_model}} is expiring soon. Don't let unexpected repair costs catch you off guard.\n\nExplore our extended protection plans to keep your vehicle covered. Plans start at affordable monthly rates with comprehensive coverage.\n\nLearn more about your protection options today!",
           channel: "email",
+          delayDays: 60,
+        },
+        {
+          subject: "30 days left — extend your {{vehicle_model}} warranty",
+          body: "Hi {{customer_name}}, your warranty expires in about 30 days. Lock in extended coverage at today's rates. Reply EXTEND for a quote or visit {{dealership_name}}.",
+          channel: "email",
+          delayDays: 30,
         },
       ],
       channels: [
@@ -586,31 +647,254 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   },
   {
     id: "tpl-006",
-    name: "Seasonal Promotion",
+    marketingLibraryTemplateId: "tpl-library-007",
+    name: "Recall",
     description:
-      "Time-limited seasonal offers tied to weather or calendar events.",
-    category: "seasonal-promotion",
+      "Notify affected owners about safety or compliance recalls and schedule repairs.",
+    category: "recall",
     defaults: {
+      audienceSegments: [
+        {
+          id: "tpl-seg-6",
+          field: "Open Recall",
+          operator: "equals",
+          value: "Yes",
+        },
+      ],
       trigger: {
-        type: "seasonal",
+        type: "time-based",
         isRecurring: false,
-        config: {},
+        config: { delayDays: 1 },
       },
       messages: [
         {
-          subject: "Spring savings for your {{vehicle_model}}",
-          body: "Hi {{customer_name}}, spring is here and it's the perfect time to get your {{vehicle_year}} {{vehicle_model}} ready for the season ahead!\n\nTake advantage of our limited-time spring service special:\n• Tire rotation — $29.99\n• A/C system check — complimentary\n• Multi-point inspection — included\n\nDon't miss out — book your spring service appointment today!",
+          subject: "Important: recall notice for your {{vehicle_model}}",
+          body: "Hi {{customer_name}}, there is an open recall on your {{vehicle_year}} {{vehicle_make}} {{vehicle_model}}. Your safety is our priority — we'll perform the repair at no cost to you.\n\nPlease schedule an appointment at {{dealership_name}} at your earliest convenience. Reply RECALL to book or call us directly.",
           channel: "email",
+        },
+        {
+          subject: "Reminder: schedule your recall repair",
+          body: "Hi {{customer_name}}, we still have an open recall on your {{vehicle_model}}. The repair is free. Reply RECALL to book or call {{dealership_name}}.",
+          channel: "email",
+          delayDays: 14,
         },
       ],
       channels: [
-        { channel: "email", isEnabled: true, estimatedReach: 1180 },
-        { channel: "sms", isEnabled: true, estimatedReach: 1050 },
-        { channel: "push", isEnabled: true, estimatedReach: 680 },
+        { channel: "email", isEnabled: true, estimatedReach: 420 },
+        { channel: "sms", isEnabled: true, estimatedReach: 390 },
       ],
     },
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Exclusion rules (who does NOT receive the campaign)
+// ---------------------------------------------------------------------------
+
+export interface ExclusionFieldDef {
+  id: string;
+  label: string;
+  operators: string[];
+  /** e.g. ["7", "14", "30"] for days; ["SMS", "Email", "Marketing"] for opt-out */
+  options?: string[];
+  valueLabel?: string;
+}
+
+export const EXCLUSION_FIELD_DEFS: ExclusionFieldDef[] = [
+  { id: "contacted_in_last", label: "Contacted in last", operators: ["within"], options: ["7", "14", "30"], valueLabel: "days" },
+  { id: "has_appointment", label: "Has scheduled appointment", operators: ["equals"], options: ["Yes"] },
+  { id: "opted_out_sms", label: "Opted out of SMS", operators: ["equals"], options: ["Yes"] },
+  { id: "opted_out_email", label: "Opted out of Email", operators: ["equals"], options: ["Yes"] },
+  { id: "opted_out_marketing", label: "Opted out of marketing", operators: ["equals"], options: ["Yes"] },
+  { id: "in_active_campaign", label: "In active campaign", operators: ["equals"], options: ["Yes"] },
+];
+
+// ---------------------------------------------------------------------------
+// Win-back and at-risk segment presets
+// ---------------------------------------------------------------------------
+
+export interface WinbackPreset {
+  id: string;
+  label: string;
+  description: string;
+  segments: AudienceSegment[];
+}
+
+export const WINBACK_AT_RISK_PRESETS: WinbackPreset[] = [
+  {
+    id: "winback-12",
+    label: "12+ months inactive + defected",
+    description:
+      "Customers with no service visit in the last 12 months who have defected to a competitor",
+    segments: [
+      { id: "wb12-1", field: "Days Since Last Service", operator: "greater than", value: "365" },
+      { id: "wb12-2", field: "Competitor Service Defection", operator: "equals", value: "Yes" },
+    ],
+  },
+  {
+    id: "recent-defection-30",
+    label: "Recent defections 30 days",
+    description:
+      "Customers showing a competitor service defection in the last 30 days",
+    segments: [
+      { id: "rd30-1", field: "Competitor Service Defection", operator: "equals", value: "Yes" },
+      { id: "rd30-2", field: "Days Since Competitor Visit", operator: "less than", value: "30" },
+    ],
+  },
+  {
+    id: "cp-decline-winback",
+    label: "Customer-pay decline follow-up",
+    description:
+      "Customers who declined recommended work recently and may shop other dealerships",
+    segments: [
+      { id: "cpd-1", field: "Declined Recommended Work", operator: "equals", value: "Yes" },
+      { id: "cpd-2", field: "Days Since Last Service", operator: "less than", value: "30" },
+    ],
+  },
+  {
+    id: "winback-18",
+    label: "No visit 18+ months",
+    description: "Customers with no service visit in the last 18 months",
+    segments: [
+      { id: "wb18-1", field: "Days Since Last Service", operator: "greater than", value: "540" },
+    ],
+  },
+  {
+    id: "winback-24",
+    label: "No visit 24+ months",
+    description: "Customers with no service visit in the last 24 months",
+    segments: [
+      { id: "wb24-1", field: "Days Since Last Service", operator: "greater than", value: "720" },
+    ],
+  },
+  {
+    id: "atrisk-recall-only",
+    label: "Last visit recall-only",
+    description: "Last service was for recall only (low loyalty signal)",
+    segments: [
+      { id: "ar1-1", field: "Last Visit Type", operator: "equals", value: "Recall" },
+    ],
+  },
+  {
+    id: "atrisk-high-mileage",
+    label: "High mileage, no recent service",
+    description: "High mileage with no service in 6+ months",
+    segments: [
+      { id: "ar2-1", field: "Mileage Since Last Service", operator: "greater than", value: "7500" },
+      { id: "ar2-2", field: "Days Since Last Service", operator: "greater than", value: "180" },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Smart recommendations (for dashboard carousel)
+// ---------------------------------------------------------------------------
+
+export type RecommendationOpportunity = "high" | "medium" | "low";
+
+export interface CampaignRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  estimatedReach: number;
+  estimatedRevenue: number;
+  opportunity: RecommendationOpportunity;
+  /** Optional template id to pre-fill wizard */
+  templateId?: string;
+  /** Optional preset id to apply audience */
+  presetId?: string;
+}
+
+export const CAMPAIGN_RECOMMENDATIONS: CampaignRecommendation[] = [
+  {
+    id: "rec-1",
+    title: "30K Mile Service Push",
+    description: "420 vehicles approaching 30,000-mile service interval",
+    estimatedReach: 420,
+    estimatedRevenue: 18500,
+    opportunity: "high",
+  },
+  {
+    id: "rec-2",
+    title: "Recent Defections: Past 30 Days",
+    description:
+      "64 customers showed very recent competitor service defections in the last 30 days",
+    estimatedReach: 64,
+    estimatedRevenue: 9600,
+    opportunity: "high",
+    presetId: "recent-defection-30",
+  },
+  {
+    id: "rec-3",
+    title: "Customer-Pay Decline Win-Back",
+    description:
+      "91 recent service customers declined add-on work and may be shopping other dealerships",
+    estimatedReach: 91,
+    estimatedRevenue: 7400,
+    opportunity: "medium",
+    presetId: "cp-decline-winback",
+  },
+  {
+    id: "rec-4",
+    title: "Win-Back: 12+ Months Inactive + Defected",
+    description:
+      "118 customers have been gone 12+ months and have already defected to a competitor dealership",
+    estimatedReach: 118,
+    estimatedRevenue: 15200,
+    opportunity: "high",
+    presetId: "winback-12",
+  },
+  {
+    id: "rec-5",
+    title: "EV Battery Health Alert",
+    description: "85 EVs/hybrids with declining battery health",
+    estimatedReach: 85,
+    estimatedRevenue: 6200,
+    opportunity: "medium",
+  },
+];
+
+/**
+ * Legacy featured suggestion (e.g. tests or older flows). Smart Marketing **Monitor**
+ * uses per-competitor win-back drafts from `buildWinBackCampaignRecommendation` in
+ * `@/lib/marketing/service-defection-mock`.
+ */
+export const MONITOR_SERVICE_CAMPAIGN_RECOMMENDATION: CampaignRecommendation = {
+  id: "rec-monitor-service",
+  title: "Service-due & recall outreach",
+  description:
+    "47 vehicles are due for service and 12 have safety recalls — coordinate one campaign to book bays and close recall work.",
+  estimatedReach: 59,
+  estimatedRevenue: 22400,
+  opportunity: "high",
+  templateId: "tpl-002",
+};
+
+// ---------------------------------------------------------------------------
+// Send time and capacity
+// ---------------------------------------------------------------------------
+
+export interface SendTimeWindow {
+  id: string;
+  label: string;
+  startHour: number;
+  endHour: number;
+}
+
+export const RECOMMENDED_SEND_WINDOWS: SendTimeWindow[] = [
+  { id: "morning", label: "9:00 AM – 12:00 PM", startHour: 9, endHour: 12 },
+  { id: "midday", label: "10:00 AM – 2:00 PM", startHour: 10, endHour: 14 },
+  { id: "afternoon", label: "2:00 PM – 5:00 PM", startHour: 14, endHour: 17 },
+  { id: "full-day", label: "9:00 AM – 5:00 PM", startHour: 9, endHour: 17 },
+];
+
+/** Mock: returns capacity hint (e.g. based on day of week). For MVP, returns static "normal". */
+export function getCapacityHint(): CapacityHint {
+  const day = new Date().getDay();
+  if (day === 0 || day === 6) return "low";
+  if (day === 1 || day === 5) return "high";
+  return "normal";
+}
 
 // ---------------------------------------------------------------------------
 // Campaign Type Labels
@@ -623,6 +907,9 @@ export const CAMPAIGN_TYPE_LABELS: Record<CampaignType, string> = {
   "battery-health": "Battery Health",
   "warranty-expiration": "Warranty Expiration",
   "seasonal-promotion": "Seasonal Promotion",
+  "lease-renewal": "Lease Renewal",
+  "vehicle-trade-in": "Vehicle Trade-In",
+  "recall": "Recall",
   custom: "Custom",
 };
 
@@ -637,6 +924,36 @@ export function getCampaignById(id: string): Campaign | undefined {
 export function computeDashboardMetrics(
   campaigns: Campaign[]
 ): DashboardMetrics {
+  const CHANNEL_OPEN_RATE_BASELINES: Record<Channel, number> = {
+    sms: 97,
+    email: 34,
+    push: 58,
+    "in-app": 49,
+  };
+
+  function estimatedOpenRateForCampaign(campaign: Campaign): number {
+    if (typeof campaign.metrics.openRate === "number") {
+      return campaign.metrics.openRate;
+    }
+
+    const enabledChannels = campaign.channels.filter((channel) => channel.isEnabled);
+    if (enabledChannels.length === 0) {
+      return 0;
+    }
+
+    const weightedTotal = enabledChannels.reduce(
+      (sum, channel) =>
+        sum + channel.estimatedReach * CHANNEL_OPEN_RATE_BASELINES[channel.channel],
+      0
+    );
+    const totalEstimatedReach = enabledChannels.reduce(
+      (sum, channel) => sum + channel.estimatedReach,
+      0
+    );
+
+    return totalEstimatedReach > 0 ? weightedTotal / totalEstimatedReach : 0;
+  }
+
   const activeCampaigns = campaigns.filter(
     (c) => c.status === "active"
   ).length;
@@ -644,12 +961,33 @@ export function computeDashboardMetrics(
   const campaignsWithMetrics = campaigns.filter(
     (c) => c.status !== "draft" && c.metrics.reach > 0
   );
+  const totalWeightedReach = campaignsWithMetrics.reduce(
+    (sum, campaign) => sum + campaign.metrics.reach,
+    0
+  );
   const avgConversionRate =
-    campaignsWithMetrics.length > 0
+    totalWeightedReach > 0
       ? campaignsWithMetrics.reduce(
-          (sum, c) => sum + c.metrics.conversionRate,
+          (sum, campaign) =>
+            sum + campaign.metrics.conversionRate * campaign.metrics.reach,
           0
-        ) / campaignsWithMetrics.length
+        ) / totalWeightedReach
+      : 0;
+  const avgResponseRate =
+    totalWeightedReach > 0
+      ? campaignsWithMetrics.reduce(
+          (sum, campaign) =>
+            sum + campaign.metrics.responseRate * campaign.metrics.reach,
+          0
+        ) / totalWeightedReach
+      : 0;
+  const avgOpenRate =
+    totalWeightedReach > 0
+      ? campaignsWithMetrics.reduce(
+          (sum, campaign) =>
+            sum + estimatedOpenRateForCampaign(campaign) * campaign.metrics.reach,
+          0
+        ) / totalWeightedReach
       : 0;
 
   const totalReached = campaigns.reduce((sum, c) => sum + c.metrics.reach, 0);
@@ -657,14 +995,19 @@ export function computeDashboardMetrics(
     (sum, c) => sum + c.metrics.revenue,
     0
   );
+  const estimatedSpend = Math.max(totalReached * 4.25, 1);
+  const roiMultiple = totalRevenue / estimatedSpend;
   // Mock: +12% vs last month for dashboard storytelling
   const revenueTrendPercent = 12;
 
   return {
     activeCampaigns,
     avgConversionRate,
+    avgOpenRate,
+    avgResponseRate,
     totalReached,
     totalRevenue,
+    roiMultiple,
     revenueTrendPercent,
   };
 }
@@ -694,8 +1037,11 @@ export const SEGMENT_FIELD_DEFS: SegmentFieldDef[] = [
   { id: "dtc_codes", label: "Diagnostic Trouble Codes", category: "Vehicle Telemetry", operators: ["contains", "equals"] },
   { id: "inactive_days", label: "Vehicle Inactive Days", category: "Vehicle Telemetry", operators: ["greater than", "less than"], unit: "days" },
   { id: "proximity_miles", label: "Distance from Dealership", category: "Vehicle Telemetry", operators: ["less than", "greater than"], unit: "miles" },
+  { id: "competitor_service_defection", label: "Competitor Service Defection", category: "Vehicle Telemetry", operators: ["equals"], options: ["Yes", "No"] },
+  { id: "days_since_competitor_visit", label: "Days Since Competitor Visit", category: "Vehicle Telemetry", operators: ["greater than", "less than", "between"], unit: "days" },
   { id: "mileage_since_service", label: "Mileage Since Last Service", category: "Service Lifecycle", operators: ["greater than", "less than", "between"], unit: "miles" },
   { id: "days_since_service", label: "Days Since Last Service", category: "Service Lifecycle", operators: ["greater than", "less than", "between"], unit: "days" },
+  { id: "declined_recommended_work", label: "Declined Recommended Work", category: "Service Lifecycle", operators: ["equals"], options: ["Yes", "No"] },
   { id: "oem_interval_status", label: "OEM Service Interval Status", category: "Service Lifecycle", operators: ["equals"], options: ["Due", "Overdue", "Upcoming", "Current"] },
 ];
 
@@ -708,19 +1054,21 @@ export const TRIGGER_TYPE_META: Record<
   "time-based": { label: "Time-Based", description: "Trigger at specific time intervals (e.g., days after purchase, service due dates)" },
   mileage: { label: "Mileage Threshold", description: "Trigger when vehicle reaches a mileage milestone (e.g., 30k, 60k miles)" },
   diagnostic: { label: "Diagnostic Code", description: "Trigger when diagnostic trouble codes are detected on the vehicle" },
-  health: { label: "Vehicle Health", description: "Trigger based on vehicle health metrics (e.g., battery health below 40%)" },
+  health: { label: "Battery Health", description: "Trigger based on battery health metrics (e.g., battery health below 40%)" },
   proximity: { label: "Proximity", description: "Trigger when a vehicle enters the dealership geofence area" },
   seasonal: { label: "Seasonal", description: "Trigger based on seasonal calendar events (e.g., winter prep, summer road trip)" },
 };
 
+const CONSENT_RATIO = 0.85;
+
 export const CHANNEL_META: Record<
   Channel,
-  { label: string; description: string; baseReach: number }
+  { label: string; description: string; baseReach: number; baseReachWithConsent: number }
 > = {
-  sms: { label: "SMS", description: "Text messages with 98% open rate", baseReach: 920 },
-  email: { label: "Email", description: "Rich HTML emails with images and links", baseReach: 1450 },
-  push: { label: "Push Notification", description: "Mobile app push notifications", baseReach: 680 },
-  "in-app": { label: "In-App Message", description: "Messages shown inside the dealership app", baseReach: 420 },
+  sms: { label: "SMS", description: "Text messages with 98% open rate", baseReach: 920, baseReachWithConsent: Math.round(920 * CONSENT_RATIO) },
+  email: { label: "Email", description: "Rich HTML emails with images and links", baseReach: 1450, baseReachWithConsent: Math.round(1450 * CONSENT_RATIO) },
+  push: { label: "Push Notification", description: "Mobile app push notifications", baseReach: 680, baseReachWithConsent: Math.round(680 * CONSENT_RATIO) },
+  "in-app": { label: "In-App Message", description: "Messages shown inside the dealership app", baseReach: 420, baseReachWithConsent: Math.round(420 * CONSENT_RATIO) },
 };
 
 export const PERSONALIZATION_VARIABLES = [
@@ -728,11 +1076,13 @@ export const PERSONALIZATION_VARIABLES = [
   "vehicle_model",
   "vehicle_year",
   "vehicle_make",
+  "vehicle_trim",
   "mileage",
   "next_service_due",
   "battery_health",
   "last_service_date",
   "dealership_name",
+  "service_director_name",
 ] as const;
 
 export const PERSONALIZATION_VARIABLE_LABELS: Record<string, string> = {
@@ -740,9 +1090,11 @@ export const PERSONALIZATION_VARIABLE_LABELS: Record<string, string> = {
   vehicle_model: "Vehicle Model",
   vehicle_year: "Vehicle Year",
   vehicle_make: "Vehicle Make",
+  vehicle_trim: "Vehicle Trim",
   mileage: "Current Mileage",
   next_service_due: "Next Service Due",
   battery_health: "Battery Health %",
   last_service_date: "Last Service Date",
   dealership_name: "Dealership Name",
+  service_director_name: "Service Director Name",
 };

@@ -49,7 +49,7 @@ function PerformanceMetric({
         : "text-muted-foreground";
 
   return (
-    <Card size="sm">
+    <Card>
       <CardContent className="space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">{label}</span>

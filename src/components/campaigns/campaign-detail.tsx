@@ -53,42 +53,47 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-8 py-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon-sm" onClick={onBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <h1 className="text-xl font-semibold font-headline tracking-tight">
-            {campaign.name}
-          </h1>
-          <Badge variant={STATUS_BADGE_VARIANT[campaign.status]}>
-            {STATUS_LABELS[campaign.status]}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          {(isActive || isPaused) && (
-            <Button variant="outline" size="sm">
-              {isActive ? (
-                <Pause className="size-3.5" />
-              ) : (
-                <Play className="size-3.5" />
-              )}
-              {isActive ? "Pause" : "Resume"}
+      {/* Page header: same layout as campaigns list — title + description left, actions right */}
+      <header className="flex flex-col gap-1 border-b border-border px-8 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon-sm" onClick={onBack}>
+              <ArrowLeft className="size-4" />
             </Button>
-          )}
-          {campaign.status !== "completed" && (
-            <Button variant="outline" size="sm">
-              <Pencil className="size-3.5" />
-              Edit
+            <h1 className="font-headline text-2xl font-semibold text-foreground tracking-tight">
+              {campaign.name}
+            </h1>
+            <Badge variant={STATUS_BADGE_VARIANT[campaign.status]}>
+              {STATUS_LABELS[campaign.status]}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            {(isActive || isPaused) && (
+              <Button variant="outline" size="sm">
+                {isActive ? (
+                  <Pause className="size-3.5" />
+                ) : (
+                  <Play className="size-3.5" />
+                )}
+                {isActive ? "Pause" : "Resume"}
+              </Button>
+            )}
+            {campaign.status !== "completed" && (
+              <Button variant="outline" size="sm">
+                <Pencil className="size-3.5" />
+                Edit
+              </Button>
+            )}
+            <Button variant="destructive" size="sm">
+              <Trash2 className="size-3.5" />
+              Delete
             </Button>
-          )}
-          <Button variant="destructive" size="sm">
-            <Trash2 className="size-3.5" />
-            Delete
-          </Button>
+          </div>
         </div>
-      </div>
+        <p className="text-sm text-muted-foreground">
+          View and manage this campaign
+        </p>
+      </header>
 
       {/* Tabs section */}
       <div className="flex-1 overflow-y-auto px-8 py-4">
@@ -119,6 +124,7 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
             <CampaignMessageView
               messages={campaign.messages}
               channels={campaign.channels}
+              offers={campaign.offers}
             />
           </TabsContent>
         </Tabs>

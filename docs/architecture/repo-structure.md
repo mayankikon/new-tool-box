@@ -13,6 +13,9 @@
 | `src/app/` | App Router routes (layout, page, globals.css). Root page (`/`) is the product app shell with sidebar navigation. |
 | `src/app/design-system/page.tsx` | Design system showcase: foundation tokens + UI components |
 | `src/components/ui/` | shadcn components (button, card, badge, input, sidebar, table, tabs, dialog, select, dropdown-menu, textarea, switch, radio-group, checkbox, separator, tooltip, progress, avatar, skeleton, sheet, label, popover, scroll-area, empty-state, mapbox-map) |
+| `src/components/ui/portfolio-checkbox.tsx` | Portfolio 3.0 **`PortfolioCheckboxControl`** (Base UI): border `#ebeced`, fill `#05B389` when checked/indeterminate; optional **`showFocusRing`** for documentation. |
+| `src/components/ui/portfolio-radio.tsx` | Portfolio 3.0 **`PortfolioRadioButton`** (Base UI): border `#ebeced`, accent `#02C495` when selected; optional **`showFocusRing`**. |
+| `src/components/ui/magicpath-form-controls-showcase.tsx` | 307×163 reference frame composed from Portfolio checkbox + radio; documented on `/design-system` **`#sort-form-controls-reference`**. |
 | `src/components/app/` | App shell: TopBar (page header with optional title, subtitle, right slot). Design system showcases TopBar and main content area pattern at `/design-system`. |
 | `src/components/geofences/` | Geofence management: GeofenceSettingsPage (list + map), GeofenceWizard (2-step: draw then name/address), GeofenceDrawStep (polygon/circle tools, undo/redo, reset, move via simple_select), GeofenceDetailsStep (name + optional address), GeofenceListPanel, GeofenceDrawingToolbar. |
 | `src/lib/geofences/geofence-store.tsx` | GeofenceProvider and useGeofences: in-memory FeatureCollection, addGeofence, removeGeofence. Initial features from dealership main lot. |

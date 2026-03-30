@@ -8,6 +8,103 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tailwind v4 preflight sets `canvas { max-width:100%; height:auto }` which
+   collapses the Mapbox GL canvas to 0×0. Undo that inside the map container. */
+.mapboxgl-canvas-container canvas,
+.mapboxgl-canvas {
+  max-width: none !important;
+  height: 100% !important;
+}
+
+/*
+ * Moon basemap: light-gray Mapbox style + soft monochrome (see `MapboxMap` `mutedMonochromeDark`).
+ */
+.sm-map-dark-muted .mapboxgl-canvas {
+  filter: grayscale(1) brightness(1.1) contrast(0.96);
+}
+
+/*
+ * Geofence hover tooltip — scope dark vs light so shared `.geofence-popup` never
+ * paints a black card in light mode (same-specificity rules were losing to order).
+ */
+.mapboxgl-popup.geofence-popup:not(.geofence-popup--light) .mapboxgl-popup-content {
+  font-family: var(--font-saira), var(--font-headline), sans-serif;
+  background: #0a0a0a !important;
+  color: #fafafa !important;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+.mapboxgl-popup.geofence-popup:not(.geofence-popup--light) .mapboxgl-popup-tip {
+  border-top-color: #0a0a0a !important;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+
+/* Light map: white card + dark text */
+.mapboxgl-popup.geofence-popup.geofence-popup--light .mapboxgl-popup-content {
+  font-family: var(--font-saira), var(--font-headline), sans-serif;
+  background: #ffffff !important;
+  color: #0a0a0a !important;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: #ffffff !important;
+}
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: #ffffff !important;
+}
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: #ffffff !important;
+}
+.mapboxgl-popup.geofence-popup.geofence-popup--light.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: #ffffff !important;
+}
+
+.mapboxgl-popup.inventory-vehicle-hover-popup .mapboxgl-popup-content {
+  font-family: var(--font-saira), var(--font-headline), sans-serif;
+  background: #0a0a0a !important;
+  color: #fafafa !important;
+  border-radius: 6px;
+  padding: 0;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  overflow: hidden;
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup .mapboxgl-popup-tip {
+  border-top-color: #0a0a0a !important;
+  margin-top: -1px;
+  margin-bottom: -1px;
+  pointer-events: none;
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light .mapboxgl-popup-content {
+  background: #ffffff !important;
+  color: #0a0a0a !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 32, 0.18);
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: #ffffff !important;
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: #ffffff !important;
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: #ffffff !important;
+}
+.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: #ffffff !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -116,17 +213,116 @@
   --chart-4: oklch(0.586 0.215 16.6);
   --chart-5: oklch(0.541 0.25 292.0);
   --radius: var(--radius-md);
+  --theme-background-sidebar: #FAFAFA;
   --sidebar: var(--theme-background-sidebar);
   --sidebar-foreground: var(--theme-text-primary);
   --sidebar-primary: var(--theme-background-button-primary-default);
   --sidebar-primary-foreground: var(--theme-text-white);
-  --sidebar-accent: var(--theme-background-button-secondary-default);
+  /* Nav active row + fold hover: clearer gray chip (distinct from hover wash on inactive rows) */
+  --sidebar-accent: color-mix(
+    in srgb,
+    var(--theme-background-button-secondary-default) 76%,
+    var(--theme-stroke-default) 24%
+  );
   --sidebar-accent-foreground: var(--theme-text-primary);
   --sidebar-border: var(--theme-stroke-default);
   --sidebar-ring: var(--theme-stroke-accent);
+  /* Inactive row hover: light wash from sidebar base — not same as active pill */
+  --sidebar-nav-item-hover-bg: color-mix(
+    in srgb,
+    var(--sidebar) 92%,
+    var(--theme-stroke-default) 8%
+  );
+  /* Default nav rows: soft gray, lighter than mixing toward black (tertiary + a hint of white) */
+  --sidebar-nav-item-muted-foreground: color-mix(
+    in srgb,
+    var(--theme-text-tertiary) 88%,
+    white 12%
+  );
+
+  --inline-tip-default-bg: var(--neutral-50);
+  --inline-tip-default-accent: var(--neutral-500);
+  --inline-tip-default-title: var(--theme-text-secondary);
+  --inline-tip-info-bg: var(--blue-100);
+  --inline-tip-info-accent: var(--blue-500);
+  --inline-tip-info-title: var(--theme-text-informative);
+  --inline-tip-success-bg: var(--green-100);
+  --inline-tip-success-accent: var(--green-400);
+  --inline-tip-success-title: var(--theme-text-success);
+  --inline-tip-warning-bg: var(--orange-100);
+  --inline-tip-warning-accent: var(--orange-500);
+  --inline-tip-warning-title: var(--theme-text-warning);
+  --inline-tip-error-bg: var(--red-100);
+  --inline-tip-error-accent: var(--red-500);
+  --inline-tip-error-title: var(--theme-text-destructive);
+}
+
+/*
+ * Coupon card previews (builder, wizard, message mocks) always read as a printed
+ * white offer card. Re-bind shadcn semantic tokens so `bg-card`, `text-foreground`,
+ * etc. stay light even when the app shell is `.dark`.
+ */
+.sm-coupon-card-surface {
+  color-scheme: light;
+  --background: rgb(255 255 255);
+  --foreground: rgb(17 17 17);
+  --card: rgb(255 255 255);
+  --card-foreground: rgb(17 17 17);
+  --popover: rgb(255 255 255);
+  --popover-foreground: rgb(17 17 17);
+  --primary: rgb(24 147 117);
+  --primary-foreground: rgb(255 255 255);
+  --secondary: rgb(244 244 244);
+  --secondary-foreground: rgb(17 17 17);
+  --muted: rgb(220 220 220);
+  --muted-foreground: rgb(130 130 130);
+  --accent: rgb(240 250 247);
+  --accent-foreground: rgb(24 147 117);
+  --destructive: rgb(231 67 65);
+  --border: rgb(220 220 220);
+  --input: rgb(220 220 220);
+  --input-hover: rgb(180 180 180);
+  --ring: rgb(74 207 174);
 }
 
 .dark {
+  /* Legibility overrides on top of Toolbox-Dark: visible borders vs surfaces, readable muted text */
+  --theme-background-page: rgb(32 32 36);
+  --theme-background-container: rgb(44 44 48);
+  --theme-background-default: rgb(56 56 62);
+  /* Strokes: slightly darker than prior pass for softer chrome */
+  --theme-stroke-default: rgb(58 58 66);
+  --theme-stroke-subtle: rgb(40 40 46);
+  --theme-stroke-hover: rgb(72 72 80);
+  --theme-stroke-destructive: rgb(196 86 84);
+  --theme-stroke-informative: rgb(48 158 198);
+  --theme-stroke-success: rgb(2 182 137);
+  --theme-stroke-warning: rgb(200 158 18);
+  /* Sidebar rail + secondary actions + aligned inputs (file-cabinet chrome) */
+  --theme-background-sidebar: #1b1b1c;
+  --theme-background-button-secondary-default: var(--theme-background-sidebar);
+  --theme-background-button-secondary-hover: color-mix(
+    in srgb,
+    var(--theme-background-sidebar) 88%,
+    rgb(255 255 255) 12%
+  );
+  --theme-text-tertiary: rgb(168 168 178);
+  --theme-text-secondary: rgb(210 210 216);
+  --theme-text-inactive: rgb(120 120 130);
+  --theme-background-input-hover: rgba(255 255 255 / 0.06);
+  --theme-background-card-hover: rgba(255 255 255 / 0.06);
+  --theme-background-account-selector: rgb(40 40 44);
+
+  /* Brand primary dark: #02B689 — fills, rings, and interactive accents */
+  --theme-background-button-primary-default: rgb(2 182 137);
+  --theme-background-button-primary-hover: rgb(10 205 162);
+  --theme-background-button-pressed: rgb(1 148 112);
+  --theme-text-interactive: rgb(72 220 186);
+  --theme-icon-interactive: rgb(64 214 178);
+  --theme-stroke-accent: rgb(2 182 137);
+  --theme-stroke-focus: rgb(64 214 178);
+  --theme-background-accent: rgb(12 46 40);
+
   --background: var(--theme-background-page);
   --foreground: var(--theme-text-primary);
   --card: var(--theme-background-container);
@@ -156,10 +352,41 @@
   --sidebar-foreground: var(--theme-text-primary);
   --sidebar-primary: var(--theme-background-button-primary-default);
   --sidebar-primary-foreground: var(--theme-text-white);
-  --sidebar-accent: var(--theme-background-button-secondary-default);
+  --sidebar-accent: color-mix(
+    in srgb,
+    var(--theme-background-button-secondary-default) 68%,
+    var(--theme-background-default) 32%
+  );
   --sidebar-accent-foreground: var(--theme-text-primary);
   --sidebar-border: var(--theme-stroke-default);
   --sidebar-ring: var(--theme-stroke-accent);
+  --sidebar-nav-item-hover-bg: color-mix(
+    in srgb,
+    var(--sidebar) 86%,
+    var(--theme-background-default) 14%
+  );
+  /* Inactive nav: airy gray (toward white), not mixed toward black */
+  --sidebar-nav-item-muted-foreground: color-mix(
+    in srgb,
+    var(--theme-text-tertiary) 80%,
+    white 20%
+  );
+
+  --inline-tip-default-bg: var(--neutral-900);
+  --inline-tip-default-accent: var(--neutral-500);
+  --inline-tip-default-title: var(--theme-text-secondary);
+  --inline-tip-info-bg: var(--blue-950);
+  --inline-tip-info-accent: var(--blue-400);
+  --inline-tip-info-title: var(--theme-text-informative);
+  --inline-tip-success-bg: var(--green-950);
+  --inline-tip-success-accent: var(--green-400);
+  --inline-tip-success-title: var(--theme-text-success);
+  --inline-tip-warning-bg: var(--orange-950);
+  --inline-tip-warning-accent: var(--orange-400);
+  --inline-tip-warning-title: var(--theme-text-warning);
+  --inline-tip-error-bg: var(--red-950);
+  --inline-tip-error-accent: var(--red-400);
+  --inline-tip-error-title: var(--theme-text-destructive);
 }
 
 @layer base {
@@ -185,6 +412,16 @@
 }
 
 @layer components {
+  .ds-doc-font {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .ds-badge-new {
+    font-family: var(--font-saira), sans-serif;
+    font-weight: 400 !important;
+    letter-spacing: 0;
+  }
+
   .shimmer-border {
     position: relative;
     overflow: hidden;
@@ -223,5 +460,28 @@
     syntax: "<angle>";
     initial-value: 0deg;
     inherits: false;
+  }
+
+  /**
+   * Checkbox checked icon: draw check stroke (tick) with ease-out.
+   * `pathLength="1"` on the path + dasharray 1 keeps math unitless.
+   */
+  .checkbox-check-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: checkbox-check-draw 0.22s ease-out forwards;
+  }
+
+  @keyframes checkbox-check-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .checkbox-check-path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
   }
 }

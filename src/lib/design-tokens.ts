@@ -98,17 +98,14 @@ export const radiusTokens = [
   { name: "md", cssVar: "--radius-md", tailwindClass: "rounded-[var(--radius-md)]" },
   { name: "lg", cssVar: "--radius-lg", tailwindClass: "rounded-[var(--radius-lg)]" },
   { name: "xl", cssVar: "--radius-xl", tailwindClass: "rounded-[var(--radius-xl)]" },
-  { name: "2xl", cssVar: "--radius-2xl", tailwindClass: "rounded-[var(--radius-2xl)]" },
-  { name: "3xl", cssVar: "--radius-3xl", tailwindClass: "rounded-[var(--radius-3xl)]" },
   { name: "full", cssVar: "--radius-full", tailwindClass: "rounded-[var(--radius-full)]" },
   { name: "Card-sm", cssVar: "--radius-Card-sm", tailwindClass: "rounded-[var(--radius-Card-sm)]" },
   { name: "Card-md", cssVar: "--radius-Card-md", tailwindClass: "rounded-[var(--radius-Card-md)]" },
-  { name: "Card-lg", cssVar: "--radius-Card-lg", tailwindClass: "rounded-[var(--radius-Card-lg)]" },
 ] as const;
 
 /** Spacing scale from Spacing.json (layout-primitives.css) */
 export const spacingTokens = [
-  "0", "1", "2", "4", "6", "8", "10", "12", "14", "16", "20", "24", "28", "32", "36", "40", "44", "48", "96",
+  "0", "1", "2", "4", "6", "8", "10", "12", "14", "16", "20", "24", "28", "32", "36", "40", "44", "48",
 ] as const;
 
 /** Stroke (border width) from Stroke.json */
@@ -128,22 +125,41 @@ export const fontFamilyTokens = [
 
 /** Font sizes from Font Size.json */
 export const fontSizeTokens = [
-  "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl",
+  { name: "xs", value: "12px" },
+  { name: "sm", value: "14px" },
+  { name: "md", value: "16px" },
+  { name: "lg", value: "18px" },
+  { name: "xl", value: "20px" },
+  { name: "2xl", value: "24px" },
+  { name: "3xl", value: "30px" },
+  { name: "4xl", value: "36px" },
+  { name: "5xl", value: "48px" },
+  { name: "6xl", value: "60px" },
 ] as const;
 
 /** Font weights */
 export const fontWeightTokens = [
-  "normal", "medium", "semibold", "bold",
+  { name: "normal", value: "400" },
+  { name: "medium", value: "500" },
+  { name: "semibold", value: "600" },
+  { name: "bold", value: "700" },
 ] as const;
 
 /** Line heights */
 export const lineHeightTokens = [
-  "5", "6", "7",
+  { name: "5", value: "20px" },
+  { name: "6", value: "24px" },
+  { name: "7", value: "28px" },
 ] as const;
 
 /** Letter spacing */
 export const letterSpacingTokens = [
-  "tighter", "tight", "normal", "wide", "wider", "widest",
+  { name: "tighter", value: "-0.80px" },
+  { name: "tight", value: "-0.40px" },
+  { name: "normal", value: "0px" },
+  { name: "wide", value: "0.40px" },
+  { name: "wider", value: "0.80px" },
+  { name: "widest", value: "1.60px" },
 ] as const;
 
 /** Theme tokens (Themes.json) for design system showcase - background swatches use var, text use color */
@@ -177,6 +193,7 @@ export const themeTokenGroups = [
     name: "Stroke (border color)",
     tokens: [
       { name: "stroke-default", cssVar: "var(--theme-stroke-default)", type: "bg" as const },
+      { name: "stroke-subtle", cssVar: "var(--theme-stroke-subtle)", type: "bg" as const },
       { name: "stroke-accent", cssVar: "var(--theme-stroke-accent)", type: "bg" as const },
       { name: "stroke-destructive", cssVar: "var(--theme-stroke-destructive)", type: "bg" as const },
     ],

@@ -1,14 +1,22 @@
 "use client";
 
 import { Fragment } from "react";
-import { Check, MessageSquare, Rocket, Sparkles, Users } from "lucide-react";
+import {
+  Check,
+  GitBranch,
+  MessageSquare,
+  Rocket,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
   { label: "Campaign Setup", icon: Sparkles },
-  { label: "Audience & Triggers", icon: Users },
-  { label: "Message & Channels", icon: MessageSquare },
+  { label: "Audience & Trigger", icon: Users },
+  { label: "Messages", icon: MessageSquare },
+  { label: "Sequence Logic", icon: GitBranch },
   { label: "Review & Launch", icon: Rocket },
 ] as const;
 

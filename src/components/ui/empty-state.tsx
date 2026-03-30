@@ -63,6 +63,19 @@ function EmptyStateActions({
   );
 }
 
+
+function EmptyStateIllustration({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="empty-state-illustration"
+      className={cn("shrink-0 text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
 export {
   EmptyState,
   EmptyStateIcon,
@@ -70,4 +83,5 @@ export {
   EmptyStateTitle,
   EmptyStateDescription,
   EmptyStateActions,
+  EmptyStateIllustration,
 };

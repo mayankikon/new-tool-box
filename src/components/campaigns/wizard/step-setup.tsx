@@ -2,15 +2,6 @@
 
 import { useCallback } from "react";
 import { motion } from "framer-motion";
-import {
-  UserPlus,
-  Wrench,
-  Droplets,
-  Battery,
-  Shield,
-  Sun,
-  FileText,
-} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -20,65 +11,30 @@ import {
   CAMPAIGN_TYPE_LABELS,
   PERSONALIZATION_VARIABLES,
 } from "@/lib/campaigns/mock-data";
-import type { CampaignTemplate, PersonalizationVariable } from "@/lib/campaigns/types";
+import {
+  MarketingTemplateLibraryHeroStrip,
+  MarketingTemplatePreviewArtifact,
+  WizardScratchPreviewStrip,
+} from "@/components/templates/marketing-template-preview-artifact";
+import { MARKETING_TEMPLATE_LIBRARY } from "@/lib/templates/mock-data";
+import type {
+  CampaignTemplate,
+  PersonalizationVariable,
+  WizardSequenceMessage,
+} from "@/lib/campaigns/types";
+import {
+  DEFAULT_COMPLIANCE_CHECKLIST,
+  DEFAULT_RESPONSE_TRACKING,
+  DEFAULT_WORKFLOW_FALLBACK_PATHS,
+} from "@/lib/campaigns/types";
+import { mergeUserCouponsWithOffers } from "@/lib/campaigns/coupon-library-storage";
+import {
+  createCouponRecommendations,
+  createDefaultOfferLibrary,
+  createSequenceLogicFromPreset,
+  DEFAULT_WORKFLOW_GOAL,
+} from "@/lib/campaigns/workflow";
 import type { WizardFormData } from "../campaign-wizard";
-
-const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
-  "tpl-001": <UserPlus className="size-5" />,
-  "tpl-002": <Wrench className="size-5" />,
-  "tpl-003": <Droplets className="size-5" />,
-  "tpl-004": <Battery className="size-5" />,
-  "tpl-005": <Shield className="size-5" />,
-  "tpl-006": <Sun className="size-5" />,
-};
-
-/** Semantic icon colors by use case: same category = same color. */
-const TEMPLATE_SEMANTIC_COLORS: Record<
-  string,
-  { bg: string; text: string; hoverBg: string }
-> = {
-  "new-owner": {
-    bg: "bg-blue-500/10",
-    text: "text-blue-600 dark:text-blue-400",
-    hoverBg: "group-hover:bg-blue-500/15",
-  },
-  "service-reminder": {
-    bg: "bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    hoverBg: "group-hover:bg-amber-500/15",
-  },
-  "oil-change": {
-    bg: "bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    hoverBg: "group-hover:bg-amber-500/15",
-  },
-  "battery-health": {
-    bg: "bg-orange-500/10",
-    text: "text-orange-600 dark:text-orange-400",
-    hoverBg: "group-hover:bg-orange-500/15",
-  },
-  "warranty-expiration": {
-    bg: "bg-indigo-500/10",
-    text: "text-indigo-600 dark:text-indigo-400",
-    hoverBg: "group-hover:bg-indigo-500/15",
-  },
-  "seasonal-promotion": {
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    hoverBg: "group-hover:bg-emerald-500/15",
-  },
-};
-
-function getSemanticIconClasses(template: { category: string }, isSelected: boolean) {
-  if (isSelected) {
-    return "bg-primary/10 text-primary";
-  }
-  const semantic = TEMPLATE_SEMANTIC_COLORS[template.category];
-  if (!semantic) {
-    return "bg-muted text-muted-foreground group-hover:bg-primary/15";
-  }
-  return cn(semantic.bg, semantic.text, semantic.hoverBg);
-}
 
 const containerVariants = {
   hidden: {},
@@ -105,63 +61,132 @@ export function StepSetup({ formData, onUpdate }: StepSetupProps) {
 
   const handleTemplateSelect = useCallback(
     (template: CampaignTemplate | null) => {
+      const offers = mergeUserCouponsWithOffers(createDefaultOfferLibrary());
       if (!template) {
-        onUpdate({
-          templateId: null,
-          type: "custom",
-          audienceSegments: [],
-          audienceSize: 0,
-          trigger: { type: "time-based", isRecurring: false, config: {} },
-          message: {
+        const messages = [
+          {
             subject: "",
             body: "",
             variables: [],
             aiPrompt: "",
             images: [],
+            channel: "sms" as const,
           },
+        ];
+        onUpdate({
+          templateId: null,
+          type: "custom",
+          audienceSegments: [],
+          exclusionRules: [],
+          audienceSize: 0,
+          trigger: { type: "time-based", isRecurring: false, config: {} },
+          messages,
+          sequenceLogic: createSequenceLogicFromPreset({
+            presetId: "no-response-escalation",
+            messages,
+            offers,
+            goal: DEFAULT_WORKFLOW_GOAL,
+          }),
+          offers,
+          couponRecommendations: createCouponRecommendations(offers),
+          campaignGoal: DEFAULT_WORKFLOW_GOAL,
+          responseTracking: DEFAULT_RESPONSE_TRACKING,
+          fallbackPaths: DEFAULT_WORKFLOW_FALLBACK_PATHS,
           channels: [],
+          complianceChecklist: DEFAULT_COMPLIANCE_CHECKLIST,
         });
         return;
       }
 
       const { defaults } = template;
-      const firstMsg = defaults.messages?.[0];
-      const bodyText = firstMsg?.body ?? "";
-      const detectedVars = PERSONALIZATION_VARIABLES.filter((v) =>
-        bodyText.includes(`{{${v}}}`),
-      ) as PersonalizationVariable[];
+      const mergedTemplateOffers = mergeUserCouponsWithOffers(
+        defaults.offers ?? createDefaultOfferLibrary(),
+      );
+      const templateMessages = defaults.messages ?? [];
+      const selectedPreset =
+        defaults.sequenceLogic?.presetId ??
+        (templateMessages.length > 2
+          ? "three-day-follow-up"
+          : template.category === "seasonal-promotion"
+            ? "coupon-recovery"
+            : "no-response-escalation");
+      const messages: WizardSequenceMessage[] =
+        templateMessages.length > 0
+          ? templateMessages.map((msg) => {
+              const detectedVars = PERSONALIZATION_VARIABLES.filter((v) =>
+                msg.body.includes(`{{${v}}}`),
+              ) as PersonalizationVariable[];
+              return {
+                subject: msg.subject ?? "",
+                body: msg.body,
+                variables: detectedVars,
+                aiPrompt: "",
+                images: [],
+                delayDays: msg.delayDays,
+                channel: msg.channel,
+              };
+            })
+          : [
+              {
+                subject: "",
+                body: "",
+                variables: [],
+                aiPrompt: "",
+                images: [],
+              },
+            ];
 
       onUpdate({
         templateId: template.id,
         type: template.category,
         name: template.name,
         audienceSegments: defaults.audienceSegments ?? [],
+        exclusionRules: [],
         audienceSize: (defaults.audienceSegments ?? []).length > 0 ? 420 : 0,
         trigger: defaults.trigger ?? {
           type: "time-based",
           isRecurring: false,
           config: {},
         },
-        message: firstMsg
-          ? {
-              subject: firstMsg.subject ?? "",
-              body: firstMsg.body,
-              variables: detectedVars,
-              aiPrompt: "",
-              images: [],
-            }
-          : {
-              subject: "",
-              body: "",
-              variables: [],
-              aiPrompt: "",
-              images: [],
-            },
+        messages,
+        sequenceLogic:
+          defaults.sequenceLogic ??
+          createSequenceLogicFromPreset({
+            presetId: selectedPreset,
+            messages,
+            offers: mergedTemplateOffers,
+            goal: DEFAULT_WORKFLOW_GOAL,
+          }),
+        offers: mergedTemplateOffers,
+        couponRecommendations: createCouponRecommendations(mergedTemplateOffers),
+        campaignGoal: DEFAULT_WORKFLOW_GOAL,
+        responseTracking: DEFAULT_RESPONSE_TRACKING,
+        fallbackPaths: DEFAULT_WORKFLOW_FALLBACK_PATHS,
         channels: defaults.channels ?? [],
+        complianceChecklist: DEFAULT_COMPLIANCE_CHECKLIST,
       });
     },
-    [formData.name, onUpdate],
+    [onUpdate],
   );
+
+  const getTemplatePreview = useCallback((template: CampaignTemplate) => {
+    const messageCount = template.defaults.messages?.length ?? 0;
+    const logicPreset =
+      template.defaults.sequenceLogic?.presetId ??
+      (messageCount > 2
+        ? "three-day-follow-up"
+        : template.category === "seasonal-promotion"
+          ? "coupon-recovery"
+          : "no-response-escalation");
+    const hasOffer =
+      (template.defaults.offers?.length ?? 0) > 0 ||
+      logicPreset === "coupon-recovery";
+    return {
+      messageCount,
+      includesLogic: logicPreset !== "single-send",
+      hasOffer,
+    };
+  }, []);
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 py-6">
@@ -189,24 +214,16 @@ export function StepSetup({ formData, onUpdate }: StepSetupProps) {
           type="button"
           onClick={() => handleTemplateSelect(null)}
           className={cn(
-            "flex w-full items-center gap-3 rounded-md border p-4 text-left transition-all duration-200",
+            "flex w-full flex-col overflow-hidden rounded-md border text-left transition-all duration-200",
+            "bg-white dark:bg-zinc-950",
             formData.templateId === null
-              ? "border-primary bg-primary/5 ring-1 ring-primary"
-              : "border-border hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm cursor-pointer",
+              ? "border-primary ring-1 ring-primary"
+              : "cursor-pointer border-border hover:border-primary/40 hover:shadow-sm",
           )}
         >
-          <span
-            className={cn(
-              "flex size-10 items-center justify-center rounded-sm transition-colors",
-              formData.templateId === null
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground",
-            )}
-          >
-            <FileText className="size-5" />
-          </span>
-          <div>
-            <p className="text-sm font-medium">Start from Scratch</p>
+          <WizardScratchPreviewStrip />
+          <div className="space-y-1 px-4 py-3">
+            <p className="text-sm font-medium text-foreground">Start from Scratch</p>
             <p className="text-xs text-muted-foreground">
               Build a fully custom campaign
             </p>
@@ -220,41 +237,82 @@ export function StepSetup({ formData, onUpdate }: StepSetupProps) {
           animate="visible"
         >
           {CAMPAIGN_TEMPLATES.map((template) => (
-            <motion.button
+            <TemplateCard
               key={template.id}
-              type="button"
-              variants={cardVariants}
-              onClick={() => handleTemplateSelect(template)}
-              className={cn(
-                "group flex items-start gap-3 rounded-md border p-4 text-left transition-all duration-200",
-                formData.templateId === template.id
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm cursor-pointer",
-              )}
-            >
-              <span
-                className={cn(
-                  "flex size-10 shrink-0 items-center justify-center rounded-sm transition-all duration-200 group-hover:scale-105",
-                  getSemanticIconClasses(template, formData.templateId === template.id),
-                )}
-              >
-                {TEMPLATE_ICONS[template.id] ?? (
-                  <FileText className="size-5" />
-                )}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{template.name}</p>
-                <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                  {template.description}
-                </p>
-                <Badge variant="secondary" className="mt-2 text-[10px]">
-                  {CAMPAIGN_TYPE_LABELS[template.category]}
-                </Badge>
-              </div>
-            </motion.button>
+              template={template}
+              isSelected={formData.templateId === template.id}
+              onSelect={() => handleTemplateSelect(template)}
+              preview={getTemplatePreview(template)}
+            />
           ))}
         </motion.div>
       </div>
     </div>
+  );
+}
+
+function TemplateCard({
+  template,
+  isSelected,
+  onSelect,
+  preview,
+}: {
+  template: CampaignTemplate;
+  isSelected: boolean;
+  onSelect: () => void;
+  preview: { messageCount: number; includesLogic: boolean; hasOffer: boolean };
+}) {
+  const libraryTemplate = MARKETING_TEMPLATE_LIBRARY.find(
+    (t) => t.id === template.marketingLibraryTemplateId,
+  );
+
+  if (!libraryTemplate) {
+    return null;
+  }
+
+  return (
+    <motion.button
+      type="button"
+      variants={cardVariants}
+      onClick={onSelect}
+      className={cn(
+        "group flex w-full flex-col overflow-hidden rounded-md border text-left transition-all duration-200",
+        "bg-white dark:bg-zinc-950",
+        isSelected
+          ? "border-primary ring-1 ring-primary"
+          : "cursor-pointer border-border hover:border-primary/40 hover:shadow-sm",
+      )}
+    >
+      <MarketingTemplateLibraryHeroStrip
+        template={libraryTemplate}
+        minHeightClassName="min-h-[120px]"
+      >
+        <MarketingTemplatePreviewArtifact template={libraryTemplate} />
+      </MarketingTemplateLibraryHeroStrip>
+      <div className="min-w-0 space-y-2 px-4 py-3">
+        <p className="text-sm font-medium text-foreground">{template.name}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground">{template.description}</p>
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant="secondary" className="text-[10px]">
+            {CAMPAIGN_TYPE_LABELS[template.category]}
+          </Badge>
+          {preview.messageCount > 0 && (
+            <Badge variant="outline" className="text-[10px]">
+              {preview.messageCount} message{preview.messageCount === 1 ? "" : "s"}
+            </Badge>
+          )}
+          {preview.includesLogic && (
+            <Badge variant="outline" className="text-[10px]">
+              Includes logic
+            </Badge>
+          )}
+          {preview.hasOffer && (
+            <Badge variant="outline" className="text-[10px]">
+              Includes offer
+            </Badge>
+          )}
+        </div>
+      </div>
+    </motion.button>
   );
 }

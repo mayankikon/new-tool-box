@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import type { CSSProperties } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
+
+import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
+import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
+import { Badge, BadgeDot, type BadgeTone } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TableHeaderCell } from "@/components/ui/table-header-cell";
+import { TableSlotCell } from "@/components/ui/table-slot-cell";
+import { Paginator } from "@/components/ui/paginator";
+import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import type { Campaign, CampaignStatus, CampaignType, Channel } from "@/lib/campaigns/types";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +40,9 @@ import {
   Megaphone,
   UserPlus,
   Droplet,
+  RefreshCw,
+  Car,
+  AlertTriangle,
   FileText,
   Mail,
   MessageSquare,
@@ -39,19 +50,6 @@ import {
   LayoutGrid,
   BarChart3,
 } from "lucide-react";
-
-const STATUS_BADGE_STYLES: Record<CampaignStatus, string> = {
-  active:
-    "bg-emerald-500/12 text-emerald-700 font-medium dark:text-emerald-400",
-  scheduled:
-    "bg-blue-500/12 text-blue-700 font-medium dark:text-blue-400",
-  completed:
-    "bg-slate-500/12 text-slate-600 font-medium dark:text-slate-400",
-  draft:
-    "bg-amber-500/12 text-amber-700 font-medium dark:text-amber-400",
-  paused:
-    "bg-red-500/12 text-red-700 font-medium dark:text-red-400",
-};
 
 const STATUS_LABELS: Record<CampaignStatus, string> = {
   active: "Active",
@@ -61,6 +59,14 @@ const STATUS_LABELS: Record<CampaignStatus, string> = {
   paused: "Paused",
 };
 
+const STATUS_BADGE_TONES: Record<CampaignStatus, BadgeTone> = {
+  active: "green",
+  scheduled: "blue",
+  completed: "gray",
+  draft: "amber",
+  paused: "red",
+};
+
 const CAMPAIGN_TYPE_ICONS: Record<CampaignType, React.ComponentType<{ className?: string }>> = {
   "service-reminder": Gauge,
   "new-owner": UserPlus,
@@ -68,19 +74,14 @@ const CAMPAIGN_TYPE_ICONS: Record<CampaignType, React.ComponentType<{ className?
   "battery-health": Battery,
   "warranty-expiration": Shield,
   "seasonal-promotion": Megaphone,
+  "lease-renewal": RefreshCw,
+  "vehicle-trade-in": Car,
+  "recall": AlertTriangle,
   custom: FileText,
 };
 
-/** Semantic icon colors by campaign type (aligned with template picker). */
-const CAMPAIGN_TYPE_ICON_CLASSES: Record<CampaignType, string> = {
-  "new-owner": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  "service-reminder": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  "oil-change": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  "battery-health": "bg-orange-500/10 text-orange-600 dark:text-orange-400",
-  "warranty-expiration": "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  "seasonal-promotion": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  custom: "bg-muted text-muted-foreground",
-};
+const ROW_HOVER_SURFACE =
+  "bg-[color-mix(in_srgb,var(--theme-background-button-secondary-default)_78%,var(--theme-background-page)_22%)]";
 
 const CHANNEL_ICONS: Record<Channel, React.ComponentType<{ className?: string }>> = {
   sms: MessageSquare,
@@ -95,6 +96,19 @@ const CHANNEL_LABELS: Record<Channel, string> = {
   push: "Push",
   "in-app": "In-App",
 };
+
+const {
+  underGlowPx,
+  tabAccent,
+  tabTopRadiusPx,
+  headerCellHeightPx,
+  bodyCellHeightPx,
+  cellPaddingXPx,
+} = FILE_CABINET_BILLING_TABLE_DEFAULTS;
+
+const ROW_STROKE_LIGHT = "var(--theme-stroke-subtle)";
+const BODY_CELL_DIVIDER =
+  "border-b border-solid border-[var(--theme-stroke-subtle)]";
 
 function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -124,10 +138,11 @@ const STATUS_TABS: StatusTabDef[] = [
   { value: "draft", label: "Draft", filterFn: (c) => c.status === "draft" },
 ];
 
-interface CampaignTableProps {
-  campaigns: Campaign[];
-  onViewCampaign?: (campaignId: string) => void;
-}
+const CAMPAIGN_DECK_TAB_LABELS: Record<string, string> = Object.fromEntries(
+  STATUS_TABS.map((tab) => [tab.value, tab.label]),
+) as Record<string, string>;
+
+const CAMPAIGN_DECK_TAB_VALUES = STATUS_TABS.map((t) => t.value) as readonly string[];
 
 const CONVERSION_STRONG_THRESHOLD = 8;
 
@@ -151,7 +166,7 @@ function CampaignRowActions({
   const isPaused = campaign.status === "paused";
 
   const buttonClass =
-    "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground";
+    "inline-flex size-8 items-center justify-center rounded-md text-emerald-700 outline-none transition-colors hover:bg-emerald-500/10 hover:text-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300";
 
   return (
     <div
@@ -193,7 +208,7 @@ function CampaignRowActions({
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground"
+          className="inline-flex size-8 items-center justify-center rounded-md text-emerald-700 outline-none hover:bg-emerald-500/10 hover:text-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
           aria-label="More actions"
         >
           <MoreHorizontal className="size-4" />
@@ -229,186 +244,451 @@ function CampaignTableView({
 }) {
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
 
-  return (
-    <div className="overflow-hidden rounded-lg border border-[#F1F3F5] border-t-0 border-l-0 rounded-t-none dark:border-border dark:border-t-0 dark:border-l-0">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b border-[#F1F3F5] hover:bg-transparent dark:border-border">
-            <TableHead className="h-12 px-4 font-medium text-muted-foreground">
-              Campaign
-            </TableHead>
-            <TableHead className="h-12 px-4 font-medium text-muted-foreground">
-              Status
-            </TableHead>
-            <TableHead className="h-12 px-4 text-right font-medium text-muted-foreground">
-              Audience
-            </TableHead>
-            <TableHead className="h-12 px-4 font-medium text-muted-foreground">
-              Channels
-            </TableHead>
-            <TableHead className="h-12 px-4 text-right font-medium text-muted-foreground">
-              Conv. %
-            </TableHead>
-            <TableHead className="h-12 px-4 font-medium text-muted-foreground">
-              Date
-            </TableHead>
-            <TableHead className="w-[180px] px-4" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {campaigns.length === 0 ? (
-            <TableRow className="border-b border-[#F1F3F5] dark:border-border">
-              <TableCell
-                colSpan={7}
-                className="h-24 px-4 text-center text-muted-foreground"
-              >
-                No campaigns found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            campaigns.map((campaign) => {
-              const TypeIcon = CAMPAIGN_TYPE_ICONS[campaign.type] ?? FileText;
-              const isHovered = hoveredRowId === campaign.id;
-              const convRate = campaign.metrics.conversionRate;
-              const isStrongConversion =
-                convRate >= CONVERSION_STRONG_THRESHOLD && convRate > 0;
+  const headerThStyle = useMemo(
+    (): CSSProperties => ({
+      backgroundColor: "transparent",
+      borderWidth: 0,
+      borderStyle: "solid",
+      borderColor: "transparent",
+      borderBottomWidth: 1,
+      borderBottomColor: ROW_STROKE_LIGHT,
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      height: headerCellHeightPx,
+      minHeight: headerCellHeightPx,
+      maxHeight: headerCellHeightPx,
+      boxSizing: "border-box",
+      verticalAlign: "middle",
+    }),
+    [],
+  );
 
-              return (
-                <TableRow
-                  key={campaign.id}
-                  className={cn(
-                    "h-14 cursor-pointer border-b border-[#F1F3F5] transition-colors dark:border-border",
-                    isHovered && "bg-muted/50"
-                  )}
-                  onClick={() => onViewCampaign?.(campaign.id)}
-                  onMouseEnter={() => setHoveredRowId(campaign.id)}
-                  onMouseLeave={() => setHoveredRowId(null)}
-                >
-                  <TableCell className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-md",
-                          CAMPAIGN_TYPE_ICON_CLASSES[campaign.type],
-                        )}
-                      >
-                        <TypeIcon className="size-4" />
-                      </div>
-                      <span
-                        className="text-foreground"
-                        style={{ fontWeight: "var(--font-weight-semibold)" }}
-                      >
-                        {campaign.name}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Badge
-                      className={cn(
-                        "border-0 font-medium",
-                        STATUS_BADGE_STYLES[campaign.status]
-                      )}
-                    >
-                      {STATUS_LABELS[campaign.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums px-4 py-3">
-                    {campaign.audienceSize > 0
-                      ? formatCompactNumber(campaign.audienceSize)
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      {campaign.channels
-                        .filter((c) => c.isEnabled)
-                        .map((ch) => {
-                          const Icon = CHANNEL_ICONS[ch.channel];
-                          return Icon ? (
-                            <span
-                              key={ch.channel}
-                              className="inline-flex size-6 items-center justify-center rounded text-muted-foreground"
-                              title={CHANNEL_LABELS[ch.channel]}
-                            >
-                              <Icon className="size-3.5" />
-                            </span>
-                          ) : null;
-                        })}
-                      {campaign.channels.filter((c) => c.isEnabled).length ===
-                        0 && "—"}
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right tabular-nums px-4 py-3",
-                      isStrongConversion &&
-                        "font-medium text-[var(--theme-text-success)]"
-                    )}
-                  >
-                    {convRate > 0
-                      ? `${convRate.toFixed(1)}%`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-muted-foreground">
-                    {formatDate(
-                      campaign.launchedAt ??
-                        campaign.scheduledAt ??
-                        campaign.createdAt
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-right">
-                    <CampaignRowActions
-                      campaign={campaign}
-                      visible={isHovered}
-                      onEdit={() => {}}
-                      onPauseResume={() => {}}
-                      onViewAnalytics={() => onViewCampaign?.(campaign.id)}
-                      onDelete={() => {}}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })
+  const headerLabelOverrideClass =
+    "[&_span.truncate]:text-sm [&_span.truncate]:leading-5";
+  const slotLabelOverrideClass =
+    "[&_span.truncate]:text-sm [&_span.truncate]:leading-5";
+  const cellTextClassName = "text-sm";
+
+  const innerRowStyle: CSSProperties = useMemo(
+    () => ({
+      height: bodyCellHeightPx,
+      minHeight: bodyCellHeightPx,
+      maxHeight: bodyCellHeightPx,
+      paddingLeft: cellPaddingXPx,
+      paddingRight: cellPaddingXPx,
+      boxSizing: "border-box",
+    }),
+    [bodyCellHeightPx, cellPaddingXPx],
+  );
+
+  const slotClass = cn("text-foreground", slotLabelOverrideClass);
+
+  return (
+    <div className="flex flex-col overflow-hidden border-0 bg-transparent">
+      <div className="min-w-0 bg-transparent">
+        <Table
+          className={cn(
+            cellTextClassName,
+            "border-separate border-spacing-0 bg-transparent",
           )}
-        </TableBody>
-      </Table>
+        >
+          <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
+            <TableRow size="compact" className="!border-0 hover:bg-transparent">
+              <TableHead
+                className="min-w-[200px] w-[320px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Campaign"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[100px] w-[140px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Status"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[88px] w-[120px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Audience"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[120px] w-[150px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Channels"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[88px] w-[120px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Conv. %"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[120px] w-[150px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="label"
+                  label="Date"
+                  className={cn(
+                    headerLabelOverrideClass,
+                    "h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none",
+                  )}
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+              <TableHead
+                className="min-w-[72px] w-[72px] p-0 align-middle"
+                style={headerThStyle}
+              >
+                <TableHeaderCell
+                  variant="empty"
+                  className="h-full min-h-0 w-full rounded-none border-0 bg-transparent shadow-none"
+                  style={{
+                    height: headerCellHeightPx,
+                    minHeight: headerCellHeightPx,
+                    maxHeight: headerCellHeightPx,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {campaigns.length === 0 ? (
+              <TableRow
+                size="default"
+                className="!border-0 !bg-transparent hover:!bg-transparent"
+              >
+                <TableCell
+                  colSpan={7}
+                  className="h-24 px-4 text-center text-muted-foreground"
+                >
+                  No campaigns found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              campaigns.map((campaign, rowIndex) => {
+                const TypeIcon = CAMPAIGN_TYPE_ICONS[campaign.type] ?? FileText;
+                const isHovered = hoveredRowId === campaign.id;
+                const convRate = campaign.metrics.conversionRate;
+                const isStrongConversion =
+                  convRate >= CONVERSION_STRONG_THRESHOLD && convRate > 0;
+                const activeChannels = campaign.channels.filter((c) => c.isEnabled);
+                const isLastRow = rowIndex === campaigns.length - 1;
+                const cellFrame = cn(
+                  "p-0 align-middle transition-colors",
+                  isHovered && ROW_HOVER_SURFACE,
+                  !isLastRow && BODY_CELL_DIVIDER
+                );
+
+                return (
+                  <TableRow
+                    key={campaign.id}
+                    size="default"
+                    className="!border-0 !bg-transparent hover:!bg-transparent"
+                    style={{ minHeight: bodyCellHeightPx }}
+                  >
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <div className="flex items-center" style={innerRowStyle}>
+                        <div className="inline-flex max-w-full items-center gap-2">
+                          <span
+                            className="inline-flex size-7 shrink-0 items-center justify-center text-[var(--theme-text-secondary)]"
+                          >
+                            <TypeIcon className="size-3.5" />
+                          </span>
+                          <span
+                            className={cn(
+                              "truncate font-medium leading-5 text-foreground",
+                              cellTextClassName,
+                            )}
+                          >
+                            {campaign.name}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <div className="flex items-center" style={innerRowStyle}>
+                        <Badge
+                          variant="soft"
+                          tone={STATUS_BADGE_TONES[campaign.status]}
+                          leadingVisual={
+                            <BadgeDot tone={STATUS_BADGE_TONES[campaign.status]} />
+                          }
+                          className="shadow-none"
+                        >
+                          {STATUS_LABELS[campaign.status]}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <TableSlotCell
+                        label={
+                          campaign.audienceSize > 0
+                            ? formatCompactNumber(campaign.audienceSize)
+                            : "—"
+                        }
+                        className={cn(slotClass, "tabular-nums")}
+                        style={innerRowStyle}
+                      />
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <div className="flex items-center" style={innerRowStyle}>
+                        <div className="inline-flex max-w-full items-center gap-2">
+                          {activeChannels.length > 0 ? (
+                            activeChannels.map((ch) => {
+                              const Icon = CHANNEL_ICONS[ch.channel];
+                              return Icon ? (
+                                <span
+                                  key={ch.channel}
+                                  className="inline-flex shrink-0"
+                                  title={CHANNEL_LABELS[ch.channel]}
+                                >
+                                  <Icon
+                                    className="size-4 text-muted-foreground"
+                                    aria-hidden
+                                  />
+                                </span>
+                              ) : null;
+                            })
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <TableSlotCell
+                        label={convRate > 0 ? `${convRate.toFixed(1)}%` : "—"}
+                        className={cn(
+                          slotClass,
+                          "tabular-nums",
+                          isStrongConversion
+                            ? "text-[var(--theme-text-success)] font-medium"
+                            : "",
+                        )}
+                        style={innerRowStyle}
+                      />
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "cursor-pointer")}
+                      onClick={() => onViewCampaign?.(campaign.id)}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <TableSlotCell
+                        label={formatDate(
+                          campaign.launchedAt ??
+                            campaign.scheduledAt ??
+                            campaign.createdAt
+                        )}
+                        className={slotClass}
+                        style={innerRowStyle}
+                      />
+                    </TableCell>
+                    <TableCell
+                      className={cn(cellFrame, "p-0 align-middle")}
+                      onMouseEnter={() => setHoveredRowId(campaign.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
+                      <div
+                        className="flex items-center justify-center"
+                        style={innerRowStyle}
+                      >
+                        <CampaignRowActions
+                          campaign={campaign}
+                          visible={isHovered}
+                          onEdit={() => {}}
+                          onPauseResume={() => {}}
+                          onViewAnalytics={() => onViewCampaign?.(campaign.id)}
+                          onDelete={() => {}}
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
+}
+
+interface CampaignTableProps {
+  campaigns: Campaign[];
+  onViewCampaign?: (campaignId: string) => void;
 }
 
 export function CampaignTable({
   campaigns,
   onViewCampaign,
 }: CampaignTableProps) {
-  return (
-    <div className="space-y-4">
-      <Tabs defaultValue="all">
-        <TabsList
-          variant="line"
-          className="h-11 gap-0 bg-transparent p-0"
-        >
-          {STATUS_TABS.map(({ value, label, filterFn }) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="gap-1.5 px-4 py-2.5 text-sm font-semibold focus-visible:ring-0 focus-visible:outline-none data-[active]:text-foreground data-[active]:shadow-none"
-            >
-              {label}
-              <span className="rounded-md bg-muted px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
-                {campaigns.filter(filterFn).length}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+  const { resolvedTheme } = useTheme();
+  const previewSurface: DashPreviewSurface =
+    resolvedTheme === "dark" ? "dark" : "light";
 
-        {STATUS_TABS.map(({ value, filterFn }) => (
-          <TabsContent key={value} value={value} className="mt-0">
+  const [deckTab, setDeckTab] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filterFn = useMemo(() => {
+    const tab = STATUS_TABS.find((t) => t.value === deckTab);
+    return tab?.filterFn ?? (() => true);
+  }, [deckTab]);
+
+  const filteredCampaigns = useMemo(
+    () => campaigns.filter(filterFn),
+    [campaigns, filterFn],
+  );
+
+  const pageSize = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredCampaigns.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pagedCampaigns = filteredCampaigns.slice(
+    (safeCurrentPage - 1) * pageSize,
+    safeCurrentPage * pageSize,
+  );
+
+  const handleDeckTabChange = useCallback((next: string) => {
+    setDeckTab(next);
+    setCurrentPage(1);
+  }, []);
+
+  return (
+    <div className="flex min-h-[min(28rem,70vh)] min-w-0 w-full flex-col">
+      <FileCabinetTableChrome
+        className="flex min-h-[280px] min-w-0 flex-1 flex-col"
+        value={deckTab}
+        onValueChange={handleDeckTabChange}
+        labels={CAMPAIGN_DECK_TAB_LABELS}
+        tabValues={CAMPAIGN_DECK_TAB_VALUES}
+        surface={previewSurface}
+        underGlowPx={underGlowPx}
+        accent={tabAccent}
+        tabTopRadiusPx={tabTopRadiusPx}
+        showLeftLamp={false}
+        noLeftLampBelowStyle="preset-led"
+        tabMotionVariant="sink-rise"
+      >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pb-2 pt-[4px]">
+          <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
             <CampaignTableView
-              campaigns={campaigns.filter(filterFn)}
+              campaigns={pagedCampaigns}
               onViewCampaign={onViewCampaign}
             />
-          </TabsContent>
-        ))}
-      </Tabs>
+          </div>
+          <div className="flex min-w-0 shrink-0 justify-end pt-2">
+            <Paginator
+              variant="inline"
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              totalItems={filteredCampaigns.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+      </FileCabinetTableChrome>
     </div>
   );
 }

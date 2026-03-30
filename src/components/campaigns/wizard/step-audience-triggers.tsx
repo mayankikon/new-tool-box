@@ -15,6 +15,7 @@ import {
   Activity,
   MapPin,
   Snowflake,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +38,9 @@ import {
   SEGMENT_FIELD_DEFS,
   SEGMENT_CATEGORIES,
   TRIGGER_TYPE_META,
+  WINBACK_AT_RISK_PRESETS,
 } from "@/lib/campaigns/mock-data";
+import { DEFAULT_PROXIMITY_RADIUS_MILES } from "@/lib/campaigns/proximity-trigger-defaults";
 import { VEHICLE_MODELS_BY_MAKE } from "@/lib/campaigns/vehicle-data";
 import type { VehicleModel } from "@/lib/campaigns/vehicle-data";
 import type { AudienceSegment, CampaignTrigger } from "@/lib/campaigns/types";
@@ -101,10 +104,11 @@ export function StepAudienceTriggers({
   const { audienceSegments, trigger } = formData;
 
   // Derive approximate customers from current rules so the badge updates in real time
-  const displayAudienceSize =
+  const baseAudienceSize =
     audienceSegments.length > 0
       ? estimateAudienceSize(audienceSegments.length)
       : 0;
+  const displayAudienceSize = Math.max(0, baseAudienceSize);
 
   // Keep formData.audienceSize in sync with segment count (e.g. when loaded from template)
   useEffect(() => {
@@ -165,6 +169,19 @@ export function StepAudienceTriggers({
     [audienceSegments, updateAudience],
   );
 
+  const applyPreset = useCallback(
+    (preset: (typeof WINBACK_AT_RISK_PRESETS)[number]) => {
+      const newIds = preset.segments.map((seg, i) => `seg-preset-${preset.id}-${ruleCounterRef.current + i}`);
+      ruleCounterRef.current += preset.segments.length;
+      const newSegments = preset.segments.map((seg, i) => ({
+        ...seg,
+        id: newIds[i] ?? seg.id,
+      }));
+      updateAudience([...audienceSegments, ...newSegments]);
+    },
+    [audienceSegments, updateAudience],
+  );
+
   const handleAiGenerate = useCallback(async () => {
     if (!aiQuery.trim()) return;
     setIsGenerating(true);
@@ -202,7 +219,13 @@ export function StepAudienceTriggers({
 
   const handleTypeSelect = useCallback(
     (type: TriggerKind) => {
-      updateTrigger({ type, config: {} });
+      updateTrigger({
+        type,
+        config:
+          type === "proximity"
+            ? { radiusMiles: DEFAULT_PROXIMITY_RADIUS_MILES }
+            : {},
+      });
     },
     [updateTrigger],
   );
@@ -225,6 +248,26 @@ export function StepAudienceTriggers({
             ~{displayAudienceSize.toLocaleString()} customers
           </div>
         )}
+      </div>
+
+      {/* Quick segments (win-back / at-risk presets) */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">
+          Quick segments
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {WINBACK_AT_RISK_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:border-primary hover:bg-primary/5 cursor-pointer"
+            >
+              <Zap className="size-3.5 text-primary" />
+              {preset.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* AI Assist Card — full-width/height header is hoverable and clickable */}
@@ -730,7 +773,7 @@ export function StepAudienceTriggers({
                 <Input
                   type="number"
                   min={1}
-                  placeholder="5"
+                  placeholder={String(DEFAULT_PROXIMITY_RADIUS_MILES)}
                   value={String(trigger.config.radiusMiles ?? "")}
                   onChange={(e) =>
                     updateConfig("radiusMiles", Number(e.target.value))

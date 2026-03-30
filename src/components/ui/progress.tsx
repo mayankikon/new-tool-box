@@ -1,83 +1,197 @@
 "use client"
 
-import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function Progress({
+const SEGMENT_COUNT = 10
+
+const progressBarVariants = cva("flex w-full flex-col gap-2", {
+  variants: {
+    variant: {
+      linear: "",
+      dashed: "",
+    },
+  },
+  defaultVariants: {
+    variant: "linear",
+  },
+})
+
+interface ProgressBarProps
+  extends React.ComponentProps<"div">,
+    VariantProps<typeof progressBarVariants> {
+  value?: number
+  label?: string
+  caption?: string
+  /** Hide the percentage value display */
+  hideValue?: boolean
+}
+
+function ProgressBar({
   className,
-  children,
-  value,
+  variant = "linear",
+  value = 0,
+  label,
+  caption,
+  hideValue = false,
   ...props
-}: ProgressPrimitive.Root.Props) {
+}: ProgressBarProps) {
+  const clampedValue = Math.max(0, Math.min(100, value))
+
   return (
-    <ProgressPrimitive.Root
-      value={value}
-      data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+    <div
+      role="progressbar"
+      aria-valuenow={clampedValue}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label ?? "Progress"}
+      data-slot="progress-bar"
+      className={cn(progressBarVariants({ variant }), className)}
       {...props}
     >
-      {children}
-      <ProgressTrack>
-        <ProgressIndicator />
-      </ProgressTrack>
-    </ProgressPrimitive.Root>
-  )
-}
-
-function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
-  return (
-    <ProgressPrimitive.Track
-      className={cn(
-        "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-muted",
-        className
+      {(label || !hideValue) && (
+        <ProgressBarHeader>
+          {label && <ProgressBarLabel>{label}</ProgressBarLabel>}
+          {!hideValue && (
+            <ProgressBarValue>{clampedValue}%</ProgressBarValue>
+          )}
+        </ProgressBarHeader>
       )}
-      data-slot="progress-track"
-      {...props}
-    />
+
+      {variant === "dashed" ? (
+        <ProgressBarDashedTrack value={clampedValue} />
+      ) : (
+        <ProgressBarLinearTrack value={clampedValue} />
+      )}
+
+      {caption && <ProgressBarCaption>{caption}</ProgressBarCaption>}
+    </div>
   )
 }
 
-function ProgressIndicator({
+function ProgressBarHeader({
   className,
   ...props
-}: ProgressPrimitive.Indicator.Props) {
+}: React.ComponentProps<"div">) {
   return (
-    <ProgressPrimitive.Indicator
-      data-slot="progress-indicator"
-      className={cn("h-full bg-primary transition-all", className)}
+    <div
+      data-slot="progress-bar-header"
+      className={cn("flex w-full items-center justify-between", className)}
       {...props}
     />
   )
 }
 
-function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
+function ProgressBarLabel({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
   return (
-    <ProgressPrimitive.Label
-      className={cn("text-sm font-medium", className)}
-      data-slot="progress-label"
-      {...props}
-    />
-  )
-}
-
-function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
-  return (
-    <ProgressPrimitive.Value
+    <span
+      data-slot="progress-bar-label"
       className={cn(
-        "ml-auto text-sm text-muted-foreground tabular-nums",
+        "text-sm font-medium leading-5 text-[var(--theme-text-primary,#111115)]",
         className
       )}
-      data-slot="progress-value"
+      {...props}
+    />
+  )
+}
+
+function ProgressBarValue({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="progress-bar-value"
+      className={cn(
+        "ml-auto text-sm font-normal leading-5 tabular-nums text-[var(--theme-text-secondary,#6f6f77)]",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ProgressBarLinearTrack({
+  className,
+  value,
+  ...props
+}: React.ComponentProps<"div"> & { value: number }) {
+  return (
+    <div
+      data-slot="progress-bar-track"
+      className={cn(
+        "relative h-1 w-full overflow-hidden rounded-full bg-muted",
+        className
+      )}
+      {...props}
+    >
+      <div
+        data-slot="progress-bar-indicator"
+        className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-300 ease-out"
+        style={{ width: `${value}%` }}
+      />
+    </div>
+  )
+}
+
+function ProgressBarDashedTrack({
+  className,
+  value,
+  ...props
+}: React.ComponentProps<"div"> & { value: number }) {
+  const filledSegments = Math.round((value / 100) * SEGMENT_COUNT)
+
+  return (
+    <div
+      data-slot="progress-bar-track"
+      className={cn(
+        "flex h-1 w-full items-center gap-1 overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      {Array.from({ length: SEGMENT_COUNT }, (_, i) => (
+        <div
+          key={i}
+          data-slot="progress-bar-segment"
+          data-filled={i < filledSegments || undefined}
+          className={cn(
+            "h-1 min-h-px min-w-px flex-1 rounded-full transition-colors duration-200",
+            i < filledSegments ? "bg-primary" : "bg-muted"
+          )}
+        />
+      ))}
+    </div>
+  )
+}
+
+function ProgressBarCaption({
+  className,
+  ...props
+}: React.ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="progress-bar-caption"
+      className={cn(
+        "text-xs font-normal leading-4 text-[var(--theme-text-secondary,#6f6f77)]",
+        className
+      )}
       {...props}
     />
   )
 }
 
 export {
-  Progress,
-  ProgressTrack,
-  ProgressIndicator,
-  ProgressLabel,
-  ProgressValue,
+  ProgressBar,
+  ProgressBarHeader,
+  ProgressBarLabel,
+  ProgressBarValue,
+  ProgressBarLinearTrack,
+  ProgressBarDashedTrack,
+  ProgressBarCaption,
+  progressBarVariants,
 }

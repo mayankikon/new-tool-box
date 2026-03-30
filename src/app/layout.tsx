@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
-import { Saira, JetBrains_Mono } from "next/font/google";
+import { Agentation } from "agentation";
+import { DialRoot } from "dialkit";
+import { Saira, Inter, JetBrains_Mono } from "next/font/google";
+import { GroovedPanelPreferenceProvider } from "@/components/chrome/grooved-panel-preference";
+import { AppThemeProvider } from "@/components/theme/app-theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AgentationDev } from "@/components/agentation-dev";
+
 import "./globals.css";
+import "dialkit/styles.css";
 
 const saira = Saira({
   variable: "--font-saira",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -25,14 +35,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${saira.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${saira.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <TooltipProvider>
-          {children}
-          <AgentationDev />
-        </TooltipProvider>
+        <AppThemeProvider>
+          <GroovedPanelPreferenceProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </GroovedPanelPreferenceProvider>
+          <DialRoot position="bottom-right" defaultOpen={false} />
+          {process.env.NODE_ENV === "development" && <Agentation />}
+        </AppThemeProvider>
       </body>
     </html>
   );

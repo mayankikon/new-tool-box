@@ -30,7 +30,7 @@ export function CampaignDetailSkeleton() {
         {/* KPI Cards */}
         <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} size="sm">
+            <Card key={i}>
               <CardContent className="flex items-center gap-3">
                 <Skeleton className="size-10 rounded-sm" />
                 <div className="space-y-1.5">

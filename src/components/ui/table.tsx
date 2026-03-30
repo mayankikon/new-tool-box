@@ -1,14 +1,22 @@
 "use client"
 
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({
+  className,
+  containerClassName,
+  ...props
+}: React.ComponentProps<"table"> & { containerClassName?: string }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn(
+        "relative w-full overflow-x-auto rounded-[var(--radius-xs,4px)]",
+        containerClassName,
+      )}
     >
       <table
         data-slot="table"
@@ -52,14 +60,30 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+const tableRowVariants = cva(
+  "border-b border-[var(--theme-stroke-subtle,var(--theme-stroke-default))] transition-colors data-[state=selected]:bg-[var(--theme-background-hover,rgba(39,39,42,0.04))]",
+  {
+    variants: {
+      size: {
+        default: "min-h-14 hover:bg-sidebar",
+        compact: "min-h-8 hover:bg-sidebar",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
+function TableRow({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<"tr"> & VariantProps<typeof tableRowVariants>) {
   return (
     <tr
       data-slot="table-row"
-      className={cn(
-        "border-b transition-colors hover:bg-accent/40 data-[state=selected]:bg-accent",
-        className
-      )}
+      className={cn(tableRowVariants({ size }), className)}
       {...props}
     />
   )
@@ -113,4 +137,5 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  tableRowVariants,
 }

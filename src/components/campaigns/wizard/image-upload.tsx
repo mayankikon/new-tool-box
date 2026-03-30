@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, Trash2, Camera, Video, FolderOpen } from "lucide-react";
+import { Upload, Trash2, Camera, Video, FolderOpen, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { videoToGifBlob } from "@/lib/campaigns/video-to-gif";
+import { MEDIA_CATALOG } from "@/lib/campaigns/media-catalog";
 import type { ImageAttachment } from "@/lib/campaigns/types";
 
 interface ImageUploadProps {
@@ -32,6 +33,7 @@ export function ImageUpload({
   maxImages = 5,
 }: ImageUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [webcamOpen, setWebcamOpen] = useState(false);
   const [webcamMode, setWebcamMode] = useState<"photo" | "video">("photo");
   const [webcamError, setWebcamError] = useState<string | null>(null);
@@ -345,6 +347,46 @@ export function ImageUpload({
     }
   }, []);
 
+  const handleSelectFromCatalog = useCallback(
+    (entry: (typeof MEDIA_CATALOG)[number]) => {
+      if (images.length >= maxImages) return;
+      const id = crypto.randomUUID();
+      const newAttachment: ImageAttachment = {
+        id,
+        name: entry.name,
+        url: entry.path,
+        size: 0,
+        type: entry.type,
+        kind: entry.kind,
+      };
+      const nextImages = [...images, newAttachment];
+      onImagesChange(nextImages);
+      setCatalogOpen(false);
+
+      if (entry.kind === "video") {
+        setGeneratingGifIds((prev) => new Set(prev).add(id));
+        videoToGifBlob(entry.path)
+          .then((gifBlob) => {
+            const gifUrl = URL.createObjectURL(gifBlob);
+            const current = imagesRef.current;
+            const updated = current.map((img) =>
+              img.id === id ? { ...img, gifPreviewUrl: gifUrl } : img,
+            );
+            onImagesChange(updated);
+          })
+          .catch(() => {})
+          .finally(() => {
+            setGeneratingGifIds((prev) => {
+              const next = new Set(prev);
+              next.delete(id);
+              return next;
+            });
+          });
+      }
+    },
+    [images, maxImages, onImagesChange],
+  );
+
   return (
     <div className="space-y-3">
       {/* Drop zone */}
@@ -404,8 +446,71 @@ export function ImageUpload({
             <FolderOpen className="size-3.5" />
             Browse Media
           </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isMaxReached}
+            onClick={() => setCatalogOpen(true)}
+            aria-label="Select from catalog"
+          >
+            <Library className="size-3.5" />
+            Select from catalog
+          </Button>
         </div>
       </div>
+
+      {/* Catalog modal */}
+      <Dialog open={catalogOpen} onOpenChange={setCatalogOpen}>
+        <DialogContent className="sm:max-w-md" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Select from catalog</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Choose a video or image to attach to your message.
+          </p>
+          <div className="grid gap-3 py-2">
+            {MEDIA_CATALOG.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => handleSelectFromCatalog(entry)}
+                className="flex items-center gap-3 rounded-md border border-border bg-muted/30 p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/50 cursor-pointer"
+              >
+                <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded bg-muted">
+                  {entry.kind === "video" ? (
+                    <video
+                      src={entry.path}
+                      className="size-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={entry.path}
+                      alt={entry.name}
+                      className="size-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">{entry.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {entry.kind === "video" ? "Video" : "Image"} · Catalog
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+          {MEDIA_CATALOG.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No catalog items available.
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <input
         ref={fileInputRef}
@@ -532,7 +637,9 @@ export function ImageUpload({
                 </div>
                 <p className="truncate text-[10px] font-medium">{item.name}</p>
                 <p className="text-[10px] text-muted-foreground">
-                  {formatFileSize(item.size)}
+                  {item.size > 0
+                    ? formatFileSize(item.size)
+                    : "Catalog"}
                   {isVideo && " · video"}
                 </p>
               </div>

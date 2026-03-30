@@ -46,7 +46,7 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon: Icon, subtitle }: MetricCardProps) {
   return (
-    <Card size="sm">
+    <Card>
       <CardContent className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-primary/10">
           <Icon className="size-5 text-primary" />
