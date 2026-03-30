@@ -5,6 +5,7 @@
 - **Framework**: Next.js 16 (App Router), React 19, TypeScript
 - **UI**: shadcn/ui (base-nova style), Tailwind CSS v4, Base UI primitives
 - **Design system**: Foundation tokens and component showcase at `/design-system`
+- **Large files**: `evox.csv` (~400MB) is tracked with **Git LFS** (see `.gitattributes`). After cloning, run `git lfs install`; fetch binaries with `git lfs pull` if the working copy shows a pointer file instead of CSV rows.
 
 ## Key paths
 
@@ -24,6 +25,7 @@
 | `src/lib/design-tokens.ts` | Token definitions for the design system page (colors, radius) |
 | `src/lib/campaigns/types.ts` | Campaign domain types (Campaign, CampaignStatus, AudienceSegment, CampaignTrigger, CampaignMessage, ChannelConfig, CampaignMetrics, CampaignTemplate, DashboardMetrics, PersonalizationVariable, WizardMessage, ImageAttachment with optional kind `image`/`video` and gifPreviewUrl for video) |
 | `src/lib/campaigns/mock-data.ts` | Mock campaigns (10 across all statuses), templates (6), type labels, helpers (getCampaignById, computeDashboardMetrics), and wizard data (segment field definitions, trigger type metadata, channel metadata, personalization variables). Make field options sourced from vehicle-data. |
+| `evox.csv` | Evox vehicle match dataset (LFS). Required input for `scripts/extract-vehicle-data.js`. |
 | `src/lib/campaigns/vehicle-data.ts` | **Generated** vehicle make/model/image data extracted from `evox.csv`; use `node scripts/extract-vehicle-data.js` to regenerate. Exports `VEHICLE_MAKES` (string[]) and `VEHICLE_MODELS_BY_MAKE` (Record mapping each make to models with CloudFront side-view image URLs). |
 | `src/lib/campaigns/video-to-gif.ts` | Browser utility: generates a ~3 second animated GIF from a video blob/URL using canvas and gifenc; used by campaign wizard image upload for video attachment preview. |
 | `scripts/extract-vehicle-data.js` | Parses `evox.csv` and generates `vehicle-data.ts` with normalized make/model/image mappings. Normalizes case variants and collapses trim-level model names. |
