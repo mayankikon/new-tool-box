@@ -73,6 +73,7 @@ import {
   mainLotGeoJSON,
 } from "@/lib/inventory/dealership-geofences";
 import { resolveIconHeadquartersFromMap } from "@/lib/inventory/icon-headquarters-building";
+import { mediaUrl } from "@/lib/media-paths";
 import {
   INVENTORY_PANEL_VEHICLES,
   type InventoryVehicleRecord,
@@ -94,9 +95,9 @@ function inventoryMapAppearanceFromTheme(
 }
 
 const MAP_FILTER_ICONS = {
-  stockType: "/dealership-icons/lead-icon-car.svg",
-  inventoryAge: "/dealership-icons/lead-icon-inventory-age.svg",
-  batteryStatus: "/dealership-icons/lead-icon-battery-full.svg",
+  stockType: mediaUrl("icons/lead-icon-car.svg"),
+  inventoryAge: mediaUrl("icons/lead-icon-inventory-age.svg"),
+  batteryStatus: mediaUrl("icons/lead-icon-battery-full.svg"),
 } as const;
 
 function MapFilterIcon({ src, alt }: { src: string; alt: string }) {

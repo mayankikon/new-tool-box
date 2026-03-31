@@ -13,7 +13,7 @@ export function RadiusSection() {
         title="Radius"
         description={
           <>
-            From <CodeInline size="sm">Radius.json</CodeInline> (layout-primitives.css). Border radius tokens for consistent rounding across components.
+            From <CodeInline size="sm">design-tokens/radius.json</CodeInline> (layout-primitives.css). Border radius tokens for consistent rounding across components.
           </>
         }
       />

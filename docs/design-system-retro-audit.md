@@ -55,7 +55,7 @@ The left nav on **`/design-playground`** mirrors **`design-system-nav-config.ts`
 | Nav slug | Live playground | Notes |
 |----------|-----------------|--------|
 | `tabs` | Yes | Tab strips: telemetry, side-LED push, **outline + under-glow** (fixed: **left lamp**, primary, halo ~11px, radius 6px, recess 0, title case). Flat channel; outline tab clicks → `card_button.mp3`. Tweaks: **preview surface only**. Saira via `font-headline`. Bezel uses fixed constants (ex–DialKit defaults). |
-| `radio` | Yes | Same page as **Tabs**; auto-scrolls to **Radio & segmented** play area. Clicks play `/sounds/card_button.mp3` when present. |
+| `radio` | Yes | Same page as **Tabs**; auto-scrolls to **Radio & segmented** play area. Clicks play `/media/audio/card_button.mp3` when present. |
 | `toggle-switch` | Yes | Two play areas: paddle on/off + push keys / annunciators (`FilterButton`, `Button`). |
 | `slider` | Yes | Three play areas: retro native range, design-system **`Slider`**, **`ProgressBar`**. |
 | `progress-bar` | Yes | Same page as **Slider**; auto-scrolls to **Progress bar** play area. |

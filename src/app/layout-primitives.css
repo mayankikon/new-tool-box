@@ -1,4 +1,4 @@
-/* Layout primitives from Figma Radius.json, Spacing.json, Stroke.json */
+/* Layout primitives from Figma design-tokens (radius, spacing, stroke) */
 /* Regenerate with: npm run tokens:layout */
 
 :root {

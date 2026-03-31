@@ -73,7 +73,7 @@ export function TabsShowcase() {
         <h2 className="text-lg font-semibold tracking-tight">Tabs</h2>
         <p className="mt-1 text-sm text-muted-foreground font-headline">
           Telemetry deck tabs, side-LED push, outline glow, and segmented radios. Outline tabs play{" "}
-          <code className="font-mono text-xs">/sounds/card_button.mp3</code> when present.{" "}
+          <code className="font-mono text-xs">/media/audio/card_button.mp3</code> when present.{" "}
           <strong>Saira</strong> via <code className="font-mono text-xs">font-headline</code>.
         </p>
       </div>

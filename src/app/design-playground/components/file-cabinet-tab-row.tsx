@@ -6,18 +6,18 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-m
 import { DashboardLedCapsuleWebgl } from "@/components/ui/dashboard-led-capsule-webgl";
 import type { TelemetryDeckLedTone } from "@/components/ui/telemetry-led-tones";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media-paths";
 
 import type { DashPreviewSurface } from "./dash-preview-canvas";
 import type { FileCabinetTabMotionVariant } from "./file-cabinet-tab-motion";
 import { OUTLINE_GLOW_TAB_VALUES } from "./outline-glow-tab-row";
 
 /**
- * Served from `public/` (sync from `dealership_logo/table/active.svg` → `table-tab-active.svg`,
- * `default.svg` → `table-tab-default.svg` when design updates those files).
+ * Served from `public/media/icons/` (design exports for file-cabinet tab lamp artwork).
  */
 const FILE_CABINET_TAB_LAMP_SRC = {
-  active: "/dealership-icons/table-tab-active.svg",
-  default: "/dealership-icons/table-tab-default.svg",
+  active: mediaUrl("icons/table-tab-active.svg"),
+  default: mediaUrl("icons/table-tab-default.svg"),
 } as const;
 
 /** Matches Tabs playground Preset + LED row default intensity (~70). */

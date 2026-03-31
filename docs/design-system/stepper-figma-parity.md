@@ -69,4 +69,4 @@ Vertical connector **below** step `i`: filled iff `i < currentStep` ⇔ status i
 
 - [ ] Design system `#stepper` matches six linked frames at 100% zoom.
 - [ ] Light and `.dark` themes: indicator and connector contrast.
-- [ ] [`campaign-wizard-v2.tsx`](../../src/components/campaigns-v2/campaign-wizard-v2.tsx) horizontal stepper: segment fill stops at active step (no line past current).
+- [ ] [`campaign-wizard.tsx`](../../src/components/campaigns/campaign-wizard.tsx) horizontal stepper: segment fill stops at active step (no line past current).

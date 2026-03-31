@@ -208,6 +208,17 @@ const ZERO_LAYOUT: ChromeLayout = {
   mergedStrokePathD: "",
 };
 
+function isChromeLayoutEqual(a: ChromeLayout, b: ChromeLayout): boolean {
+  return (
+    a.rootW === b.rootW &&
+    a.rootH === b.rootH &&
+    a.cardTop === b.cardTop &&
+    a.tabPathD === b.tabPathD &&
+    a.cardPathD === b.cardPathD &&
+    a.mergedStrokePathD === b.mergedStrokePathD
+  );
+}
+
 function computeChromeLayout(
   rootEl: HTMLElement,
   tableEl: HTMLElement,
@@ -405,6 +416,8 @@ export function FileCabinetTableChrome({
   const tableCardRef = React.useRef<HTMLDivElement>(null);
   const activeTabElRef = React.useRef<HTMLButtonElement | null>(null);
   const layoutRef = React.useRef<ChromeLayout>(ZERO_LAYOUT);
+  /** Last committed layout; avoids ResizeObserver ↔ setState feedback loops. */
+  const lastLayoutCommitRef = React.useRef<ChromeLayout>(ZERO_LAYOUT);
   const prevValueRef = React.useRef(value);
   const exitIdRef = React.useRef(0);
   const lastChromeDebugLogRef = React.useRef<string>("");
@@ -435,7 +448,10 @@ export function FileCabinetTableChrome({
     const tableEl = tableCardRef.current;
     const tabEl = activeTabElRef.current;
     if (!rootEl || !tableEl || !tabEl) {
-      setLayout(ZERO_LAYOUT);
+      if (!isChromeLayoutEqual(lastLayoutCommitRef.current, ZERO_LAYOUT)) {
+        lastLayoutCommitRef.current = ZERO_LAYOUT;
+        setLayout(ZERO_LAYOUT);
+      }
       return;
     }
     const dpr =
@@ -464,6 +480,10 @@ export function FileCabinetTableChrome({
         console.info("[FileCabinetChrome] seam / stroke debug", nextLayout.debugSnapshot);
       }
     }
+    if (isChromeLayoutEqual(lastLayoutCommitRef.current, nextLayout)) {
+      return;
+    }
+    lastLayoutCommitRef.current = nextLayout;
     setLayout(nextLayout);
   }, [activeIndex, squareTopLeft, tabTopRadiusPx]);
 
@@ -497,13 +517,26 @@ export function FileCabinetTableChrome({
     if (!rootEl || !tableEl) {
       return;
     }
-    const ro = new ResizeObserver(() => updateLayout());
+    let rafId: number | null = null;
+    const scheduleUpdate = () => {
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateLayout();
+      });
+    };
+    const ro = new ResizeObserver(scheduleUpdate);
     ro.observe(rootEl);
     ro.observe(tableEl);
-    window.addEventListener("resize", updateLayout);
+    window.addEventListener("resize", scheduleUpdate);
     return () => {
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+      }
       ro.disconnect();
-      window.removeEventListener("resize", updateLayout);
+      window.removeEventListener("resize", scheduleUpdate);
     };
   }, [updateLayout]);
 

@@ -1,16 +1,16 @@
 /**
- * Generates src/app/color-primitives.css from Figma Colors.json.
+ * Generates src/app/color-primitives.css from Figma design-tokens/colors.json.
  * Run: npm run tokens:colors
  */
 const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const colorsPath = path.join(root, "Colors.json");
+const colorsPath = path.join(root, "design-tokens", "colors.json");
 const outPath = path.join(root, "src", "app", "color-primitives.css");
 
 if (!fs.existsSync(colorsPath)) {
-  console.error("Colors.json not found at project root.");
+  console.error("design-tokens/colors.json not found.");
   process.exit(1);
 }
 
@@ -41,7 +41,7 @@ const declarations = solid
   .filter(Boolean);
 
 const out = [
-  "/* Color primitives from Figma Colors.json - do not edit by hand */",
+  "/* Color primitives from Figma design-tokens/colors.json - do not edit by hand */",
   "/* Regenerate with: npm run tokens:colors */",
   "",
   ":root {",

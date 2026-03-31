@@ -64,6 +64,7 @@ import {
 } from "@/components/ui/ai-textarea";
 import { ShimmeringText } from "@/components/shimmering-text/shimmering-text";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media-paths";
 import {
   ATLAS_AI_HEADLINES,
   ATLAS_AI_HOME_MODULES,
@@ -139,7 +140,7 @@ function AtlasAiLogo({
     <div className={cn("relative flex items-center justify-center", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/dealership-logo/ikon-mark.svg"
+        src={mediaUrl("logos/ikon-mark.svg")}
         alt="Atlas AI"
         className={cn("size-8", imageClassName)}
         loading="eager"

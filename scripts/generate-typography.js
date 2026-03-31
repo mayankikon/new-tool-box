@@ -1,13 +1,13 @@
 /**
- * Generates src/app/typography-primitives.css from Figma Font Family.json and Font Size.json.
+ * Generates src/app/typography-primitives.css from Figma design-tokens/font-family.json and font-size.json.
  * Run: npm run tokens:typography
  */
 const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const fontFamilyPath = path.join(root, "Font Family.json");
-const fontSizePath = path.join(root, "Font Size.json");
+const fontFamilyPath = path.join(root, "design-tokens", "font-family.json");
+const fontSizePath = path.join(root, "design-tokens", "font-size.json");
 const outPath = path.join(root, "src", "app", "typography-primitives.css");
 
 for (const p of [fontFamilyPath, fontSizePath]) {
@@ -29,7 +29,7 @@ function getVal(v, mode) {
 }
 
 const lines = [
-  "/* Typography primitives from Figma Font Family.json + Font Size.json */",
+  "/* Typography primitives from Figma design-tokens/font-family.json + font-size.json */",
   "/* Regenerate with: npm run tokens:typography */",
   "",
   ":root {",

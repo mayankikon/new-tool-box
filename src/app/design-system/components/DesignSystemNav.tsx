@@ -38,10 +38,10 @@ function filterNavEntries(query: string): NavEntry[] {
   });
 }
 
-function scrollToSection(slug: string) {
+function scrollToSection(slug: string, behavior: ScrollBehavior = "smooth") {
   const el = document.getElementById(slug);
   if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
+    el.scrollIntoView({ behavior });
   }
 }
 
@@ -56,10 +56,14 @@ export function DesignSystemNav() {
 
   useEffect(() => {
     const hash = getCurrentHash();
-    if (hash) {
-      setActiveSlug(hash);
-      scrollToSection(hash);
-    }
+    if (!hash) return;
+    setActiveSlug(hash);
+    // Defer until after paint; use instant scroll on load so a long page does not smooth-scroll
+    // and re-layout repeatedly (reduces flicker with sticky chrome + heavy sections).
+    const id = requestAnimationFrame(() => {
+      scrollToSection(hash, "auto");
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {

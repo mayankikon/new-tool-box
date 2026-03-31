@@ -1,14 +1,14 @@
 /**
- * Generates src/app/layout-primitives.css from Figma Radius.json, Spacing.json, Stroke.json.
+ * Generates src/app/layout-primitives.css from Figma design-tokens (radius, spacing, stroke).
  * Run: npm run tokens:layout
  */
 const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const radiusPath = path.join(root, "Radius.json");
-const spacingPath = path.join(root, "Spacing.json");
-const strokePath = path.join(root, "Stroke.json");
+const radiusPath = path.join(root, "design-tokens", "radius.json");
+const spacingPath = path.join(root, "design-tokens", "spacing.json");
+const strokePath = path.join(root, "design-tokens", "stroke.json");
 const outPath = path.join(root, "src", "app", "layout-primitives.css");
 
 for (const p of [radiusPath, spacingPath, strokePath]) {
@@ -36,7 +36,7 @@ function cssName(prefix, name) {
 }
 
 const lines = [
-  "/* Layout primitives from Figma Radius.json, Spacing.json, Stroke.json */",
+  "/* Layout primitives from Figma design-tokens (radius, spacing, stroke) */",
   "/* Regenerate with: npm run tokens:layout */",
   "",
   ":root {",

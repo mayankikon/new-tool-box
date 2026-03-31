@@ -44,7 +44,7 @@ export function BatteryThresholdShowcaseSection() {
       <h3 className="ds-doc-font mb-2 text-lg font-medium text-foreground">Battery threshold</h3>
       <p className="ds-doc-font mb-4 text-sm text-muted-foreground">
         Low-battery alert threshold in volts (10–12.5 V, {BATTERY_THRESHOLD_STEP} V steps). Uses the dealership
-        battery glyph (<CodeInline>public/dealership-icons/lead-icon-battery-full.svg</CodeInline>) with a
+        battery glyph (<CodeInline>public/media/icons/lead-icon-battery-full.svg</CodeInline>) with a
         dynamic fill; marked slider matches{" "}
         <a href="#slider" className="text-primary underline-offset-2 hover:underline">
           Slider

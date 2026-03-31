@@ -4,14 +4,15 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { mediaUrl } from "@/lib/media-paths"
 import { Checkbox } from "@/components/ui/checkbox"
 
 export type TableHeaderSortState = "asc" | "desc" | "inactive"
 
 const TABLE_SORT_ICON_SRC: Record<TableHeaderSortState, string> = {
-  asc: "/dealership-icons/table-sort-ascending.svg",
-  desc: "/dealership-icons/table-sort-descending.svg",
-  inactive: "/dealership-icons/table-sort-inactive.svg",
+  asc: mediaUrl("icons/table-sort-ascending.svg"),
+  desc: mediaUrl("icons/table-sort-descending.svg"),
+  inactive: mediaUrl("icons/table-sort-inactive.svg"),
 }
 
 function TableSortIndicatorIcon({ state }: { state: TableHeaderSortState }) {

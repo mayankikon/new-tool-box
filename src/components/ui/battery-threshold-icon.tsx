@@ -18,7 +18,7 @@ interface BatteryThresholdIconProps {
 /**
  * Dealership "Battery, Full" glyph (24×24 viewBox): outline + inner fill level
  * driven by threshold between {@link BATTERY_THRESHOLD_V_MIN} and {@link BATTERY_THRESHOLD_V_MAX}.
- * Asset source: `public/dealership-icons/lead-icon-battery-full.svg` / `dealership_logo/Battery, Full.svg`.
+ * Asset source: `public/media/icons/lead-icon-battery-full.svg` (Figma “Battery, Full” glyph).
  */
 export function BatteryThresholdIcon({ valueVolts, className }: BatteryThresholdIconProps) {
   const span = BATTERY_THRESHOLD_V_MAX - BATTERY_THRESHOLD_V_MIN;

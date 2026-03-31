@@ -30,7 +30,7 @@ export function FoundationTokensSection() {
             Semantic colors
           </h3>
           <p className="ds-doc-font text-sm text-muted-foreground mb-3">
-            These map to theme tokens (Themes.json) and power shadcn components.
+            These map to theme tokens (design-tokens/themes.json) and power shadcn components.
           </p>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {colorTokenGroups.map((group) => (
@@ -51,7 +51,7 @@ export function FoundationTokensSection() {
         <div>
           <h3 className="ds-doc-font text-lg font-medium text-foreground mb-4">Radius</h3>
           <p className="ds-doc-font text-sm text-muted-foreground mb-3">
-            From <CodeInline>Radius.json</CodeInline> (layout-primitives.css).
+            From <CodeInline>design-tokens/radius.json</CodeInline> (layout-primitives.css).
           </p>
           <ShowcaseCard padding="lg" className="flex flex-wrap gap-6">
             {radiusTokens.map((token) => (
@@ -68,7 +68,7 @@ export function FoundationTokensSection() {
         <div>
           <h3 className="ds-doc-font text-lg font-medium text-foreground mb-4">Spacing</h3>
           <p className="ds-doc-font text-sm text-muted-foreground mb-3">
-            From <CodeInline>Spacing.json</CodeInline>. Figma scale (px); use <CodeInline>var(--spacing-*)</CodeInline> when you need these values. Tailwind utilities (<CodeInline>p-4</CodeInline>, <CodeInline>gap-2</CodeInline>) use Tailwind's default scale so components keep correct sizing.
+            From <CodeInline>design-tokens/spacing.json</CodeInline>. Figma scale (px); use <CodeInline>var(--spacing-*)</CodeInline> when you need these values. Tailwind utilities (<CodeInline>p-4</CodeInline>, <CodeInline>gap-2</CodeInline>) use Tailwind's default scale so components keep correct sizing.
           </p>
           <ShowcaseCard padding="lg" className="flex flex-wrap items-end gap-4">
             {spacingTokens.map((size) => (
@@ -85,7 +85,7 @@ export function FoundationTokensSection() {
         <div>
           <h3 className="ds-doc-font text-lg font-medium text-foreground mb-4">Stroke</h3>
           <p className="ds-doc-font text-sm text-muted-foreground mb-3">
-            Border width from <CodeInline>Stroke.json</CodeInline>. Use <CodeInline>border</CodeInline>, <CodeInline>border-2</CodeInline>, etc.
+            Border width from <CodeInline>design-tokens/stroke.json</CodeInline>. Use <CodeInline>border</CodeInline>, <CodeInline>border-2</CodeInline>, etc.
           </p>
           <ShowcaseCard padding="lg" className="space-y-3">
             {strokeTokens.map((token) => (

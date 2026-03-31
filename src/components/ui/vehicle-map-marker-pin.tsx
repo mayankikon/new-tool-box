@@ -5,9 +5,9 @@ import { MapMarkerHoverFrame } from "@/components/ui/map-marker-hover-frame";
 import { encodePublicAssetPath } from "@/components/icons/map-marker-assets";
 
 export const VEHICLE_MAP_PIN_SOURCES = {
-  teal: "/map-markers/map-marker-vehicle-teal.svg",
-  gold: "/map-markers/map-marker-vehicle-gold.svg",
-  red: "/map-markers/map-marker-vehicle-orange.svg",
+  teal: "/media/map-markers/map-marker-vehicle-teal.svg",
+  gold: "/media/map-markers/map-marker-vehicle-gold.svg",
+  red: "/media/map-markers/map-marker-vehicle-orange.svg",
 } as const;
 
 const VEHICLE_MAP_PIN_ACCENT_HEX = {
