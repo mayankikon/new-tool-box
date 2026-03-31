@@ -103,12 +103,12 @@ export const radiusTokens = [
   { name: "Card-md", cssVar: "--radius-Card-md", tailwindClass: "rounded-[var(--radius-Card-md)]" },
 ] as const;
 
-/** Spacing scale from Spacing.json (layout-primitives.css) */
+/** Spacing scale from design-tokens/spacing.json (layout-primitives.css) */
 export const spacingTokens = [
   "0", "1", "2", "4", "6", "8", "10", "12", "14", "16", "20", "24", "28", "32", "36", "40", "44", "48",
 ] as const;
 
-/** Stroke (border width) from Stroke.json */
+/** Stroke (border width) from design-tokens/stroke.json */
 export const strokeTokens = [
   { name: "sm", cssVar: "--stroke-sm", value: "0.5px" },
   { name: "default", cssVar: "--stroke-default", value: "1px" },
@@ -116,14 +116,14 @@ export const strokeTokens = [
   { name: "xl", cssVar: "--stroke-xl", value: "3px" },
 ] as const;
 
-/** Typography: font families from Font Family.json */
+/** Typography: font families from design-tokens/font-family.json */
 export const fontFamilyTokens = [
   { name: "headline", cssVar: "--font-headline", className: "font-headline" },
   { name: "body", cssVar: "--font-body", className: "font-sans" },
   { name: "code", cssVar: "--font-code", className: "font-mono" },
 ] as const;
 
-/** Font sizes from Font Size.json */
+/** Font sizes from design-tokens/font-size.json */
 export const fontSizeTokens = [
   { name: "xs", value: "12px" },
   { name: "sm", value: "14px" },
@@ -162,7 +162,7 @@ export const letterSpacingTokens = [
   { name: "widest", value: "1.60px" },
 ] as const;
 
-/** Theme tokens (Themes.json) for design system showcase - background swatches use var, text use color */
+/** Theme tokens (design-tokens/themes.json) for design system showcase - background swatches use var, text use color */
 export const themeTokenGroups = [
   {
     name: "Background",

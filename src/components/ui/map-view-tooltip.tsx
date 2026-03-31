@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media-paths";
 
 export type MapViewTooltipVariant = "map" | "table";
 
@@ -15,16 +16,16 @@ export interface MapViewTooltipProps extends React.ComponentProps<"div"> {
   description?: string;
   /** Elevated / pressed surface (e.g. parent hover or selected). */
   isActive?: boolean;
-  /** Override preview image (default: Figma Sort UI 1.3 export in `public/tooltip/`). */
+  /** Override preview image (default: Figma Sort UI 1.3 export in `public/media/tooltips/`). */
   mapPreviewSrc?: string;
   tablePreviewSrc?: string;
 }
 
-const DEFAULT_MAP_PREVIEW = "/tooltip/map-view.svg";
-/** Table / list preview: Figma "call-to-action table" export (`public/tooltip/table-cta.svg`). */
-const DEFAULT_TABLE_PREVIEW = "/tooltip/table-cta.svg";
-const POINTER_MAP = "/tooltip/pointer-map.svg";
-const POINTER_TABLE = "/tooltip/pointer-table.svg";
+const DEFAULT_MAP_PREVIEW = mediaUrl("tooltips/map-view.svg");
+/** Table / list preview: Figma "call-to-action table" export (`public/media/tooltips/table-cta.svg`). */
+const DEFAULT_TABLE_PREVIEW = mediaUrl("tooltips/table-cta.svg");
+const POINTER_MAP = mediaUrl("tooltips/pointer-map.svg");
+const POINTER_TABLE = mediaUrl("tooltips/pointer-table.svg");
 
 const DEFAULT_COPY: Record<
   MapViewTooltipVariant,
@@ -42,7 +43,7 @@ const DEFAULT_COPY: Record<
 
 /**
  * Rich tooltip body for choosing or explaining inventory map vs table views.
- * Map preview: `map-view.svg`. Table preview: `table-cta.svg` (CTA table export). Pointers: `pointer-*.svg`. All under `public/tooltip/`.
+ * Map preview: `map-view.svg`. Table preview: `table-cta.svg` (CTA table export). Pointers: `pointer-*.svg`. All under `public/media/tooltips/`.
  */
 export function MapViewTooltip({
   variant,

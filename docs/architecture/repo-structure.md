@@ -3,6 +3,7 @@
 ## Overview
 
 - **Framework**: Next.js 16 (App Router), React 19, TypeScript
+- **Local dev**: `npm run dev` uses **Webpack** (`next dev --webpack`) — Turbopack has panicked on large client routes (e.g. `/design-system`). Optional: `npm run dev:turbopack` to try Turbopack after Next.js upgrades.
 - **UI**: shadcn/ui (base-nova style), Tailwind CSS v4, Base UI primitives
 - **Design system**: Foundation tokens and component showcase at `/design-system`
 - **Large files**: `evox.csv` (~400MB) is tracked with **Git LFS** (see `.gitattributes`). After cloning, run `git lfs install`; fetch binaries with `git lfs pull` if the working copy shows a pointer file instead of CSV rows.
@@ -22,7 +23,10 @@
 | `src/lib/geofences/geofence-store.tsx` | GeofenceProvider and useGeofences: in-memory FeatureCollection, addGeofence, removeGeofence. Initial features from dealership main lot. |
 | `src/lib/inventory/dealership-geofences.ts` | GeofenceProperties, MainLotProperties, DEALERSHIP_CENTER, mainLotGeoJSON (single main lot polygon). |
 | `src/lib/utils.ts` | `cn()` and shared utilities |
+| `src/lib/media-paths.ts` | `MEDIA_BASE` (`/media`) and `mediaUrl()` for static assets under `public/media/` |
 | `src/lib/design-tokens.ts` | Token definitions for the design system page (colors, radius) |
+| `public/media/` | Static assets (icons, logos, tooltips, map markers, OEM images, audio); URLs prefixed `/media/` |
+| `design-tokens/` | Figma JSON exports (`colors.json`, `themes.json`, `spacing.json`, `radius.json`, `stroke.json`, `font-family.json`, `font-size.json`) consumed by `scripts/generate-*-primitives.js` |
 | `src/lib/campaigns/types.ts` | Campaign domain types (Campaign, CampaignStatus, AudienceSegment, CampaignTrigger, CampaignMessage, ChannelConfig, CampaignMetrics, CampaignTemplate, DashboardMetrics, PersonalizationVariable, WizardMessage, ImageAttachment with optional kind `image`/`video` and gifPreviewUrl for video) |
 | `src/lib/campaigns/mock-data.ts` | Mock campaigns (10 across all statuses), templates (6), type labels, helpers (getCampaignById, computeDashboardMetrics), and wizard data (segment field definitions, trigger type metadata, channel metadata, personalization variables). Make field options sourced from vehicle-data. |
 | `evox.csv` | Evox vehicle match dataset (LFS). Required input for `scripts/extract-vehicle-data.js`. |
@@ -47,10 +51,10 @@
 | `src/components/campaigns/wizard/step-message-channels.tsx` | Step 3: Two-column layout — left: channel chip toggles, smart channel selection switch, AI message generator, subject/body editor with variable inserter (outside-click close, ARIA), image upload; right: sticky DevicePreview with live variable interpolation |
 | `src/components/campaigns/wizard/step-review-launch.tsx` | Step 4: Two-column layout — left: animated revenue impact estimator (counting numbers), summary cards with edit-back links, launch confirmation dialog; right: sticky DevicePreview |
 | `src/components/campaigns/detail/` | Detail tab content: campaign-overview (KPI metrics + configuration summary cards), campaign-analytics (performance metrics with trend indicators + channel reach bars + conversion funnel), campaign-audience-view (segment rules summary + audience size), campaign-message-view (per-channel message previews with variable highlighting) |
-| `src/app/color-primitives.css` | **Generated** color primitives from `Colors.json` (Figma); use `npm run tokens:colors` to regenerate |
-| `src/app/typography-primitives.css` | **Generated** typography from `Font Family.json` + `Font Size.json` (Figma); use `npm run tokens:typography` to regenerate |
-| `src/app/layout-primitives.css` | **Generated** spacing, radius, stroke from `Radius.json`, `Spacing.json`, `Stroke.json` (Figma); use `npm run tokens:layout` to regenerate |
-| `src/app/theme-primitives.css` | **Generated** color theme (semantic tokens) from `Themes.json` (Figma); use `npm run tokens:theme` to regenerate. Light/dark from Toolbox-Light and Toolbox-Dark. |
+| `src/app/color-primitives.css` | **Generated** color primitives from `design-tokens/colors.json` (Figma); use `npm run tokens:colors` to regenerate |
+| `src/app/typography-primitives.css` | **Generated** typography from `design-tokens/font-family.json` + `design-tokens/font-size.json` (Figma); use `npm run tokens:typography` to regenerate |
+| `src/app/layout-primitives.css` | **Generated** spacing, radius, stroke from `design-tokens/radius.json`, `spacing.json`, `stroke.json` (Figma); use `npm run tokens:layout` to regenerate |
+| `src/app/theme-primitives.css` | **Generated** color theme (semantic tokens) from `design-tokens/themes.json` (Figma); use `npm run tokens:theme` to regenerate. Light/dark from Toolbox-Light and Toolbox-Dark. |
 | `components.json` | shadcn CLI config (aliases, style, Tailwind) |
 
 ## Product app shell
@@ -67,9 +71,9 @@
 
 - **Route**: `/design-system`
 - **Content**:
-  - **Theme tokens**: Semantic colors from Themes.json (background, text, stroke, button) as swatches and text samples
-  - **Foundation tokens**: Semantic colors (mapped to theme), radius (Radius.json), spacing scale (Spacing.json), stroke/border width (Stroke.json)
-  - **Typography**: Font families (headline, body, code), font sizes, weights, line heights, letter spacing from Font Family.json + Font Size.json
+  - **Theme tokens**: Semantic colors from `design-tokens/themes.json` (background, text, stroke, button) as swatches and text samples
+  - **Foundation tokens**: Semantic colors (mapped to theme), radius (`design-tokens/radius.json`), spacing scale (`design-tokens/spacing.json`), stroke/border width (`design-tokens/stroke.json`)
+  - **Typography**: Font families (headline, body, code), font sizes, weights, line heights, letter spacing from `design-tokens/font-family.json` + `font-size.json`
   - **Components**: Live previews of shadcn components (Button, Badge, Input, Card, Sidebar) with variants
   - **Page layout & chrome**: App shell elements used on every page — **TopBar** (`src/components/app/top-bar.tsx`) with optional title, subtitle, and right slot; **main content area** pattern (scrollable container with `px-8` / 32px horizontal padding and `py-6`). Shown on the design system page for review.
 
@@ -77,7 +81,7 @@ To add more components to the showcase, install via `npx shadcn@latest add <comp
 
 ## Color primitives
 
-Solid color primitives (e.g. `--gray-50`, `--slate-700`, `--blue-500`) are generated from the Figma export **`Colors.json`** into `src/app/color-primitives.css`. That file is imported in `globals.css`. Regenerate with:
+Solid color primitives (e.g. `--gray-50`, `--slate-700`, `--blue-500`) are generated from the Figma export **`design-tokens/colors.json`** into `src/app/color-primitives.css`. That file is imported in `globals.css`. Regenerate with:
 
 ```bash
 npm run tokens:colors
@@ -87,7 +91,7 @@ Use primitives in CSS via `var(--gray-50)` etc. Semantic tokens (e.g. `--backgro
 
 ## Typography primitives
 
-Typography tokens are generated from Figma **`Font Family.json`** and **`Font Size.json`** into `src/app/typography-primitives.css` (imported in `globals.css`). Regenerate with:
+Typography tokens are generated from Figma **`design-tokens/font-family.json`** and **`design-tokens/font-size.json`** into `src/app/typography-primitives.css` (imported in `globals.css`). Regenerate with:
 
 ```bash
 npm run tokens:typography
@@ -103,7 +107,7 @@ Tailwind theme maps these so you can use `text-xs`, `font-headline`, `font-mediu
 
 ## Layout primitives (spacing, radius, stroke)
 
-Spacing, radius, and stroke (border width) tokens are generated from Figma **`Radius.json`**, **`Spacing.json`**, and **`Stroke.json`** into `src/app/layout-primitives.css` (imported in `globals.css`). Regenerate with:
+Spacing, radius, and stroke (border width) tokens are generated from Figma **`design-tokens/radius.json`**, **`design-tokens/spacing.json`**, and **`design-tokens/stroke.json`** into `src/app/layout-primitives.css` (imported in `globals.css`). Regenerate with:
 
 ```bash
 npm run tokens:layout
@@ -115,15 +119,15 @@ npm run tokens:layout
 
 ## Color theme primitives
 
-Semantic color tokens for light and dark themes are generated from Figma **`Themes.json`** into `src/app/theme-primitives.css` (imported in `globals.css`). Regenerate with:
+Semantic color tokens for light and dark themes are generated from Figma **`design-tokens/themes.json`** into `src/app/theme-primitives.css` (imported in `globals.css`). Regenerate with:
 
 ```bash
 npm run tokens:theme
 ```
 
-- **Modes**: Toolbox-Light (`:root`) and Toolbox-Dark (`.dark`) are used. Themes.json also defines TUNR-Light and TUNR-Dark; the script could be extended to emit optional theme classes.
+- **Modes**: Toolbox-Light (`:root`) and Toolbox-Dark (`.dark`) are used. `design-tokens/themes.json` also defines TUNR-Light and TUNR-Dark; the script could be extended to emit optional theme classes.
 - **Tokens** (62): All variables are emitted with a `--theme-*` prefix, e.g. `--theme-background-page`, `--theme-text-primary`, `--theme-stroke-default`, `--theme-background-button-primary-default`, `--theme-background-badge-*`, `--theme-icon-*`, `--theme-background-account-selector`, etc.
 - **Interaction state tokens**: `--theme-stroke-hover` (input/control border on hover), `--theme-stroke-focus` (focus ring color), `--theme-background-input-hover` (subtle input bg on hover), `--theme-background-card-hover` (card bg on hover). Mapped to `--input-hover` and `--primary-hover` in `globals.css`.
-- **Wiring**: In `globals.css`, the main semantic tokens (`--background`, `--foreground`, `--primary`, `--card`, `--destructive`, `--border`, `--sidebar`, `--input-hover`, `--primary-hover`, etc.) are set to the corresponding theme primitives so the app and shadcn use Themes.json as the source of truth for light/dark.
+- **Wiring**: In `globals.css`, the main semantic tokens (`--background`, `--foreground`, `--primary`, `--card`, `--destructive`, `--border`, `--sidebar`, `--input-hover`, `--primary-hover`, etc.) are set to the corresponding theme primitives so the app and shadcn use `design-tokens/themes.json` as the source of truth for light/dark.
 - **Utility classes**: `globals.css` defines a `.shimmer-border` component class that adds an animated rotating conic-gradient border (violet/purple/teal) via `::before` pseudo-element and `@property --shimmer-angle`. Used on AI-themed CTAs (e.g. recommendation banner).
 - **Chart colors**: 5-color palette using OKLCH anchored by brand emerald (chart-1), with sky blue (chart-2), amber (chart-3), rose (chart-4), and violet (chart-5) for variety and accessibility.

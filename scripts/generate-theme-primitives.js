@@ -1,5 +1,5 @@
 /**
- * Generates src/app/theme-primitives.css from Figma Themes.json.
+ * Generates src/app/theme-primitives.css from Figma design-tokens/themes.json.
  * Outputs semantic color tokens for light (Toolbox-Light) and dark (Toolbox-Dark) modes.
  * Run: npm run tokens:theme
  */
@@ -7,11 +7,11 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const themesPath = path.join(root, "Themes.json");
+const themesPath = path.join(root, "design-tokens", "themes.json");
 const outPath = path.join(root, "src", "app", "theme-primitives.css");
 
 if (!fs.existsSync(themesPath)) {
-  console.error("Themes.json not found at project root.");
+  console.error("design-tokens/themes.json not found.");
   process.exit(1);
 }
 
@@ -38,7 +38,7 @@ function varName(name) {
 }
 
 const lines = [
-  "/* Color theme primitives from Figma Themes.json - do not edit by hand */",
+  "/* Color theme primitives from Figma design-tokens/themes.json - do not edit by hand */",
   "/* Regenerate with: npm run tokens:theme */",
   "/* Light theme: " + (modes[lightMode] || lightMode) + " */",
   "",

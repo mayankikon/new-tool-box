@@ -1,0 +1,100 @@
+<svg width="177" height="103" viewBox="0 0 177 103" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect width="177" height="103" fill="#222225"/>
+  <rect x="0.5" y="0.5" width="176" height="102" stroke="#5B5B5B" fill="none"/>
+  <!-- Horizontal grid lines (Sort UI 1.3 stroke) -->
+  <g transform="translate(0.11, 19.06)">
+    <line y1="0.568147" x2="174.001" y2="0.568147" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(0.11, 38.06)">
+    <line y1="0.568147" x2="174.001" y2="0.568147" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(0.11, 57.06)">
+    <line y1="0.568147" x2="174.001" y2="0.568147" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(0.11, 76.06)">
+    <line y1="0.568147" x2="174.001" y2="0.568147" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(0.11, 95.06)">
+    <line y1="0.568147" x2="174.001" y2="0.568147" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <!-- Vertical grid lines -->
+  <g transform="translate(51.7, 0.06)">
+    <line x1="0.567308" y1="0" x2="0.567312" y2="102" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(95.9, 0.06)">
+    <line x1="0.567308" y1="0" x2="0.567312" y2="102" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(122.24, 0.06)">
+    <line x1="0.567308" y1="0" x2="0.567312" y2="102" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <g transform="translate(149.61, 0.06)">
+    <line x1="0.567308" y1="0" x2="0.567312" y2="102" stroke="#5B5B5B" stroke-width="1.13462"/>
+  </g>
+  <!-- Column 1: row pills (fill only, no extra stroke) -->
+  <g fill="#5B5B5B">
+    <rect x="8.91" y="5.8" width="35.29" height="7.03" rx="3.515"/>
+    <rect x="8.91" y="24.5" width="35.29" height="7.03" rx="3.515"/>
+    <rect x="8.91" y="43.3" width="35.29" height="7.03" rx="3.515"/>
+    <rect x="8.91" y="62" width="35.29" height="7.03" rx="3.515"/>
+    <rect x="8.91" y="81.8" width="35.29" height="7.03" rx="3.515"/>
+  </g>
+  <!-- Column 2: double lines; flex gap 2.26923px; rx = half line height for pill caps -->
+  <g fill="#5B5B5B">
+    <!-- row 0: base y=5.8 -->
+    <rect x="57.43" y="5.8" width="33.089" height="2.26923" rx="1.13462"/>
+    <rect x="57.43" y="10.3385" width="24.9615" height="2.26923" rx="1.13462"/>
+    <!-- row 1: base y=24.5 -->
+    <rect x="57.43" y="24.5" width="33.089" height="2.26923" rx="1.13462"/>
+    <rect x="57.43" y="29.0385" width="24.9615" height="2.26923" rx="1.13462"/>
+    <!-- row 2: base y=43.3 -->
+    <rect x="57.43" y="43.3" width="33.089" height="2.26923" rx="1.13462"/>
+    <rect x="57.43" y="47.8385" width="24.9615" height="2.26923" rx="1.13462"/>
+    <!-- row 3: base y=62 -->
+    <rect x="57.43" y="62" width="33.089" height="2.26923" rx="1.13462"/>
+    <rect x="57.43" y="66.5385" width="24.9615" height="2.26923" rx="1.13462"/>
+    <!-- row 4: base y=81.8 -->
+    <rect x="57.43" y="81.8" width="33.089" height="2.26923" rx="1.13462"/>
+    <rect x="57.43" y="86.3385" width="24.9615" height="2.26923" rx="1.13462"/>
+  </g>
+  <!-- Column 3: mini bar charts (13px wide, 2px gap; bottom of 12px stack aligns with row) -->
+  <g fill="#5B5B5B">
+    <rect x="103" y="9" width="3" height="6" rx="1.5"/>
+    <rect x="108" y="6" width="3" height="9" rx="1.5"/>
+    <rect x="113" y="3" width="3" height="12" rx="1.5"/>
+  </g>
+  <g fill="#5B5B5B">
+    <rect x="103" y="28" width="3" height="6" rx="1.5"/>
+    <rect x="108" y="25" width="3" height="9" rx="1.5"/>
+    <rect x="113" y="22" width="3" height="12" rx="1.5"/>
+  </g>
+  <g fill="#5B5B5B">
+    <rect x="103" y="47" width="3" height="6" rx="1.5"/>
+    <rect x="108" y="44" width="3" height="9" rx="1.5"/>
+    <rect x="113" y="41" width="3" height="12" rx="1.5"/>
+  </g>
+  <g fill="#5B5B5B">
+    <rect x="103" y="66" width="3" height="6" rx="1.5"/>
+    <rect x="108" y="63" width="3" height="9" rx="1.5"/>
+    <rect x="113" y="60" width="3" height="12" rx="1.5"/>
+  </g>
+  <g fill="#5B5B5B">
+    <rect x="103" y="85" width="3" height="6" rx="1.5"/>
+    <rect x="108" y="82" width="3" height="9" rx="1.5"/>
+    <rect x="113" y="79" width="3" height="12" rx="1.5"/>
+  </g>
+  <!-- Status column A -->
+  <rect x="128.43" y="4" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="128.43" y="23" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="128.43" y="42" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="128.43" y="61" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="128.43" y="80" width="16.84" height="11" rx="2.26" fill="#E7B413"/>
+  <!-- Status column B: fill only (stroke was doubling edges vs export) -->
+  <rect x="154.76" y="4" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="154.76" y="23" width="16.84" height="11" rx="2.26" fill="#1A9375"/>
+  <rect x="154.76" y="42" width="16.84" height="11" rx="2.26" fill="#E7B413"/>
+  <rect x="154.76" y="61" width="16.84" height="11" rx="2.26" fill="#E7B413"/>
+  <rect x="154.76" y="80" width="16.84" height="11" rx="2.26" fill="#E74341"/>
+  <!-- Bottom + right chrome -->
+  <rect x="0" y="98" width="174" height="5" fill="#222225" stroke="#222225" stroke-width="1"/>
+  <rect x="174" y="0" width="3" height="103" fill="#222225" stroke="#222225" stroke-width="1"/>
+</svg>

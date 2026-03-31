@@ -2,6 +2,9 @@
 /**
  * Runs `next dev` with a sanitized NODE_OPTIONS and stale-lock cleanup.
  *
+ * Default `npm run dev` passes `--webpack` because Turbopack can panic on this
+ * repo (e.g. `/design-system`). Use `npm run dev:turbopack` to try Turbopack.
+ *
  * - Strips broken `--localstorage-file` entries from NODE_OPTIONS (Node 25+).
  * - If `.next/dev/lock` exists but no process holds it (crashed dev), removes
  *   the lock so `next dev` can start. If something still holds the lock, exits

@@ -1,13 +1,13 @@
 /**
- * Splits `public/map markers/Map Marker.svg` (Figma export) into standalone SVGs
- * under `public/map-markers/` with unique filter/clip IDs for safe inline use.
+ * Splits `public/media/map-markers-source/Map Marker.svg` (Figma export) into standalone SVGs
+ * under `public/media/map-markers/` with unique filter/clip IDs for safe inline use.
  */
 import fs from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const srcPath = path.join(root, "public/map markers/Map Marker.svg");
-const outDir = path.join(root, "public/map-markers");
+const srcPath = path.join(root, "public/media/map-markers-source/Map Marker.svg");
+const outDir = path.join(root, "public/media/map-markers");
 
 const raw = fs.readFileSync(srcPath, "utf8");
 const noGuide = raw.replace(

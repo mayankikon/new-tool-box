@@ -1,10 +1,10 @@
 /**
- * Static map-marker artwork from Figma exports in `public/map markers/`.
- * Extracted pins live in `public/map-markers/` (see `scripts/extract-map-marker-svgs.mjs`).
+ * Static map-marker artwork from Figma exports in `public/media/map-markers-source/`.
+ * Extracted pins live in `public/media/map-markers/` (see `scripts/extract-map-marker-svgs.mjs`).
  */
 
 export interface MapMarkerAssetItem {
-  /** URL path under `public/` (may contain spaces). */
+  /** URL path under `public/` (may contain spaces; encode with {@link encodePublicAssetPath} when rendering). */
   publicPath: string;
   figmaLabel: string;
 }
@@ -21,39 +21,39 @@ export function encodePublicAssetPath(absolutePublicPath: string): string {
 /** One SVG per pin variant, split from `Map Marker.svg`. */
 export const extractedMapMarkerAssets: MapMarkerAssetItem[] = [
   {
-    publicPath: "/map-markers/map-marker-number-default.svg",
+    publicPath: "/media/map-markers/map-marker-number-default.svg",
     figmaLabel: "Style=Number, State=Default",
   },
   {
-    publicPath: "/map-markers/map-marker-number-active.svg",
+    publicPath: "/media/map-markers/map-marker-number-active.svg",
     figmaLabel: "Style=Number, State=Active",
   },
   {
-    publicPath: "/map-markers/map-marker-signal.svg",
+    publicPath: "/media/map-markers/map-marker-signal.svg",
     figmaLabel: "Style=Signal, State=Active",
   },
   {
-    publicPath: "/map-markers/map-marker-signal-error.svg",
+    publicPath: "/media/map-markers/map-marker-signal-error.svg",
     figmaLabel: "Style=Signal - Error, State=Active",
   },
   {
-    publicPath: "/map-markers/map-marker-group.svg",
+    publicPath: "/media/map-markers/map-marker-group.svg",
     figmaLabel: "Style=Group, State=Active",
   },
   {
-    publicPath: "/map-markers/map-marker-key.svg",
+    publicPath: "/media/map-markers/map-marker-key.svg",
     figmaLabel: "Style=Key, State=Active",
   },
   {
-    publicPath: "/map-markers/map-marker-vehicle-teal.svg",
+    publicPath: "/media/map-markers/map-marker-vehicle-teal.svg",
     figmaLabel: "Style=Car - 2 (teal shield)",
   },
   {
-    publicPath: "/map-markers/map-marker-vehicle-gold.svg",
+    publicPath: "/media/map-markers/map-marker-vehicle-gold.svg",
     figmaLabel: "Style=Car - 2 (gold shield)",
   },
   {
-    publicPath: "/map-markers/map-marker-vehicle-orange.svg",
+    publicPath: "/media/map-markers/map-marker-vehicle-orange.svg",
     figmaLabel: "Style=Car - 3, State=Active",
   },
 ];
@@ -61,21 +61,21 @@ export const extractedMapMarkerAssets: MapMarkerAssetItem[] = [
 /** Raster-backed vehicle chips from Figma (embedded imagery in SVG). */
 export const vehicleMarkerChipAssets: MapMarkerAssetItem[] = [
   {
-    publicPath: "/map markers/Vehicle Marker.svg",
+    publicPath: "/media/map-markers-source/Vehicle Marker.svg",
     figmaLabel: "Vehicle Marker",
   },
   {
-    publicPath: "/map markers/Vehicle Marker-1.svg",
+    publicPath: "/media/map-markers-source/Vehicle Marker-1.svg",
     figmaLabel: "Vehicle Marker — variant 1",
   },
   {
-    publicPath: "/map markers/Vehicle Marker-2.svg",
+    publicPath: "/media/map-markers-source/Vehicle Marker-2.svg",
     figmaLabel: "Vehicle Marker — variant 2",
   },
 ];
 
 export const vehicleStatusIndicatorsLargeAsset: MapMarkerAssetItem = {
-  publicPath: "/map markers/Vehicle Card/Status Indicators - Large.svg",
+  publicPath: "/media/map-markers-source/Vehicle Card/Status Indicators - Large.svg",
   figmaLabel: "Vehicle Card / Status Indicators — Large",
 };
 

@@ -115,7 +115,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TelemetryDeckTab, TelemetryDeckTabList, TelemetryDeckTabs } from "@/components/ui/telemetry-deck-tabs";
-import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { ToggleSwitch, type ToggleSwitchOption } from "@/components/ui/toggle-switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VehicleListItem } from "@/components/ui/vehicle-list-item";
 import { VehicleListPanel } from "@/components/ui/vehicle-list-panel";
@@ -243,7 +243,7 @@ function InteractiveToggleSwitchShowcase() {
   const [mode, setMode] = React.useState<"label" | "icon">("label");
   const [value, setValue] = React.useState("map");
 
-  const options =
+  const options: [ToggleSwitchOption, ToggleSwitchOption] =
     mode === "icon"
       ? [
           { value: "map", icon: <Info className="size-4" /> },
@@ -310,7 +310,7 @@ function InteractiveTabsShowcase() {
         <TelemetryDeckTabs value={deckValue} onValueChange={setDeckValue}>
           <TelemetryDeckTabList>
             <TelemetryDeckTab value="drive">Drive</TelemetryDeckTab>
-            <TelemetryDeckTab value="energy" ledTone="green">Energy</TelemetryDeckTab>
+            <TelemetryDeckTab value="energy" ledTone="forest">Energy</TelemetryDeckTab>
             <TelemetryDeckTab value="alerts" ledTone="amber">Alerts</TelemetryDeckTab>
           </TelemetryDeckTabList>
         </TelemetryDeckTabs>
@@ -423,7 +423,7 @@ function InteractiveAiTextAreaShowcase() {
 
 function wrapSection(id: string, title: string, description: React.ReactNode, content: React.ReactNode) {
   return (
-    <section id={id} className="scroll-mt-28 space-y-8">
+    <section key={id} id={id} className="scroll-mt-28 space-y-8">
       <SectionTitle title={title} description={description} />
       {content}
     </section>

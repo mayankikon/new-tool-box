@@ -36,6 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioCardGroup, RadioCardOption } from "@/components/ui/radio-card";
 import { InlineTip } from "@/components/ui/inline-tip";
 import { cn } from "@/lib/utils";
+import { mediaUrl } from "@/lib/media-paths";
 import {
   EXCLUSION_FIELD_DEFS,
   SEGMENT_FIELD_DEFS,
@@ -65,12 +66,12 @@ const TRIGGER_ICONS: Record<TriggerKind, React.ReactNode> = {
 };
 
 const OEM_LOGO_BY_MAKE: Record<string, string> = {
-  BMW: "/oem-logos/bmw.png",
-  Chevrolet: "/oem-logos/chevrolet.png",
-  Ford: "/oem-logos/ford.png",
-  Honda: "/oem-logos/honda.png",
-  Nissan: "/oem-logos/nissan.png",
-  Toyota: "/oem-logos/toyota.png",
+  BMW: mediaUrl("images/oem/bmw.png"),
+  Chevrolet: mediaUrl("images/oem/chevrolet.png"),
+  Ford: mediaUrl("images/oem/ford.png"),
+  Honda: mediaUrl("images/oem/honda.png"),
+  Nissan: mediaUrl("images/oem/nissan.png"),
+  Toyota: mediaUrl("images/oem/toyota.png"),
 };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => ({

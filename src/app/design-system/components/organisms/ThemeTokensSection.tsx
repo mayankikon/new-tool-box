@@ -13,7 +13,7 @@ export function ThemeTokensSection() {
         title="Theme tokens"
         description={
           <>
-            Semantic colors from <CodeInline size="sm">Themes.json</CodeInline> (Toolbox-Light / Toolbox-Dark). Drive <CodeInline size="sm">--background</CodeInline>, <CodeInline size="sm">--primary</CodeInline>, etc.
+            Semantic colors from <CodeInline size="sm">design-tokens/themes.json</CodeInline> (Toolbox-Light / Toolbox-Dark). Drive <CodeInline size="sm">--background</CodeInline>, <CodeInline size="sm">--primary</CodeInline>, etc.
           </>
         }
       />

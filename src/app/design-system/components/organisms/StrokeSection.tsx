@@ -13,7 +13,7 @@ export function StrokeSection() {
         title="Stroke"
         description={
           <>
-            Border width from <CodeInline size="sm">Stroke.json</CodeInline>. Use <CodeInline size="sm">border</CodeInline>, <CodeInline size="sm">border-2</CodeInline>, etc.
+            Border width from <CodeInline size="sm">design-tokens/stroke.json</CodeInline>. Use <CodeInline size="sm">border</CodeInline>, <CodeInline size="sm">border-2</CodeInline>, etc.
           </>
         }
       />

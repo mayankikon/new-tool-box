@@ -6,6 +6,11 @@ First, run the development server:
 
 ```bash
 npm run dev
+```
+
+Uses Webpack for dev stability (Turbopack can crash on this project). For Turbopack: `npm run dev:turbopack`.
+
+```bash
 # or
 yarn dev
 # or

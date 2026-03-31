@@ -13,7 +13,7 @@ export function SpacingSection() {
         title="Spacing"
         description={
           <>
-            From <CodeInline size="sm">Spacing.json</CodeInline>. Figma scale (px); use <CodeInline size="sm">var(--spacing-*)</CodeInline> when you need these values. Tailwind utilities (<CodeInline size="sm">p-4</CodeInline>, <CodeInline size="sm">gap-2</CodeInline>) use Tailwind&apos;s default scale.
+            From <CodeInline size="sm">design-tokens/spacing.json</CodeInline>. Figma scale (px); use <CodeInline size="sm">var(--spacing-*)</CodeInline> when you need these values. Tailwind utilities (<CodeInline size="sm">p-4</CodeInline>, <CodeInline size="sm">gap-2</CodeInline>) use Tailwind&apos;s default scale.
           </>
         }
       />
