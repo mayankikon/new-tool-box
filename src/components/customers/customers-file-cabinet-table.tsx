@@ -183,7 +183,7 @@ function CustomerTableRow({
   return (
     <TableRow
       size="default"
-      className="!border-0 !bg-transparent hover:!bg-transparent"
+      className="!border-0 !bg-transparent hover:!bg-gray-100 dark:hover:!bg-gray-800/50"
       style={{ minHeight: bodyCellHeightPx }}
     >
       <TableCell className={cellFrame}>
