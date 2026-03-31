@@ -36,10 +36,11 @@ const {
   cellPaddingXPx,
 } = FILE_CABINET_BILLING_TABLE_DEFAULTS;
 
-const ROW_STROKE_LIGHT = "var(--theme-stroke-subtle)";
+const ROW_STROKE_LIGHT =
+  "var(--theme-stroke-subtle, var(--theme-stroke-default))";
 
 const BODY_CELL_DIVIDER =
-  "border-b border-solid border-[var(--theme-stroke-subtle)]";
+  "border-b border-solid border-[var(--theme-stroke-subtle,var(--theme-stroke-default))]";
 
 const BILLING_HEADER_TH_STYLE: CSSProperties = {
   backgroundColor: "transparent",
