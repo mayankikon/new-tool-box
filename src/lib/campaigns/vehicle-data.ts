@@ -1,0 +1,80 @@
+/**
+ * Canonical vehicle catalog for campaigns: makes, models, and Evox CloudFront side-view image URLs.
+ * Edit this file directly when adding or updating inventory imagery; the repo no longer ships `evox.csv`.
+ */
+
+export interface VehicleModel {
+  model: string;
+  imageUrl: string;
+}
+
+export const VEHICLE_MAKES: string[] = [
+  "BMW",
+  "Chevrolet",
+  "Ford",
+  "Honda",
+  "Toyota"
+];
+
+export const VEHICLE_MODELS_BY_MAKE: Record<string, VehicleModel[]> = {
+  "BMW": [
+    { model: "3 Series", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/1tvIOGelzvwjTIsX/57834/color_0640_001_png/MY2026/57834/57834_cc0640_001_C4P.png?c=426&p=37&s=DVlDOm97F3vnkWKCrAOnPA" },
+    { model: "4 Series", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/83vYxmqmVcCO0zmC/57833/color_0640_001_png/MY2026/57833/57833_cc0640_001_C4F.png?c=426&p=37&s=nGDFc9sk9bEdcDwHseoaNJ" },
+    { model: "5 Series", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/p7K8bWnXuNYZqCt3/56597/color_0640_001_png/MY2026/56597/56597_cc0640_001_475.png?c=426&p=37&s=dOQZ8Qw3oXw2_0wuMTu5us" },
+    { model: "7 Series", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/XaiA_UKHaaODkHXm/57078/color_0640_001_png/MY2026/57078/57078_cc0640_001_C36.png?c=426&p=37&s=JimsgUWYnqHUbDa_nM9yCb" },
+    { model: "iX", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/2UGGwW6jLrS5E0UK/53430/color_0640_001_png/MY2024/53430/53430_cc0640_001_C4A.png?c=426&p=37&s=SFCe9jFvbu6aaGd64eaXnz" },
+    { model: "X1", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/_wb6m5YazUD0qoBA/57039/color_0640_001_png/MY2026/57039/57039_cc0640_001_C5Y.png?c=426&p=37&s=Kqvye42b2DFNKaxcGwxEKe" },
+    { model: "X3", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/oNFrHlgMaPwhtqUG/57037/color_0640_001_png/MY2026/57037/57037_cc0640_001_C4F.png?c=426&p=37&s=OmFyLh2UMfes5Da99R7dUq" },
+    { model: "X5", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/GYDHk_keiOaX_Mt5/56620/color_0640_001_png/MY2026/56620/56620_cc0640_001_C3Z.png?c=426&p=37&s=5bIew86tYuzI6IF0gX9OQb" },
+    { model: "X6", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/YYmCId0h6g6F57sa/56623/color_0640_001_png/MY2026/56623/56623_cc0640_001_416.png?c=426&p=37&s=Fyh_hcrgDypHajgPLvgqpI" },
+    { model: "X7", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/nqk5a5Jn9hQ2aT_V/56578/color_0640_001_png/MY2026/56578/56578_cc0640_001_C4P.png?c=426&p=37&s=t6cgXsqTmHThRywgnhTmUe" },
+  ],
+  "Chevrolet": [
+    { model: "Colorado", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/VHvpHQUi5q1V0omS/12368/color_0640_001_png/MY2018/12368/12368_cc0640_001_GPJ.png?c=426&p=37&s=33TB6ptVHkZ7FDcGhc_7ir" },
+    { model: "Corvette", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/hkb3RNCWo9FUGumM/14487/color_0640_001_png/MY2020/14487/14487_cc0640_001_G26.png?c=426&p=37&s=8sPkjhuZAsFyVeISN6H9lp" },
+    { model: "Equinox", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/BTU6o7wQ8WjZ3Fmi/58165/color_0640_001_png/MY2026/58165/58165_cc0640_001_GAZ.png?c=426&p=37&s=cGDjjqRJW_VOCHNeNlHEpk" },
+    { model: "Equinox EV", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/okb5Oo5IX0oHJF45/58172/color_0640_001_png/MY2026/58172/58172_cc0640_001_GBA.png?c=426&p=37&s=4y3o3Yv82w5ckWdoQMzOta" },
+    { model: "Silverado 1500", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/WYKrPUINmOgISvWd/54064/color_0640_001_png/MY2024/54064/54064_cc0640_001_GNT.png?c=426&p=37&s=7AhfWYYfaX6VFH1aZ1DRje" },
+    { model: "Silverado 2500HD", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/jJkjwhaka1VpPhPo/8376/color_0640_001_png/MY2013/8376/8376_cc0640_001_41U.png?c=426&p=37&s=JMDAi4SzqmJfchk8_UU61y" },
+    { model: "Silverado 3500HD", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/xYIGD4XMRsfJajjJ/50417/color_0640_001_png/MY2022/50417/50417_cc0640_001_GAZ.png?c=426&p=37&s=4c8PJWMP5VIZRts3LREmrZ" },
+    { model: "Suburban", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/8sGVrQn5scKxObCP/58193/color_0640_001_png/MY2026/58193/58193_cc0640_001_GAZ.png?c=426&p=37&s=mrvVFMhj_gy8HlcQ8v3ZGG" },
+    { model: "Tahoe", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/JPoXTqgE6wIGIaGF/58204/color_0640_001_png/MY2026/58204/58204_cc0640_001_GAZ.png?c=426&p=37&s=2lViOzaUZ2KcmOw06lD5ir" },
+    { model: "Trax", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/lS31A4vlp0MIDQnn/57651/color_0640_001_png/MY2026/57651/57651_cc0640_001_GB0.png?c=426&p=37&s=2z6MJP3vNWGWc2rjgBMlIH" },
+  ],
+  "Ford": [
+    { model: "Bronco", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/z58m0XwNDSCH0vCN/52222/color_0640_001_png/MY2023/52222/52222_cc0640_001_G4.png?c=426&p=37&s=sFuEbuJjhGQXe8TiKd5HS0" },
+    { model: "Bronco Sport", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/aKzg1WigZnpVil__/54012/color_0640_001_png/MY2024/54012/54012_cc0640_001_YZ.png?c=426&p=37&s=kD1ZuM5fNq9IUPhq7bWIZx" },
+    { model: "Escape", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/_J_IlO_be5brD0zv/53000/color_0640_001_png/MY2023/53000/53000_cc0640_001_M7.png?c=426&p=37&s=DeT5rX687uSC92ditGg6LF" },
+    { model: "Expedition", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/uVOOxzJI6S1XmzWr/50870/color_0640_001_png/MY2022/50870/50870_cc0640_001_UM.png?c=426&p=37&s=zihiN3DfDle295WL9fKuQK" },
+    { model: "Expedition Max", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/OesUAkdkRECyVCwG/52638/color_0640_001_png/MY2023/52638/52638_cc0640_001_YZ.png?c=426&p=37&s=m8nqtQNG8l_UfWoTohSBv9" },
+    { model: "Explorer", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/bt5BireUoOwlNM8i/11372/color_0640_001_png/MY2017/11372/11372_cc0640_001_UX.png?c=426&p=37&s=duodGyTWD7ZNegZ1O2J_kO" },
+    { model: "F-150", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/K1GCPbToH_3yOkqC/52108/color_0640_001_png/MY2023/52108/52108_cc0640_001_YZ.png?c=426&p=37&s=kGr7RBZ1fXBPuFE_CoujuI" },
+    { model: "F-250", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/U3Xk_yVpeKOpVg4s/57370/color_0640_001_png/MY2026/57370/57370_cc0640_001_E9.png?c=426&p=37&s=e_8FLfCAWQM3zHp4hGVdwN" },
+    { model: "F-450", imageUrl: "" },
+    { model: "Mustang Mach-E", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/18r2473v6lk77atu/52366/color_0640_001_png/MY2023/52366/52366_cc0640_001_M7.png?c=426&p=37&s=gY4RAdu7Gt66WDgiiSTiGe" },
+  ],
+  "Honda": [
+    { model: "Accord", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/XmFwR_nQ6LXkfuv5/57931/color_0640_001_png/MY2026/57931/57931_cc0640_001_BK.png?c=426&p=37&s=vdOg5mDWpVOu9Zb4QNbByG" },
+    { model: "Civic", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/m2hlSJ4Gx2rWJCRg/54359/color_0640_001_png/MY2024/54359/54359_cc0640_001_GA.png?c=426&p=37&s=OkiruhH_Rwm3NLNlZGIsJe" },
+    { model: "Civic Type R", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/8D7I1qXloDxpiZCI/55184/color_0640_001_png/MY2024/55184/55184_cc0640_001_WH.png?c=426&p=37&s=iNOhQHtrmeEjP17qKwN8Jw" },
+    { model: "CR-V", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/pnjjimXHtYHFSMYX/53563/color_0640_001_png/MY2024/53563/53563_cc0640_001_SI.png?c=426&p=37&s=RFCk_Rl9kP85MmFj_czHoQ" },
+    { model: "HR-V", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/1lkuCevWcLbRmk8W/54705/color_0640_001_png/MY2025/54705/54705_cc0640_001_BK.png?c=426&p=37&s=suuPJtXDpATw3wGthp6agd" },
+    { model: "Odyssey", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/6q8UF1BH0Qa9b1u3/57225/color_0640_001_png/MY2026/57225/57225_cc0640_001_SA.png?c=426&p=37&s=oLSPBG_bh7IBB_AdGB1HHg" },
+    { model: "Passport", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/Xj68tsdhJo_TCzh2/50332/color_0640_001_png/MY2022/50332/50332_cc0640_001_BS.png?c=426&p=37&s=8RPPkWrcKbuJOB_RsRPUVD" },
+    { model: "Pilot", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/W9VGiYFmhkxGpSej/57703/color_0640_001_png/MY2026/57703/57703_cc0640_001_WX.png?c=426&p=37&s=RUHAp0PZgV_1d4o3AkSfyT" },
+    { model: "Prologue", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/jGDfI83oe_foQ55c/58303/color_0640_001_png/MY2026/58303/58303_cc0640_001_GM.png?c=426&p=37&s=3e0s4LzgswX04i2z_woTis" },
+    { model: "Ridgeline", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/s07W_OzVcxKIf9Bd/14964/color_0640_001_png/MY2021/14964/14964_cc0640_001_WX.png?c=426&p=37&s=e6S4zUbCY_ZjgvUZfKEg_N" },
+  ],
+  "Toyota": [
+    { model: "4Runner", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/2424tSJTt_YhAftl/57678/color_0640_001_png/MY2026/57678/57678_cc0640_001_202.png?c=426&p=37&s=or2JlkvR2mDVQqODyYAhE4" },
+    { model: "bZ4X", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/rT7GzJcbVR_vnFJI/56963/color_0640_001_png/MY2026/56963/56963_cc0640_001_1L5.png?c=426&p=37&s=mswWMuACS4DKcqjzQOb0FO" },
+    { model: "Camry", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/tLYH_IdUkhDf0l4K/57216/color_0640_001_png/MY2026/57216/57216_cc0640_001_795.png?c=426&p=37&s=P9sYSnOfRcYxjwazBnzHaf" },
+    { model: "Corolla", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/gOwg_spxuo807pYt/57341/color_0640_001_png/MY2026/57341/57341_cc0640_001_040.png?c=426&p=37&s=h1EtzSVwmjsM2wXpwharGB" },
+    { model: "Crown Signia", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/PqU3Sq08wdDxyYoE/56565/color_0640_001_png/MY2026/56565/56565_cc0640_001_1L6.png?c=426&p=37&s=0YP67zMjWmiN9su_2e0ZVc" },
+    { model: "Highlander", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/Jyq9KTlf8woR2bGD/57728/color_0640_001_png/MY2026/57728/57728_cc0640_001_8X8.png?c=426&p=37&s=2TNlYj1jbw_4v3yFUDtyMr" },
+    { model: "RAV4", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/oQnDrfE3Xj_wWtgt/56962/color_0640_001_png/MY2026/56962/56962_cc0640_001_6X7.png?c=426&p=37&s=G5nBuT61yhTuHM383OwOPX" },
+    { model: "Sequoia", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/5NkwOv2EhR8FnuLT/57422/color_0640_001_png/MY2026/57422/57422_cc0640_001_796.png?c=426&p=37&s=eZ1M_v_PVRDHLpIWMUpXpl" },
+    { model: "Tacoma", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/P9io0WkkHn7iuBmG/57694/color_0640_001_png/MY2026/57694/57694_cc0640_001_1J9.png?c=426&p=37&s=T4gXIiReDAzMjtpL62E90J" },
+    { model: "Tundra", imageUrl: "https://d2ivfcfbdvj3sm.cloudfront.net/XZQoysCCFNAbkVje/50735/color_0640_001_png/MY2022/50735/50735_cc0640_001_218.png?c=426&p=37&s=o_lsSg4paEAP_9Lean0BJJ" },
+  ],
+};

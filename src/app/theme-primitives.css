@@ -1,0 +1,140 @@
+/* Color theme primitives from Figma Themes.json - do not edit by hand */
+/* Regenerate with: npm run tokens:theme */
+/* Light theme: Toolbox-Light */
+
+:root {
+  --theme-background-page: rgb(255 255 255);
+  --theme-background-container: rgb(250 250 250);
+  --theme-background-default: rgb(220 220 220);
+  --theme-text-primary: rgb(17 17 17);
+  --theme-text-secondary: rgb(79 79 79);
+  --theme-text-tertiary: rgb(130 130 130);
+  --theme-text-inactive: rgb(165 165 165);
+  --theme-text-destructive: rgb(212 36 34);
+  --theme-text-informative: rgb(43 93 243);
+  --theme-text-success: rgb(62 164 75);
+  --theme-stroke-default: rgb(220 220 220);
+  /* Softer row/divider lines (e.g. data tables) */
+  --theme-stroke-subtle: rgb(237 237 237);
+  --theme-stroke-accent: rgb(74 207 174);
+  --theme-stroke-destructive: rgb(231 67 65);
+  --theme-stroke-informative: rgb(67 125 252);
+  --theme-stroke-success: rgb(62 164 75);
+  --theme-stroke-warning: rgb(242 115 19);
+  --theme-background-badge-default: rgb(255 255 255);
+  --theme-background-badge-red: rgba(238 110 108 / 0.1000);
+  --theme-background-badge-orange: rgba(243 143 54 / 0.1000);
+  --theme-background-badge-amber: rgba(245 189 30 / 0.1000);
+  --theme-background-badge-yellow: rgba(245 202 15 / 0.1000);
+  --theme-background-badge-lime: rgba(171 228 53 / 0.1000);
+  --theme-background-badge-green: rgba(102 220 126 / 0.1000);
+  --theme-background-badge-emerald: rgba(86 209 151 / 0.1000);
+  --theme-background-badge-teal: rgba(83 210 190 / 0.1000);
+  --theme-background-badge-cyan: rgba(74 208 239 / 0.1000);
+  --theme-background-badge-sky: rgba(77 185 250 / 0.1000);
+  --theme-background-badge-blue: rgba(101 160 253 / 0.1000);
+  --theme-background-badge-indigo: rgba(126 134 251 / 0.1000);
+  --theme-background-badge-violet: rgba(161 133 253 / 0.1000);
+  --theme-background-badge-purple: rgba(184 126 254 / 0.1000);
+  --theme-background-badge-fuchsia: rgba(221 114 250 / 0.1000);
+  --theme-background-badge-pink: rgba(234 110 179 / 0.1000);
+  --theme-background-badge-rose: rgba(241 110 129 / 0.1000);
+  --theme-background-badge-gray: rgba(39 39 42 / 0.0600);
+  --theme-background-pressed: rgb(180 180 180);
+  --theme-icon-primary: rgb(17 17 17);
+  --theme-icon-secondary: rgb(102 102 102);
+  --theme-icon-inactive: rgb(143 143 143);
+  --theme-icon-white: rgb(255 255 255);
+  --theme-icon-interactive: rgb(24 147 117);
+  --theme-icon-destructive: rgb(231 67 65);
+  --theme-background-badge-white: rgba(255 255 255 / 0.1000);
+  --theme-background-button-secondary-default: rgb(244 244 244);
+  --theme-background-button-primary-default: rgb(24 147 117);
+  --theme-text-warning: rgb(227 87 6);
+  --theme-background-button-disabled: rgb(130 130 130);
+  --theme-background-sidebar: rgb(244 244 244);
+  --theme-background-skrim: rgba(9 9 11 / 0.5000);
+  --theme-background-button-pressed: rgb(16 97 76);
+  --theme-text-interactive: rgb(24 147 117);
+  --theme-text-white: rgb(255 255 255);
+  --theme-background-button-destructive: rgb(231 67 65);
+  --theme-background-hover: rgb(203 203 203);
+  --theme-background-accent: rgb(240 250 247);
+  --theme-background-button-primary-hover: rgb(19 118 94);
+  --theme-background-button-secondary-hover: rgb(220 220 220);
+  --theme-stroke-hover: rgb(180 180 180);
+  --theme-background-input-hover: rgb(248 252 251);
+  --theme-stroke-focus: rgb(74 207 174);
+  --theme-background-card-hover: rgb(248 252 251);
+  --theme-background-account-selector: rgb(255 255 255);
+}
+
+/* Dark theme: Toolbox-Dark */
+
+.dark {
+
+  --theme-background-page: rgb(45 45 45);
+  --theme-background-container: rgb(60 60 60);
+  --theme-background-default: rgb(60 60 60);
+  --theme-text-primary: rgb(255 255 255);
+  --theme-text-secondary: rgb(203 203 203);
+  --theme-text-tertiary: rgb(165 165 165);
+  --theme-text-inactive: rgb(130 130 130);
+  --theme-text-destructive: rgb(237 102 100);
+  --theme-text-informative: rgb(101 160 253);
+  --theme-text-success: rgb(102 220 126);
+  --theme-stroke-default: rgb(60 60 60);
+  --theme-stroke-subtle: rgb(54 54 54);
+  --theme-stroke-accent: rgb(2 182 137);
+  --theme-stroke-destructive: rgb(237 102 100);
+  --theme-stroke-informative: rgb(74 208 239);
+  --theme-stroke-success: rgb(2 182 137);
+  --theme-stroke-warning: rgb(245 202 15);
+  --theme-background-badge-default: rgba(255 255 255 / 0.1000);
+  --theme-background-badge-red: rgba(238 110 108 / 0.1000);
+  --theme-background-badge-orange: rgba(243 143 54 / 0.1000);
+  --theme-background-badge-amber: rgba(245 189 30 / 0.1000);
+  --theme-background-badge-yellow: rgba(245 202 15 / 0.1000);
+  --theme-background-badge-lime: rgba(171 228 53 / 0.1000);
+  --theme-background-badge-green: rgba(102 220 126 / 0.1000);
+  --theme-background-badge-emerald: rgba(86 209 151 / 0.1000);
+  --theme-background-badge-teal: rgba(83 210 190 / 0.1000);
+  --theme-background-badge-cyan: rgba(74 208 239 / 0.1000);
+  --theme-background-badge-sky: rgba(77 185 250 / 0.1000);
+  --theme-background-badge-blue: rgba(101 160 253 / 0.1000);
+  --theme-background-badge-indigo: rgba(126 134 251 / 0.1000);
+  --theme-background-badge-violet: rgba(161 133 253 / 0.1000);
+  --theme-background-badge-purple: rgba(184 126 254 / 0.1000);
+  --theme-background-badge-fuchsia: rgba(221 114 250 / 0.1000);
+  --theme-background-badge-pink: rgba(234 110 179 / 0.1000);
+  --theme-background-badge-rose: rgba(241 110 129 / 0.1000);
+  --theme-background-badge-gray: rgba(255 255 255 / 0.1000);
+  --theme-background-pressed: rgb(102 102 102);
+  --theme-icon-primary: rgb(255 255 255);
+  --theme-icon-secondary: rgb(203 203 203);
+  --theme-icon-inactive: rgb(165 165 165);
+  --theme-icon-white: rgb(255 255 255);
+  --theme-icon-interactive: rgb(64 214 178);
+  --theme-icon-destructive: rgb(237 102 100);
+  --theme-background-badge-white: rgba(255 255 255 / 0.1000);
+  /* Aligned with globals `.dark`: sidebar rail = secondary chrome */
+  --theme-background-sidebar: rgb(27 27 28);
+  --theme-background-button-secondary-default: rgb(27 27 28);
+  --theme-background-button-primary-default: rgb(2 182 137);
+  --theme-text-warning: rgb(243 143 54);
+  --theme-background-button-disabled: rgb(102 102 102);
+  --theme-background-skrim: rgba(255 255 255 / 0.2000);
+  --theme-background-button-pressed: rgb(1 148 112);
+  --theme-text-interactive: rgb(72 220 186);
+  --theme-text-white: rgb(255 255 255);
+  --theme-background-button-destructive: rgb(237 102 100);
+  --theme-background-hover: rgb(79 79 79);
+  --theme-background-accent: rgb(12 46 40);
+  --theme-background-button-primary-hover: rgb(10 205 162);
+  --theme-background-button-secondary-hover: rgb(40 40 44);
+  --theme-stroke-hover: rgb(102 102 102);
+  --theme-background-input-hover: rgba(255 255 255 / 0.04);
+  --theme-stroke-focus: rgb(64 214 178);
+  --theme-background-card-hover: rgba(255 255 255 / 0.04);
+  --theme-background-account-selector: rgb(45 45 45);
+}

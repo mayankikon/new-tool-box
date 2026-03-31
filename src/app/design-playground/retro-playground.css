@@ -1,0 +1,387 @@
+/**
+ * Scoped styling for retro range inputs on the design playground only.
+ * Imported from design-playground/layout.tsx.
+ */
+
+.retro-range-track {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(30, 30, 35, 0.9) 40%,
+    rgba(15, 15, 18, 0.95) 100%
+  );
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.retro-range-track::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 28px;
+  margin-top: -9px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    90deg,
+    #6b7280 0%,
+    #d1d5db 35%,
+    #9ca3af 70%,
+    #4b5563 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.retro-range-track::-moz-range-thumb {
+  width: 22px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    90deg,
+    #6b7280 0%,
+    #d1d5db 35%,
+    #9ca3af 70%,
+    #4b5563 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.retro-range-track::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(30, 30, 35, 0.9) 100%
+  );
+}
+
+/* Ridged thumb variant */
+.retro-range-ridged::-webkit-slider-thumb {
+  width: 20px;
+  height: 32px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #9ca3af 0px,
+    #9ca3af 2px,
+    #4b5563 2px,
+    #4b5563 4px
+  );
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.retro-range-ridged::-moz-range-thumb {
+  width: 20px;
+  height: 32px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #9ca3af 0px,
+    #9ca3af 2px,
+    #4b5563 2px,
+    #4b5563 4px
+  );
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.retro-range-temp {
+  background: linear-gradient(
+    90deg,
+    #1e3a8a 0%,
+    #38bdf8 35%,
+    #fbbf24 65%,
+    #dc2626 100%
+  );
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.retro-range-temp::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #1e3a8a 0%,
+    #38bdf8 35%,
+    #fbbf24 65%,
+    #dc2626 100%
+  );
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.retro-range-temp::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #1e3a8a 0%,
+    #38bdf8 35%,
+    #fbbf24 65%,
+    #dc2626 100%
+  );
+}
+
+/* Low-voltage → healthy pack (playground battery threshold native range) */
+.retro-range-battery-voltage {
+  background: linear-gradient(
+    90deg,
+    #7f1d1d 0%,
+    #b45309 28%,
+    #ca8a04 52%,
+    #16a34a 82%,
+    #15803d 100%
+  );
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.retro-range-battery-voltage::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #7f1d1d 0%,
+    #b45309 28%,
+    #ca8a04 52%,
+    #16a34a 82%,
+    #15803d 100%
+  );
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.retro-range-battery-voltage::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #7f1d1d 0%,
+    #b45309 28%,
+    #ca8a04 52%,
+    #16a34a 82%,
+    #15803d 100%
+  );
+}
+
+/* ─── Design system RangeSlider: “drawing handle” skeuomorph (playground) ─── */
+
+.playground-ds-slider-drawing [data-slot="slider-range-track"],
+.playground-ds-slider-drawing [data-slot="slider-track"] {
+  background-color: #e0e0e0 !important;
+}
+
+.playground-ds-slider-drawing [data-slot="slider-range-indicator"],
+.playground-ds-slider-drawing [data-slot="slider-indicator"] {
+  background-color: #55555c !important;
+}
+
+/**
+ * Circular metallic thumb + pause-style grip ridges.
+ * Do not set `position` here — Base UI positions the thumb with `position: absolute`.
+ * `position: relative` (or any non-absolute override) leaves the thumb in flex flow (far right).
+ */
+.slider-thumb-drawing {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #ffffff 0%,
+    #ececec 44%,
+    #c8c8c8 78%,
+    #a6a6aa 100%
+  ) !important;
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    inset 0 3px 6px rgba(255, 255, 255, 0.88),
+    inset 0 -5px 10px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+.slider-thumb-drawing::before,
+.slider-thumb-drawing::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 11px;
+  margin-top: -5.5px;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.slider-thumb-drawing::before {
+  left: calc(50% - 4px);
+}
+
+.slider-thumb-drawing::after {
+  left: calc(50% + 2px);
+}
+
+.playground-ds-slider-drawing [data-slot="slider-range-thumb-0"].slider-thumb-drawing::before,
+.playground-ds-slider-drawing [data-slot="slider-range-thumb-0"].slider-thumb-drawing::after {
+  background-color: #7a7a80;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.playground-ds-slider-drawing [data-slot="slider-range-thumb-1"].slider-thumb-drawing::before,
+.playground-ds-slider-drawing [data-slot="slider-range-thumb-1"].slider-thumb-drawing::after {
+  background-color: #2ecc71;
+  box-shadow:
+    0 0 10px rgba(46, 204, 113, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* Single-thumb design system Slider — same recessed grip as range low thumb */
+.playground-ds-slider-drawing [data-slot="slider-thumb"].slider-thumb-drawing::before,
+.playground-ds-slider-drawing [data-slot="slider-thumb"].slider-thumb-drawing::after {
+  background-color: #7a7a80;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Fluid shell pilot */
+.fluid-shell-pilot-root {
+  --fluid-shell-expanded-width: 280px;
+  --fluid-shell-collapsed-width: 72px;
+  --fluid-shell-gap: 12px;
+  --fluid-shell-content-radius: 8px;
+  --fluid-shell-surface-radius: 8px;
+  --fluid-shell-surface-padding: 12px;
+  --fluid-shell-surface-border: color-mix(in srgb, var(--border) 75%, transparent);
+  --fluid-shell-surface-shadow:
+    0 1px 2px hsla(0, 0%, 0%, 0.08),
+    0 -1px 0 hsla(0, 0%, 0%, 0.1);
+  font-family: var(--font-saira), sans-serif;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.fluid-shell-pilot-outer-texture {
+  background-color: #f3f5f8;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0.18) 34%, rgba(255, 255, 255, 0) 58%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2.8px,
+      rgba(126, 138, 156, 0.052) 2.8px,
+      rgba(126, 138, 156, 0.052) 4px
+    ),
+    linear-gradient(180deg, #fafbfd 0%, #f1f4f8 100%);
+}
+
+.fluid-shell-pilot-surface {
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  gap: var(--fluid-shell-gap);
+  border-radius: var(--fluid-shell-surface-radius);
+  border: 1px solid var(--fluid-shell-surface-border);
+  background-color: transparent;
+  padding: var(--fluid-shell-surface-padding);
+  box-shadow: var(--fluid-shell-surface-shadow);
+  overflow: hidden;
+}
+
+.fluid-shell-pilot-sidebar {
+  display: flex;
+  min-height: 0;
+  background-color: transparent;
+}
+
+.fluid-shell-pilot-sidebar > aside {
+  border-radius: var(--fluid-shell-content-radius);
+  overflow: hidden;
+}
+
+.fluid-shell-pilot-content {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--fluid-shell-content-radius);
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  background-color: var(--sidebar);
+  overflow: hidden;
+}
+
+.fluid-shell-pilot-sidebar-rail {
+  background-color: transparent !important;
+  border-right: 0 !important;
+  border-left: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.fluid-shell-pilot-sidebar-rail [aria-current="page"] {
+  background-color: #eaeaf0 !important;
+  color: var(--sidebar-accent-foreground) !important;
+}
+
+.fluid-shell-pilot-sidebar-rail a:hover,
+.fluid-shell-pilot-sidebar-rail button:hover {
+  background-color: #eaeaf0 !important;
+}
+
+.fluid-shell-pilot-main {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.fluid-shell-pilot-main [aria-label="Top bar"] {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fluid-shell-pilot-surface,
+  .fluid-shell-pilot-sidebar > aside {
+    transition: none !important;
+  }
+}
+
+.playground-ds-slider-drawing .slider-thumb-drawing:hover {
+  transform: scale(1.03) !important;
+}
+
+.playground-ds-slider-drawing .slider-thumb-drawing:active,
+.playground-ds-slider-drawing .slider-thumb-drawing:focus-within,
+.playground-ds-slider-drawing .slider-thumb-drawing[data-dragging] {
+  transform: scale(1.06) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-ds-slider-drawing .slider-thumb-drawing:hover,
+  .playground-ds-slider-drawing .slider-thumb-drawing:active,
+  .playground-ds-slider-drawing .slider-thumb-drawing:focus-within,
+  .playground-ds-slider-drawing .slider-thumb-drawing[data-dragging] {
+    transform: none !important;
+  }
+}
