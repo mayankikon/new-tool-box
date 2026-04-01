@@ -34,7 +34,7 @@ const tableHeaderCellVariants = cva(
   {
     variants: {
       variant: {
-        label: "gap-4 px-2.5",
+        label: "cursor-default gap-4 px-3 [&_*]:cursor-default",
         checkbox: "justify-center",
         icon: "justify-center",
         empty: "",

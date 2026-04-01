@@ -1,94 +1,9 @@
 /**
- * Foundation design tokens sourced from globals.css.
- * Used by the design system showcase to display token names and swatches.
+ * Foundation design tokens sourced from globals.css / design-tokens JSON.
+ * Used by the design system showcase. Theme colors (`themeTokenGroups`) are the canonical palette;
+ * shadcn-style semantic groups are not duplicated here — components still use `--background`, `--primary`,
+ * etc. from `globals.css` via Tailwind.
  */
-
-export const colorTokenGroups = [
-  {
-    name: "Base",
-    tokens: [
-      { name: "background", cssVar: "--background", tailwindClass: "bg-background" },
-      { name: "foreground", cssVar: "--foreground", tailwindClass: "bg-foreground" },
-    ],
-  },
-  {
-    name: "Card",
-    tokens: [
-      { name: "card", cssVar: "--card", tailwindClass: "bg-card" },
-      { name: "card-foreground", cssVar: "--card-foreground", tailwindClass: "bg-card-foreground" },
-    ],
-  },
-  {
-    name: "Popover",
-    tokens: [
-      { name: "popover", cssVar: "--popover", tailwindClass: "bg-popover" },
-      { name: "popover-foreground", cssVar: "--popover-foreground", tailwindClass: "bg-popover-foreground" },
-    ],
-  },
-  {
-    name: "Primary",
-    tokens: [
-      { name: "primary", cssVar: "--primary", tailwindClass: "bg-primary" },
-      { name: "primary-foreground", cssVar: "--primary-foreground", tailwindClass: "bg-primary-foreground" },
-    ],
-  },
-  {
-    name: "Secondary",
-    tokens: [
-      { name: "secondary", cssVar: "--secondary", tailwindClass: "bg-secondary" },
-      { name: "secondary-foreground", cssVar: "--secondary-foreground", tailwindClass: "bg-secondary-foreground" },
-    ],
-  },
-  {
-    name: "Muted",
-    tokens: [
-      { name: "muted", cssVar: "--muted", tailwindClass: "bg-muted" },
-      { name: "muted-foreground", cssVar: "--muted-foreground", tailwindClass: "bg-muted-foreground" },
-    ],
-  },
-  {
-    name: "Accent",
-    tokens: [
-      { name: "accent", cssVar: "--accent", tailwindClass: "bg-accent" },
-      { name: "accent-foreground", cssVar: "--accent-foreground", tailwindClass: "bg-accent-foreground" },
-    ],
-  },
-  {
-    name: "Destructive",
-    tokens: [{ name: "destructive", cssVar: "--destructive", tailwindClass: "bg-destructive" }],
-  },
-  {
-    name: "Border & Input",
-    tokens: [
-      { name: "border", cssVar: "--border", tailwindClass: "bg-border" },
-      { name: "input", cssVar: "--input", tailwindClass: "bg-input" },
-      { name: "ring", cssVar: "--ring", tailwindClass: "bg-ring" },
-    ],
-  },
-  {
-    name: "Charts",
-    tokens: [
-      { name: "chart-1", cssVar: "--chart-1", tailwindClass: "bg-chart-1" },
-      { name: "chart-2", cssVar: "--chart-2", tailwindClass: "bg-chart-2" },
-      { name: "chart-3", cssVar: "--chart-3", tailwindClass: "bg-chart-3" },
-      { name: "chart-4", cssVar: "--chart-4", tailwindClass: "bg-chart-4" },
-      { name: "chart-5", cssVar: "--chart-5", tailwindClass: "bg-chart-5" },
-    ],
-  },
-  {
-    name: "Sidebar",
-    tokens: [
-      { name: "sidebar", cssVar: "--sidebar", tailwindClass: "bg-sidebar" },
-      { name: "sidebar-foreground", cssVar: "--sidebar-foreground", tailwindClass: "bg-sidebar-foreground" },
-      { name: "sidebar-primary", cssVar: "--sidebar-primary", tailwindClass: "bg-sidebar-primary" },
-      { name: "sidebar-primary-foreground", cssVar: "--sidebar-primary-foreground", tailwindClass: "bg-sidebar-primary-foreground" },
-      { name: "sidebar-accent", cssVar: "--sidebar-accent", tailwindClass: "bg-sidebar-accent" },
-      { name: "sidebar-accent-foreground", cssVar: "--sidebar-accent-foreground", tailwindClass: "bg-sidebar-accent-foreground" },
-      { name: "sidebar-border", cssVar: "--sidebar-border", tailwindClass: "bg-sidebar-border" },
-      { name: "sidebar-ring", cssVar: "--sidebar-ring", tailwindClass: "bg-sidebar-ring" },
-    ],
-  },
-] as const;
 
 export const radiusTokens = [
   { name: "none", cssVar: "--radius-none", value: "0px", tailwindClass: "rounded-[var(--radius-none)]" },

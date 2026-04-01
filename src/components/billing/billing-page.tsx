@@ -27,6 +27,10 @@ import {
 import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+} from "@/lib/data-table-row-hover";
 import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
 import { cn } from "@/lib/utils";
 
@@ -562,11 +566,17 @@ function BillingDataTableRow({
   return (
     <TableRow
       size="default"
-      className="!border-0 !bg-transparent hover:!bg-transparent"
+      className={cn(
+        DATA_TABLE_ROW_GROUP_CLASS,
+        "!border-0 !bg-transparent hover:!bg-transparent",
+      )}
       style={{ minHeight: bodyCellHeightPx }}
     >
       <TableCell className={cellFrame}>
-        <div className="flex items-center" style={innerStyle}>
+        <div
+          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        >
           <span className="truncate text-sm font-medium leading-5 text-primary">
             {record.vin}
           </span>
@@ -576,7 +586,7 @@ function BillingDataTableRow({
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={record.stockNumber}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
@@ -584,23 +594,31 @@ function BillingDataTableRow({
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={String(record.year)}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.make} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.make}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.model} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.model}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={record.customerName}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
@@ -608,7 +626,7 @@ function BillingDataTableRow({
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={record.serviceType}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
@@ -616,7 +634,7 @@ function BillingDataTableRow({
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={`$${record.price}`}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
@@ -624,19 +642,23 @@ function BillingDataTableRow({
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={record.stockType}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.trim} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.trim}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={record.registeredBy}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>
@@ -858,8 +880,8 @@ export function BillingPage({
           tabMotionVariant="sink-rise"
           tabValues={BILLING_SERVICE_TAB_VALUES}
         >
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pb-2 pt-[4px]">
-            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               <Table className="border-separate border-spacing-0 bg-transparent text-sm">
                 <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
                   <TableRow size="compact" className="!border-0 hover:bg-transparent">
@@ -917,7 +939,7 @@ export function BillingPage({
                 </TableBody>
               </Table>
             </div>
-            <div className="flex min-w-0 shrink-0 justify-end pt-2">
+            <div className="flex min-w-0 shrink-0 justify-end px-2 pt-2">
               <Paginator
                 variant="inline"
                 currentPage={safeCurrentPage}

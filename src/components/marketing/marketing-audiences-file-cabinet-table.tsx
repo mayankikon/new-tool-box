@@ -14,6 +14,10 @@ import {
 import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { ProgressBar } from "@/components/ui/progress";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+} from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
 
 import type {
@@ -190,11 +194,17 @@ function AudienceTableRow({
   return (
     <TableRow
       size="default"
-      className="!border-0 !bg-transparent hover:!bg-muted"
+      className={cn(
+        DATA_TABLE_ROW_GROUP_CLASS,
+        "!border-0 !bg-transparent hover:!bg-muted",
+      )}
       style={{ minHeight: bodyCellHeightPx }}
     >
       <TableCell className={cellFrame}>
-        <div className="flex items-center" style={innerStyle}>
+        <div
+          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        >
           <span
             className={cn(
               "truncate font-medium leading-5 text-foreground",
@@ -207,7 +217,10 @@ function AudienceTableRow({
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <div className="flex items-center" style={innerStyle}>
+        <div
+          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        >
           <span className={cn("truncate leading-5 text-foreground", cellTextClassName)}>
             {vehicleStatusLabel(row.vehicleStatus)}
           </span>
@@ -215,7 +228,13 @@ function AudienceTableRow({
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <div className="flex items-center gap-3" style={innerStyle}>
+        <div
+          className={cn(
+            "flex items-center gap-3",
+            DATA_TABLE_CELL_INNER_HOVER_CLASS,
+          )}
+          style={innerStyle}
+        >
           <span className="w-9 shrink-0 text-right text-sm tabular-nums text-foreground">
             {row.retentionScore}
           </span>

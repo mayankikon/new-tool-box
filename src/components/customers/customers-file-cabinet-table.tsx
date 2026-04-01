@@ -14,6 +14,10 @@ import {
 import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+} from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
 
 import type { CustomerRecord, CustomerSortKey } from "./customers-table-model";
@@ -184,11 +188,17 @@ function CustomerTableRow({
   return (
     <TableRow
       size="default"
-      className="!border-0 !bg-transparent hover:!bg-gray-100 dark:hover:!bg-gray-800/50"
+      className={cn(
+        DATA_TABLE_ROW_GROUP_CLASS,
+        "!border-0 !bg-transparent hover:!bg-gray-100 dark:hover:!bg-gray-800/50",
+      )}
       style={{ minHeight: bodyCellHeightPx }}
     >
       <TableCell className={cellFrame}>
-        <div className="flex items-center" style={innerStyle}>
+        <div
+          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        >
           <span
             className={cn(
               "truncate font-medium leading-5 text-primary",
@@ -201,7 +211,10 @@ function CustomerTableRow({
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <div className="flex items-center" style={innerStyle}>
+        <div
+          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        >
           <span
             className={cn(
               "truncate text-sm font-normal leading-5 text-black dark:text-foreground",
@@ -214,29 +227,49 @@ function CustomerTableRow({
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.purchaseDate} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.purchaseDate}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={String(record.year)} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={String(record.year)}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.make} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.make}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.model} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.model}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
-        <TableSlotCell label={record.email} className={slotClass} style={innerStyle} />
+        <TableSlotCell
+          label={record.email}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          style={innerStyle}
+        />
       </TableCell>
 
       <TableCell className={cellFrame}>
         <TableSlotCell
           label={inviteStatusLabel(record.status)}
-          className={slotClass}
+          className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
           style={innerStyle}
         />
       </TableCell>

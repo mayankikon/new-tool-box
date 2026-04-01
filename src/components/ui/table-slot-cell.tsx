@@ -13,14 +13,14 @@ const tableSlotCellVariants = cva(
   {
     variants: {
       variant: {
-        default: "gap-2 px-2.5",
-        media: "gap-3 px-2.5",
-        avatar: "gap-2 px-2.5",
-        badge: "gap-1 px-2.5",
-        progress: "gap-2 px-2.5",
+        default: "gap-2 px-3",
+        media: "gap-3 px-3",
+        avatar: "gap-2 px-3",
+        badge: "gap-1 px-3",
+        progress: "gap-2 px-3",
         checkbox: "justify-center",
         icon: "justify-center",
-        number: "justify-center px-2.5",
+        number: "justify-center px-3",
         empty: "",
       },
       state: {

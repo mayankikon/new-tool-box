@@ -25,6 +25,7 @@ export interface SimpleInventoryTableShellProps {
 
 /**
  * Product **Table** layout (no file-cabinet tabs): `border-border` card with inner scroll.
+ * Scroll region has no horizontal inset so row strokes span the full card width; pagination keeps **`px-2`** when **`paginationPlacement="bottom"`**.
  * Default fill **`bg-card`**; pass **`surface`** to match **Table with tabs** / file-cabinet card.
  * Default **`paginationPlacement="top"`** when used directly; **`DesignSystemTableShellNoTabs`** sets **`"bottom"`** (Customers, Billing, Staff, Inventory table, design-system **Table** pattern).
  */
@@ -48,8 +49,8 @@ export function SimpleInventoryTableShell({
   );
 
   const cardBody = (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pb-2 pt-[4px]">
-      <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+      <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
         {children}
       </div>
     </div>
@@ -64,11 +65,11 @@ export function SimpleInventoryTableShell({
         )}
       >
         <div className={cardShellClass}>
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pt-[4px] pb-0">
-            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col pt-[4px] pb-0">
+            <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               {children}
             </div>
-            <div className="flex min-w-0 shrink-0 justify-end pb-2 pt-2">
+            <div className="flex min-w-0 shrink-0 justify-end px-2 pb-2 pt-2">
               {pagination}
             </div>
           </div>
