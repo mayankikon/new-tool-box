@@ -91,16 +91,16 @@ export const colorTokenGroups = [
 ] as const;
 
 export const radiusTokens = [
-  { name: "none", cssVar: "--radius-none", tailwindClass: "rounded-[var(--radius-none)]" },
-  { name: "2xs", cssVar: "--radius-2xs", tailwindClass: "rounded-[var(--radius-2xs)]" },
-  { name: "xs", cssVar: "--radius-xs", tailwindClass: "rounded-[var(--radius-xs)]" },
-  { name: "sm", cssVar: "--radius-sm", tailwindClass: "rounded-[var(--radius-sm)]" },
-  { name: "md", cssVar: "--radius-md", tailwindClass: "rounded-[var(--radius-md)]" },
-  { name: "lg", cssVar: "--radius-lg", tailwindClass: "rounded-[var(--radius-lg)]" },
-  { name: "xl", cssVar: "--radius-xl", tailwindClass: "rounded-[var(--radius-xl)]" },
-  { name: "full", cssVar: "--radius-full", tailwindClass: "rounded-[var(--radius-full)]" },
-  { name: "Card-sm", cssVar: "--radius-Card-sm", tailwindClass: "rounded-[var(--radius-Card-sm)]" },
-  { name: "Card-md", cssVar: "--radius-Card-md", tailwindClass: "rounded-[var(--radius-Card-md)]" },
+  { name: "none", cssVar: "--radius-none", value: "0px", tailwindClass: "rounded-[var(--radius-none)]" },
+  { name: "2xs", cssVar: "--radius-2xs", value: "2px", tailwindClass: "rounded-[var(--radius-2xs)]" },
+  { name: "xs", cssVar: "--radius-xs", value: "4px", tailwindClass: "rounded-[var(--radius-xs)]" },
+  { name: "sm", cssVar: "--radius-sm", value: "6px", tailwindClass: "rounded-[var(--radius-sm)]" },
+  { name: "md", cssVar: "--radius-md", value: "8px", tailwindClass: "rounded-[var(--radius-md)]" },
+  { name: "lg", cssVar: "--radius-lg", value: "12px", tailwindClass: "rounded-[var(--radius-lg)]" },
+  { name: "xl", cssVar: "--radius-xl", value: "16px", tailwindClass: "rounded-[var(--radius-xl)]" },
+  { name: "full", cssVar: "--radius-full", value: "9999px", tailwindClass: "rounded-[var(--radius-full)]" },
+  { name: "Card-sm", cssVar: "--radius-Card-sm", value: "8px", tailwindClass: "rounded-[var(--radius-Card-sm)]" },
+  { name: "Card-md", cssVar: "--radius-Card-md", value: "12px", tailwindClass: "rounded-[var(--radius-Card-md)]" },
 ] as const;
 
 /** Spacing scale from design-tokens/spacing.json (layout-primitives.css) */

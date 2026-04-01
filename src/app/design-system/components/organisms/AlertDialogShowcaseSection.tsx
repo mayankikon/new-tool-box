@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import {
   Input,
   InputContainer,
@@ -36,9 +36,9 @@ export function AlertDialogShowcaseSection() {
           foundation tokens: <CodeInline>bg-popover</CodeInline>,{" "}
           <CodeInline>text-foreground</CodeInline> /{" "}
           <CodeInline>text-muted-foreground</CodeInline>,{" "}
-          <CodeInline>rounded-[10px]</CodeInline> (10px), <CodeInline>p-6</CodeInline>,{" "}
+          <CodeInline>rounded-[var(--radius-lg)]</CodeInline> (12px), <CodeInline>p-6</CodeInline>,{" "}
           <CodeInline>border</CodeInline> (<CodeInline>--stroke-default</CodeInline>, 1px all sides),{" "}
-          <CodeInline>gap-6</CodeInline> (24px) before footer. Motion: 200ms enter / 150ms
+          <CodeInline>gap-4</CodeInline> (16px) between stacked sections. Motion: 200ms enter / 150ms
           exit (fade, scale, light blur);{" "}
           <CodeInline>motion-reduce</CodeInline> disables animation. Title{" "}
           <CodeInline>font-medium</CodeInline> (500); body <CodeInline>text-sm</CodeInline>{" "}
@@ -177,7 +177,7 @@ export function AlertDialogShowcaseSection() {
               </AlertDialogHeader>
               <div className="flex w-full flex-col gap-3">
                 <div className="flex items-start gap-2.5">
-                  <Checkbox id="ds-alert-del-understand" defaultChecked />
+                  <PortfolioCheckboxControl id="ds-alert-del-understand" defaultChecked />
                   <label
                     htmlFor="ds-alert-del-understand"
                     className="font-sans text-sm leading-5 text-foreground select-none"
@@ -186,7 +186,7 @@ export function AlertDialogShowcaseSection() {
                   </label>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Checkbox id="ds-alert-del-export" />
+                  <PortfolioCheckboxControl id="ds-alert-del-export" />
                   <label
                     htmlFor="ds-alert-del-export"
                     className="font-sans text-sm leading-5 text-foreground select-none"
@@ -242,7 +242,7 @@ export function AlertDialogShowcaseSection() {
                   </InputContainer>
                 </InputGroup>
                 <div className="flex items-start gap-2.5">
-                  <Checkbox id="ds-alert-transfer-notify" defaultChecked />
+                  <PortfolioCheckboxControl id="ds-alert-transfer-notify" defaultChecked />
                   <label
                     htmlFor="ds-alert-transfer-notify"
                     className="font-sans text-sm leading-5 text-foreground select-none"
@@ -251,7 +251,7 @@ export function AlertDialogShowcaseSection() {
                   </label>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Checkbox id="ds-alert-transfer-billing" />
+                  <PortfolioCheckboxControl id="ds-alert-transfer-billing" />
                   <label
                     htmlFor="ds-alert-transfer-billing"
                     className="font-sans text-sm leading-5 text-foreground select-none"

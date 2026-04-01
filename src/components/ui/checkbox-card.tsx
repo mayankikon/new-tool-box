@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import { cn } from "@/lib/utils";
 
 interface CheckboxCardGroupProps
@@ -22,7 +22,7 @@ function CheckboxCardGroup({ className, ...props }: CheckboxCardGroupProps) {
 }
 
 interface CheckboxCardOptionProps
-  extends Omit<React.ComponentProps<typeof Checkbox>, "children"> {
+  extends Omit<React.ComponentProps<typeof PortfolioCheckboxControl>, "children"> {
   title: string;
   description?: string;
   subDetail?: string;
@@ -61,7 +61,7 @@ function CheckboxCardOption({
       <div className="relative flex flex-col gap-1 p-4">
         <div className="flex items-start gap-2">
           <div className="flex items-start gap-3">
-            <Checkbox
+            <PortfolioCheckboxControl
               id={id}
               aria-describedby={descriptionId}
               {...props}

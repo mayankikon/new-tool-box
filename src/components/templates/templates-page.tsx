@@ -544,9 +544,9 @@ function TemplateDetailPage({
                       {onOpenCampaign ? (
                         <Button
                           type="button"
-                          variant="link"
+                          variant="ghost"
                           size="sm"
-                          className="h-auto shrink-0 p-0 text-xs"
+                          className="h-auto shrink-0 px-2 py-1 text-xs text-primary hover:bg-primary/10 hover:text-primary"
                           onClick={() => onOpenCampaign(campaign.id)}
                         >
                           Open in Campaigns

@@ -471,7 +471,7 @@ export function StepMessageChannels({
                 <Button
                   ref={variableButtonRef}
                   variant="ghost"
-                  size="xs"
+                  size="2xs"
                   onClick={() => setShowVariables((prev) => !prev)}
                   aria-expanded={showVariables}
                   aria-haspopup="menu"

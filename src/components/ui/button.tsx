@@ -18,8 +18,6 @@ const buttonVariants = cva(
           "border-border bg-background hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 dark:active:bg-input/50",
         secondary:
           "border border-[#DADADB] bg-white text-foreground hover:border-[#CACACB] hover:bg-zinc-50 active:border-[#CACACB] active:bg-zinc-100 aria-expanded:border-[#CACACB] aria-expanded:bg-zinc-50 aria-expanded:text-foreground dark:border-border dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[var(--theme-background-button-secondary-hover)] dark:active:bg-[var(--theme-background-button-secondary-hover)] dark:aria-expanded:bg-[var(--theme-background-button-secondary-hover)]",
-        dashed:
-          "border border-dashed border-border bg-background hover:bg-muted hover:text-foreground hover:border-border active:bg-muted active:text-foreground dark:border-input dark:bg-transparent dark:hover:bg-input/30 dark:active:bg-input/50",
         soft:
           "bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/20 focus-visible:border-primary/40 focus-visible:ring-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 dark:active:bg-primary/30",
         ghost:
@@ -27,13 +25,11 @@ const buttonVariants = cva(
         muted:
           "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground dark:hover:bg-muted/50 dark:active:bg-muted/50",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 active:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:active:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline active:underline",
+          "bg-destructive text-white hover:opacity-95 active:opacity-95 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive dark:text-white dark:hover:opacity-95 dark:active:opacity-95 dark:focus-visible:ring-destructive/40",
       },
       size: {
         "2xs":
           "h-6 gap-1 rounded-[min(var(--radius-xs),6px)] px-2 text-xs in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        xs: "h-7 gap-1 rounded-[min(var(--radius-xs),6px)] px-2 text-xs in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-[min(var(--radius-xs),8px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         default:
           "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5",

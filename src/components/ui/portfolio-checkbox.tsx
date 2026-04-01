@@ -5,13 +5,14 @@ import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { CheckIcon, MinusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-
-/** Portfolio 3.0 form control — checkbox border (Figma reference). */
-export const PORTFOLIO_CHECKBOX_BORDER_HEX = "#ebeced";
-/** Portfolio 3.0 — checked / indeterminate fill. */
-export const PORTFOLIO_FORM_CONTROL_GREEN_HEX = "#01AC81";
-/** Portfolio 3.0 — disabled fill. */
-export const PORTFOLIO_FORM_CONTROL_DISABLED_FILL_HEX = "#a3a3a3";
+import {
+  PORTFOLIO_CHECKBOX_DEFAULT_VISUALS,
+  PORTFOLIO_FORM_CONTROL_BORDER_HEX,
+  PORTFOLIO_FORM_CONTROL_DISABLED_FILL_HEX,
+  PORTFOLIO_FORM_CONTROL_GREEN_HEX,
+  type PortfolioCheckboxVisuals,
+  hexToRgbaString,
+} from "@/components/ui/portfolio-form-controls-visuals";
 
 export interface PortfolioCheckboxControlProps
   extends CheckboxPrimitive.Root.Props {
@@ -19,6 +20,8 @@ export interface PortfolioCheckboxControlProps
   showFocusRing?: boolean;
   /** Gray-out style while keeping control interactive. */
   visualDisabled?: boolean;
+  /** Optional visual overrides for the Portfolio 3.0 chrome study. */
+  visualSpec?: PortfolioCheckboxVisuals;
 }
 
 /**
@@ -30,6 +33,8 @@ function PortfolioCheckboxControl({
   disabled,
   showFocusRing,
   visualDisabled,
+  visualSpec = PORTFOLIO_CHECKBOX_DEFAULT_VISUALS,
+  style,
   ...props
 }: PortfolioCheckboxControlProps) {
   const isVisuallyDisabled = Boolean(disabled || visualDisabled);
@@ -48,30 +53,45 @@ function PortfolioCheckboxControl({
         isVisuallyDisabled && "opacity-65",
         className
       )}
-      style={
-        {
-          "--portfolio-checkbox-border": PORTFOLIO_CHECKBOX_BORDER_HEX,
-          "--portfolio-checkbox-green": PORTFOLIO_FORM_CONTROL_GREEN_HEX,
-          "--portfolio-checkbox-disabled": PORTFOLIO_FORM_CONTROL_DISABLED_FILL_HEX,
-        } as React.CSSProperties
-      }
+      style={{
+        "--portfolio-checkbox-border": PORTFOLIO_FORM_CONTROL_BORDER_HEX,
+        "--portfolio-checkbox-green": visualSpec.accentColor,
+        "--portfolio-checkbox-disabled": visualSpec.disabledFillColor,
+        "--portfolio-checkbox-surface": visualSpec.surfaceColor,
+        ...style,
+      }}
       {...props}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-[4px] bg-[linear-gradient(to_bottom_right,#ECECED_0%,#7A7B7F_50%,#ECECED_100%)]"
+        className="pointer-events-none absolute inset-0 z-0 rounded-[4px]"
+        style={{
+          background: `linear-gradient(to bottom right, ${visualSpec.gradientStartColor} 0%, ${visualSpec.gradientMidColor} 50%, ${visualSpec.gradientEndColor} 100%)`,
+        }}
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-px z-0 rounded-[3px] bg-[#fafafa] transition-colors group-data-checked:bg-black group-data-indeterminate:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-disabled:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)]"
+        className="pointer-events-none absolute inset-px z-0 rounded-[3px] bg-[color:var(--portfolio-checkbox-surface)] transition-colors group-data-checked:bg-black group-data-indeterminate:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-disabled:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)]"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-3 -translate-x-1/2 -translate-y-1/2 rounded-[0.775px] bg-[color:var(--portfolio-checkbox-green)] blur-[2px] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:opacity-0 group-data-[visual-disabled=true]:opacity-0"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-[0.775px] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:opacity-0 group-data-[visual-disabled=true]:opacity-0"
+        style={{
+          width: visualSpec.glowSizePx,
+          height: visualSpec.glowSizePx,
+          backgroundColor: hexToRgbaString(
+            visualSpec.accentColor,
+            visualSpec.glowOpacity
+          ),
+          filter: `blur(${visualSpec.glowBlurPx}px)`,
+        }}
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-3 -translate-x-1/2 -translate-y-1/2 rounded-[2px] bg-[color:var(--portfolio-checkbox-green)] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[color:var(--portfolio-checkbox-disabled)]"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-3 -translate-x-1/2 -translate-y-1/2 bg-[color:var(--portfolio-checkbox-green)] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[color:var(--portfolio-checkbox-disabled)]"
+        style={{
+          borderRadius: visualSpec.fillRadiusPx,
+        }}
       />
       <CheckboxPrimitive.Indicator
         data-slot="portfolio-checkbox-indicator"

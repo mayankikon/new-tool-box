@@ -31,8 +31,8 @@ This document inventories the current design system page (`src/app/design-system
 | 5 | Badge | Single card, flex wrap | Variants default/secondary/outline/soft/destructive |
 | 6 | Input | Multiple cards | Default, Shortcut, Add-on, Inline add-on, Quantity, Tail/Lead button, Soft, states |
 | 7 | Input Caption | Single card, variants | default/success/error/checkbox, password strength (none/low/medium/high) |
-| 8 | Checkbox | Multiple cards | `appearance`: `default` (1.3 Playground, filled primary) \| `sort` (Shift 2.0: accent stroke + icon). Basic states × both; label+description; list; card; segmented. Figma Shift 2.0: [15460-17838](https://www.figma.com/design/tn4ORHyi1Mi49nQ1SROYCY/Shift-2.0-Sort-UI?node-id=15460-17838) |
-| 9 | Radio | Multiple cards | Same patterns as Checkbox; `RadioGroupItem` supports the same `appearance` values. Figma Shift 2.0: [15460-17838](https://www.figma.com/design/tn4ORHyi1Mi49nQ1SROYCY/Shift-2.0-Sort-UI?node-id=15460-17838) |
+| 8 | Checkbox | Multiple cards | Portfolio 3.0 **`PortfolioCheckboxControl`** for basic, group-with-description, list, and card patterns on `/design-system`. Segmented controls remain on legacy **`Checkbox`** via **`checkbox-segmented`**. Figma Shift 2.0: [15460-17838](https://www.figma.com/design/tn4ORHyi1Mi49nQ1SROYCY/Shift-2.0-Sort-UI?node-id=15460-17838) |
+| 9 | Radio | Multiple cards | Same layout patterns as Checkbox; **`PortfolioRadioButton`** inside **`RadioGroup`** for basic/list/card on `/design-system`. Segmented radios use legacy **`RadioGroupItem`** via **`radio-segmented`**. Figma Shift 2.0: [15460-17838](https://www.figma.com/design/tn4ORHyi1Mi49nQ1SROYCY/Shift-2.0-Sort-UI?node-id=15460-17838) |
 | 9b | Toggle Switch | Single card | Segmented binary toggle (`toggle-switch.tsx`) |
 | 9c | Automotive system toggle | Inline switches | Skeuomorphic `AutomotiveSystemSwitch` (`automotive-system-toggle.tsx`, Base UI Switch; light/dark palettes, fluorescent LED) |
 | 10 | Card | Single card | CardHeader/Content/Footer composition |

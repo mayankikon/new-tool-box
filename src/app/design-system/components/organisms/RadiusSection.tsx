@@ -23,6 +23,7 @@ export function RadiusSection() {
             key={token.name}
             type="radius"
             name={token.name}
+            value={token.value}
             tailwindClass={token.tailwindClass}
           />
         ))}

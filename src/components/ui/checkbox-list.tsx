@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import { cn } from "@/lib/utils";
 
 interface CheckboxListProps
@@ -22,7 +22,7 @@ function CheckboxList({ className, ...props }: CheckboxListProps) {
 }
 
 interface CheckboxListItemProps
-  extends Omit<React.ComponentProps<typeof Checkbox>, "children"> {
+  extends Omit<React.ComponentProps<typeof PortfolioCheckboxControl>, "children"> {
   label: string;
   description?: string;
   right?: React.ReactNode;
@@ -54,7 +54,7 @@ function CheckboxListItem({
         className
       )}
     >
-      <Checkbox
+      <PortfolioCheckboxControl
         id={id}
         aria-describedby={descriptionId}
         {...props}

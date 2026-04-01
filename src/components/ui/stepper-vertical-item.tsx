@@ -35,7 +35,7 @@ function StepperVerticalItem({
   const indicatorColumn = (
     <div
       data-slot="stepper-vertical-indicator-column"
-      className="flex w-6 shrink-0 flex-col items-center gap-2"
+      className="flex w-6 shrink-0 flex-col items-center"
     >
       <StepperIndicator
         status={status}

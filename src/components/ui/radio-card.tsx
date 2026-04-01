@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup } from "@/components/ui/radio-group"
+import { PortfolioRadioButton } from "@/components/ui/portfolio-radio"
 import { cn } from "@/lib/utils"
 
 interface RadioCardGroupProps extends React.ComponentProps<typeof RadioGroup> {
@@ -20,7 +21,7 @@ function RadioCardGroup({ className, ...props }: RadioCardGroupProps) {
 }
 
 interface RadioCardOptionProps
-  extends Omit<React.ComponentProps<typeof RadioGroupItem>, "children"> {
+  extends Omit<React.ComponentProps<typeof PortfolioRadioButton>, "children"> {
   title: string
   description?: string
   subDetail?: string
@@ -70,7 +71,7 @@ function RadioCardOption({
       <div className="relative flex flex-col gap-1 p-4">
         <div className="flex items-start gap-2">
           <div className="flex items-start gap-3">
-            <RadioGroupItem
+            <PortfolioRadioButton
               id={id}
               aria-describedby={descriptionId}
               {...props}

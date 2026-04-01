@@ -3,12 +3,12 @@
 import * as React from "react";
 import { CheckboxGroup as CheckboxGroupPrimitive } from "@base-ui/react/checkbox-group";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import { cn } from "@/lib/utils";
 
 /**
  * Manages multiple checkboxes (value = string[]).
- * Use with Checkbox (with value prop) or CheckboxGroupItemWithDescription.
+ * Use with PortfolioCheckboxControl (with value prop) or CheckboxGroupItemWithDescription.
  */
 function CheckboxGroup({
   className,
@@ -24,7 +24,7 @@ function CheckboxGroup({
 }
 
 interface CheckboxGroupItemWithDescriptionProps
-  extends Omit<React.ComponentProps<typeof Checkbox>, "children"> {
+  extends Omit<React.ComponentProps<typeof PortfolioCheckboxControl>, "children"> {
   label: string;
   description?: string;
 }
@@ -52,7 +52,7 @@ function CheckboxGroupItemWithDescription({
         className
       )}
     >
-      <Checkbox
+      <PortfolioCheckboxControl
         id={id}
         aria-describedby={descriptionId}
         {...props}
