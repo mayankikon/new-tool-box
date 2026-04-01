@@ -52,7 +52,7 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
-          "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-6 rounded-[10px] border-[length:var(--stroke-default)] border-border bg-popover p-6 text-popover-foreground outline-none ease-out data-[size=default]:max-w-sm data-[size=sm]:max-w-sm data-[size=default]:sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:blur-in-3 data-open:duration-200 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98 data-closed:blur-out-2 data-closed:duration-150 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none",
+          "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[var(--radius-lg)] border-[length:var(--stroke-default)] border-border bg-popover p-6 text-popover-foreground outline-none ease-out data-[size=default]:max-w-sm data-[size=sm]:max-w-sm data-[size=default]:sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:blur-in-3 data-open:duration-200 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98 data-closed:blur-out-2 data-closed:duration-150 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none",
           className
         )}
         {...props}

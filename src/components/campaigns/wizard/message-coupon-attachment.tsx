@@ -141,7 +141,7 @@ export function MessageCouponAttachment({
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="2xs"
                 onClick={handleOpenChooser}
               >
                 Change
@@ -149,7 +149,7 @@ export function MessageCouponAttachment({
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="2xs"
                 onClick={() => onOfferIdChange(undefined)}
               >
                 Remove
@@ -157,7 +157,7 @@ export function MessageCouponAttachment({
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="2xs"
                 onClick={onEditCoupon}
               >
                 Edit coupon

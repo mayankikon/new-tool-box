@@ -233,7 +233,7 @@ export function CouponLibraryPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      size="xs"
+                      size="2xs"
                       leadingIcon={<Pencil className="size-3" />}
                       onClick={() => handleEdit(offer)}
                     >
@@ -242,7 +242,7 @@ export function CouponLibraryPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      size="xs"
+                      size="2xs"
                       leadingIcon={<Copy className="size-3" />}
                       onClick={() => handleDuplicate(offer)}
                     >
@@ -251,7 +251,7 @@ export function CouponLibraryPage() {
                     <Button
                       type="button"
                       variant="ghost"
-                      size="xs"
+                      size="2xs"
                       className="text-destructive hover:text-destructive"
                       leadingIcon={<Trash2 className="size-3" />}
                       onClick={() => handleDelete(offer.id)}

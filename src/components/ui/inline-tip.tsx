@@ -40,7 +40,7 @@ const indicatorVariants = cva("w-1 shrink-0 self-stretch rounded-full", {
   },
 })
 
-const titleVariants = cva("font-bold", {
+const titleVariants = cva("font-medium", {
   variants: {
     variant: {
       default: "text-(--inline-tip-default-title)",

@@ -51,7 +51,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckboxCardGroup, CheckboxCardOption } from "@/components/ui/checkbox-card";
 import { CheckboxGroup, CheckboxGroupItemWithDescription } from "@/components/ui/checkbox-group";
 import { CheckboxList, CheckboxListItem } from "@/components/ui/checkbox-list";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -92,15 +92,14 @@ import {
   InputShortcutBadge,
 } from "@/components/ui/input";
 import { InputCaption } from "@/components/ui/input-caption";
-import { LinkButton } from "@/components/ui/link-button";
 import { MapViewTooltip } from "@/components/ui/map-view-tooltip";
 import { MagicPathFormControlsShowcase } from "@/components/ui/magicpath-form-controls-showcase";
 import { Paginator } from "@/components/ui/paginator";
 import { ProgressBar } from "@/components/ui/progress";
 import { RadioCardGroup, RadioCardOption } from "@/components/ui/radio-card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
+import { PortfolioRadioButton } from "@/components/ui/portfolio-radio";
 import { RadioList, RadioListItem } from "@/components/ui/radio-list";
-import { RadioSegmented } from "@/components/ui/radio-segmented";
 import { Sidebar } from "@/components/ui/sidebar";
 import { Slider, RangeSlider } from "@/components/ui/slider";
 import { StepperHorizontal } from "@/components/ui/stepper-horizontal";
@@ -201,7 +200,7 @@ function InteractiveBadgeShowcase() {
         {(["soft", "outline", "ghost", "link"] as const).map((nextVariant) => (
           <Button
             key={nextVariant}
-            size="xs"
+            size="2xs"
             variant={variant === nextVariant ? "default" : "outline"}
             onClick={() => setVariant(nextVariant)}
           >
@@ -209,19 +208,19 @@ function InteractiveBadgeShowcase() {
           </Button>
         ))}
         {(["sm", "md"] as const).map((nextSize) => (
-          <Button key={nextSize} size="xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
+          <Button key={nextSize} size="2xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
             {nextSize}
           </Button>
         ))}
         {(["default", "pill"] as const).map((nextShape) => (
-          <Button key={nextShape} size="xs" variant={shape === nextShape ? "default" : "outline"} onClick={() => setShape(nextShape)}>
+          <Button key={nextShape} size="2xs" variant={shape === nextShape ? "default" : "outline"} onClick={() => setShape(nextShape)}>
             {nextShape}
           </Button>
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {BADGE_TONES.map((nextTone) => (
-          <Button key={nextTone} size="xs" variant={tone === nextTone ? "default" : "outline"} onClick={() => setTone(nextTone)}>
+          <Button key={nextTone} size="2xs" variant={tone === nextTone ? "default" : "outline"} onClick={() => setTone(nextTone)}>
             {nextTone}
           </Button>
         ))}
@@ -258,12 +257,12 @@ function InteractiveToggleSwitchShowcase() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {(["sm", "default", "lg"] as const).map((nextSize) => (
-          <Button key={nextSize} size="xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
+          <Button key={nextSize} size="2xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
             {nextSize}
           </Button>
         ))}
         {(["label", "icon"] as const).map((nextMode) => (
-          <Button key={nextMode} size="xs" variant={mode === nextMode ? "default" : "outline"} onClick={() => setMode(nextMode)}>
+          <Button key={nextMode} size="2xs" variant={mode === nextMode ? "default" : "outline"} onClick={() => setMode(nextMode)}>
             {nextMode}
           </Button>
         ))}
@@ -290,7 +289,7 @@ function InteractiveTabsShowcase() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         {(["line", "pill"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="xs" variant={tabsVariant === nextVariant ? "default" : "outline"} onClick={() => setTabsVariant(nextVariant)}>
+          <Button key={nextVariant} size="2xs" variant={tabsVariant === nextVariant ? "default" : "outline"} onClick={() => setTabsVariant(nextVariant)}>
             {nextVariant}
           </Button>
         ))}
@@ -327,12 +326,12 @@ function InteractiveProgressBarShowcase() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {(["linear", "dashed"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
+          <Button key={nextVariant} size="2xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
             {nextVariant}
           </Button>
         ))}
         {[60, 40, 30, 20, 10].map((nextValue) => (
-          <Button key={nextValue} size="xs" variant={value === nextValue ? "default" : "outline"} onClick={() => setValue(nextValue)}>
+          <Button key={nextValue} size="2xs" variant={value === nextValue ? "default" : "outline"} onClick={() => setValue(nextValue)}>
             {nextValue}%
           </Button>
         ))}
@@ -356,12 +355,12 @@ function InteractivePaginatorShowcase() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {(["simple", "inline", "numbered", "dots"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
+          <Button key={nextVariant} size="2xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
             {nextVariant}
           </Button>
         ))}
         {[1, 2, 3, 4, 5].map((page) => (
-          <Button key={page} size="xs" variant={currentPage === page ? "default" : "outline"} onClick={() => setCurrentPage(page)}>
+          <Button key={page} size="2xs" variant={currentPage === page ? "default" : "outline"} onClick={() => setCurrentPage(page)}>
             p{page}
           </Button>
         ))}
@@ -387,16 +386,16 @@ function InteractiveAiTextAreaShowcase() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {(["default", "shadow", "soft"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
+          <Button key={nextVariant} size="2xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
             {nextVariant}
           </Button>
         ))}
         {(["icon", "pill", "pill-sm"] as const).map((shape) => (
-          <Button key={shape} size="xs" variant={submitShape === shape ? "default" : "outline"} onClick={() => setSubmitShape(shape)}>
+          <Button key={shape} size="2xs" variant={submitShape === shape ? "default" : "outline"} onClick={() => setSubmitShape(shape)}>
             {shape}
           </Button>
         ))}
-        <Button size="xs" variant={showSecondary ? "default" : "outline"} onClick={() => setShowSecondary((current) => !current)}>
+        <Button size="2xs" variant={showSecondary ? "default" : "outline"} onClick={() => setShowSecondary((current) => !current)}>
           secondary
         </Button>
       </div>
@@ -550,14 +549,14 @@ function renderComponentShowcase(slug: string, label: string) {
       return wrapSection(
         slug,
         label,
-        "Basic checkbox states plus list, card, and segmented patterns.",
+        "Portfolio 3.0 checkboxes: basic states plus group, list, and card patterns (segmented controls use the legacy primitives separately).",
         <ShowcaseCard className="space-y-8">
           <div className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Basic</p>
             <div className="flex flex-wrap items-center gap-6">
-              <label className="flex items-center gap-2 text-sm"><Checkbox checked /> Checked</label>
-              <label className="flex items-center gap-2 text-sm"><Checkbox /> Unchecked</label>
-              <label className="flex items-center gap-2 text-sm"><Checkbox disabled checked /> Disabled</label>
+              <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl checked /> Checked</label>
+              <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl /> Unchecked</label>
+              <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl disabled checked /> Disabled</label>
             </div>
           </div>
           <div className="space-y-3">
@@ -614,7 +613,7 @@ function renderComponentShowcase(slug: string, label: string) {
       return wrapSection(
         slug,
         label,
-        "Mutually-exclusive controls with list, card, and segmented patterns.",
+        "Portfolio 3.0 radios: mutually exclusive controls with basic, list, and card patterns.",
         <ShowcaseCard className="space-y-8">
           <div className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Basic</p>
@@ -625,7 +624,7 @@ function renderComponentShowcase(slug: string, label: string) {
                 { value: "low", label: "Low priority" },
               ].map((item) => (
                 <label key={item.value} className="flex items-center gap-3 text-sm">
-                  <RadioGroupItem value={item.value} id={`radio-${item.value}`} />
+                  <PortfolioRadioButton value={item.value} id={`radio-${item.value}`} />
                   {item.label}
                 </label>
               ))}
@@ -658,17 +657,6 @@ function renderComponentShowcase(slug: string, label: string) {
               />
             </RadioCardGroup>
           </div>
-          <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Segmented pattern</p>
-            <RadioSegmented
-              defaultValue="map"
-              options={[
-                { value: "map", label: "Map", icon: <Car className="size-4" /> },
-                { value: "table", label: "Table", icon: <Hash className="size-4" /> },
-                { value: "timeline", label: "Timeline", icon: <Bell className="size-4" /> },
-              ]}
-            />
-          </div>
         </ShowcaseCard>,
       );
     case "toggle-switch":
@@ -697,7 +685,7 @@ function renderComponentShowcase(slug: string, label: string) {
         slug,
         label,
         "Standard cards with title, body and footer actions.",
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Active Campaigns</CardTitle>
@@ -706,15 +694,6 @@ function renderComponentShowcase(slug: string, label: string) {
             <CardContent className="text-sm text-muted-foreground">Reach increased by 14.6% week over week.</CardContent>
             <CardFooter>
               <Button size="sm">View Details</Button>
-            </CardFooter>
-          </Card>
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Compact Card</CardTitle>
-              <CardDescription>Smaller spacing variant.</CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Button variant="outline" size="xs">Open</Button>
             </CardFooter>
           </Card>
         </div>,
@@ -764,21 +743,39 @@ function renderComponentShowcase(slug: string, label: string) {
       return wrapSection(
         slug,
         label,
-        "Default and card tooltip variants.",
+        "Tooltip placements for all four sides, plus the card variant.",
         <ShowcaseCard>
           <TooltipProvider>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <Tooltip>
                 <TooltipTrigger render={<Button variant="outline" size="sm" />}>
-                  Hover me
+                  Top
                 </TooltipTrigger>
-                <TooltipContent>Quick tooltip copy</TooltipContent>
+                <TooltipContent side="top">Quick tooltip copy</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
+                  Right
+                </TooltipTrigger>
+                <TooltipContent side="right">Quick tooltip copy</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
+                  Bottom
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Quick tooltip copy</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
+                  Left
+                </TooltipTrigger>
+                <TooltipContent side="left">Quick tooltip copy</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger render={<Button variant="secondary" size="sm" />}>
-                  Rich tooltip
+                  Card tooltip
                 </TooltipTrigger>
-                <TooltipContent variant="card">Use card tooltips for longer explanatory text.</TooltipContent>
+                <TooltipContent side="top" variant="card">Use card tooltips for longer explanatory text.</TooltipContent>
               </Tooltip>
             </div>
           </TooltipProvider>
@@ -1044,7 +1041,14 @@ function renderComponentShowcase(slug: string, label: string) {
             ]}
             title="Create Campaign"
             subtitle="Configure targeting, channels and schedule."
-            right={<Button size="sm">Save Draft</Button>}
+            right={
+              <>
+                <Button variant="secondary" size="lg">
+                  Cancel
+                </Button>
+                <Button size="lg">Save Draft</Button>
+              </>
+            }
           />
         </ShowcaseCard>,
       );
@@ -1062,19 +1066,6 @@ function renderComponentShowcase(slug: string, label: string) {
             ]}
             title=""
           />
-        </ShowcaseCard>,
-      );
-    case "link-button":
-      return wrapSection(
-        slug,
-        label,
-        "Text-forward button for inline actions.",
-        <ShowcaseCard>
-          <div className="flex flex-wrap gap-3">
-            <LinkButton asButton>Default link button</LinkButton>
-            <LinkButton asButton variant="muted">Muted</LinkButton>
-            <LinkButton asButton variant="primary" underline>Primary</LinkButton>
-          </div>
         </ShowcaseCard>,
       );
     case "filter-button":
@@ -1095,7 +1086,7 @@ function renderComponentShowcase(slug: string, label: string) {
         <section key={slug} id={slug} className="scroll-mt-28 space-y-8">
           <SectionTitle
             title={label}
-            description="Portfolio 3.0 form controls: `PortfolioCheckboxControl` (border #ebeced, selected fill #01AC81) and `PortfolioRadioButton` (accent #01AC81). Below: Figma-sized 307×163 reference frame (`magicpath-form-controls-showcase.tsx`). Product checkboxes/radios use `Checkbox` / `RadioGroupItem` in `src/components/ui/`."
+            description="Portfolio 3.0 form controls: `PortfolioCheckboxControl` (border #ebeced, selected fill #01AC81) and `PortfolioRadioButton` (accent #01AC81). Below: the state reference matrix in `magicpath-form-controls-showcase.tsx`. On `/design-system`, non-segmented checkbox/radio showcases use these Portfolio components; product surfaces may still import `Checkbox` / `RadioGroupItem` from `src/components/ui/` where the standard primitives are required."
           />
           <div className="flex justify-center rounded-sm border border-border bg-card p-6">
             <MagicPathFormControlsShowcase className="rounded-sm shadow-sm" />

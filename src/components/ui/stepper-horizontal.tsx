@@ -31,7 +31,7 @@ function StepperHorizontal({
       data-slot="stepper-horizontal"
       role="list"
       aria-label="Progress steps"
-      className={cn("flex w-full items-start gap-1", className)}
+      className={cn("flex w-full items-start", className)}
       {...props}
     >
       {steps.map((step, index) => (

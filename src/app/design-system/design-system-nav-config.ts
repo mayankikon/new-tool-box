@@ -29,7 +29,6 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
     { slug: "avatar-bar", label: "Avatar bar" },
     { slug: "top-bar", label: "Top bar" },
     { slug: "breadcrumbs", label: "Breadcrumbs" },
-    { slug: "link-button", label: "Link Button" },
     { slug: "filter-button", label: "Filter Button" },
     { slug: "badge", label: "Badge" },
     { slug: "input", label: "Input" },

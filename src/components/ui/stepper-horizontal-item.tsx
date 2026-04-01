@@ -39,7 +39,7 @@ function StepperHorizontalItem({
   const indicatorRow = (
     <div
       data-slot="stepper-horizontal-indicator-row"
-      className="flex w-full shrink-0 items-center gap-2"
+      className="flex w-full shrink-0 items-center"
     >
       {align === "right" && !isFirst && (
         <StepperConnector

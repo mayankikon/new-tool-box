@@ -444,7 +444,7 @@ export function CouponBuilderForm({
                   <Button
                     type="button"
                     variant="outline"
-                    size="xs"
+                    size="2xs"
                     onClick={handleResetAccountLogo}
                   >
                     Use Default App Icon
@@ -503,7 +503,7 @@ export function CouponBuilderForm({
                     <Button
                       type="button"
                       variant="outline"
-                      size="xs"
+                      size="2xs"
                       leadingIcon={<RefreshCw className="size-3" />}
                       onClick={handlePickRandomVehicleForCoupon}
                     >
@@ -780,7 +780,7 @@ export function CouponBuilderForm({
                   <Button
                     key={opt.id}
                     type="button"
-                    size="xs"
+                    size="2xs"
                     variant={active ? "default" : "outline"}
                     onClick={() => toggleCondition(opt.create)}
                   >

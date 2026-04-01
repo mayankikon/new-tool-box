@@ -307,7 +307,7 @@ export function StepReviewLaunch({
                 </div>
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="2xs"
                   onClick={() => onGoToStep(0)}
                 >
                   <Pencil className="size-3" />
@@ -343,7 +343,7 @@ export function StepReviewLaunch({
                 </div>
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="2xs"
                   onClick={() => onGoToStep(1)}
                 >
                   <Pencil className="size-3" />
@@ -398,7 +398,7 @@ export function StepReviewLaunch({
                 </div>
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="2xs"
                   onClick={() => onGoToStep(2)}
                 >
                   <Pencil className="size-3" />
@@ -513,7 +513,7 @@ export function StepReviewLaunch({
                 </div>
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="2xs"
                   onClick={() => onGoToStep(3)}
                 >
                   <Pencil className="size-3" />

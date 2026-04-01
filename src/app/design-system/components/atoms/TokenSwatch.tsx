@@ -24,6 +24,7 @@ export interface TokenSwatchTextProps {
 export interface TokenSwatchRadiusProps {
   type: "radius";
   name: string;
+  value: string;
   tailwindClass: string;
   className?: string;
 }
@@ -91,10 +92,18 @@ export function TokenSwatch(props: TokenSwatchProps) {
     return (
       <div className={cn("flex flex-col items-center gap-2", className)}>
         <div
-          className={cn("h-14 w-14 bg-primary", props.tailwindClass)}
+          className={cn(
+            "h-14 w-14 bg-primary/10 outline outline-1 outline-primary/50",
+            props.tailwindClass
+          )}
           title={props.tailwindClass}
         />
-        <span className="text-xs text-muted-foreground">{name}</span>
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-xs text-muted-foreground">{name}</span>
+          <span className="text-xs text-muted-foreground/80 tabular-nums">
+            {props.value}
+          </span>
+        </div>
       </div>
     );
   }
@@ -103,7 +112,7 @@ export function TokenSwatch(props: TokenSwatchProps) {
     return (
       <div className={cn("flex flex-col items-center gap-2 min-w-[2.5rem]", className)}>
         <div
-          className="rounded-sm bg-primary opacity-80 shrink-0"
+          className="rounded-sm bg-primary/10 outline outline-1 outline-primary/50 shrink-0"
           style={{
             width: `var(--spacing-${props.size})`,
             height: `var(--spacing-${props.size})`,
