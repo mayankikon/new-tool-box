@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { PageLayoutChromeShowcase } from "@/app/design-playground/showcases/page-layout-chrome-showcase";
+import { FileCabinetTabRow } from "@/app/design-playground/components/file-cabinet-tab-row";
 import { CAMPAIGN_RECOMMENDATIONS } from "@/lib/campaigns/mock-data";
 import { inventoryDashboardData } from "@/lib/inventory/dashboard-data";
 import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
@@ -93,7 +94,6 @@ import {
 } from "@/components/ui/input";
 import { InputCaption } from "@/components/ui/input-caption";
 import { MapViewTooltip } from "@/components/ui/map-view-tooltip";
-import { MagicPathFormControlsShowcase } from "@/components/ui/magicpath-form-controls-showcase";
 import { Paginator } from "@/components/ui/paginator";
 import { ProgressBar } from "@/components/ui/progress";
 import { RadioCardGroup, RadioCardOption } from "@/components/ui/radio-card";
@@ -104,16 +104,6 @@ import { Sidebar } from "@/components/ui/sidebar";
 import { Slider, RangeSlider } from "@/components/ui/slider";
 import { StepperHorizontal } from "@/components/ui/stepper-horizontal";
 import { StepperVertical } from "@/components/ui/stepper-vertical";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TelemetryDeckTab, TelemetryDeckTabList, TelemetryDeckTabs } from "@/components/ui/telemetry-deck-tabs";
 import { ToggleSwitch, type ToggleSwitchOption } from "@/components/ui/toggle-switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VehicleListItem } from "@/components/ui/vehicle-list-item";
@@ -121,6 +111,10 @@ import { VehicleListPanel } from "@/components/ui/vehicle-list-panel";
 import { VehicleMapClusterMarker } from "@/components/ui/vehicle-map-cluster-marker";
 import { VehicleMapMarkerChip } from "@/components/ui/vehicle-map-marker-chip";
 import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
+import {
+  CUSTOMER_DECK_TAB_LABELS,
+} from "@/components/customers/customers-table-model";
+import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 
 import { DesignSystemNav } from "./components/DesignSystemNav";
 import { DesignSystemTemplate } from "./components/DesignSystemTemplate";
@@ -187,6 +181,12 @@ const BADGE_TONES: BadgeTone[] = [
   "pink",
   "rose",
 ];
+
+const {
+  underGlowPx: fileCabinetUnderGlowPx,
+  tabAccent: fileCabinetTabAccent,
+  tabTopRadiusPx: fileCabinetTabTopRadiusPx,
+} = FILE_CABINET_BILLING_TABLE_DEFAULTS;
 
 function InteractiveBadgeShowcase() {
   const [variant, setVariant] = React.useState<"soft" | "outline" | "ghost" | "link">("soft");
@@ -281,38 +281,31 @@ function InteractiveToggleSwitchShowcase() {
 }
 
 function InteractiveTabsShowcase() {
-  const [tabsVariant, setTabsVariant] = React.useState<"line" | "pill">("line");
-  const [value, setValue] = React.useState("overview");
-  const [deckValue, setDeckValue] = React.useState("drive");
+  const [activeTab, setActiveTab] = React.useState("drive");
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        {(["line", "pill"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="2xs" variant={tabsVariant === nextVariant ? "default" : "outline"} onClick={() => setTabsVariant(nextVariant)}>
-            {nextVariant}
-          </Button>
-        ))}
-      </div>
-      <Tabs value={value} onValueChange={setValue}>
-        <TabsList variant={tabsVariant}>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="audience">Audience</TabsTrigger>
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="pt-4 text-sm text-muted-foreground">Campaign overview content.</TabsContent>
-        <TabsContent value="audience" className="pt-4 text-sm text-muted-foreground">Audience targeting content.</TabsContent>
-        <TabsContent value="messages" className="pt-4 text-sm text-muted-foreground">Message channel content.</TabsContent>
-      </Tabs>
-      <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Telemetry deck strip</p>
-        <TelemetryDeckTabs value={deckValue} onValueChange={setDeckValue}>
-          <TelemetryDeckTabList>
-            <TelemetryDeckTab value="drive">Drive</TelemetryDeckTab>
-            <TelemetryDeckTab value="energy" ledTone="forest">Energy</TelemetryDeckTab>
-            <TelemetryDeckTab value="alerts" ledTone="amber">Alerts</TelemetryDeckTab>
-          </TelemetryDeckTabList>
-        </TelemetryDeckTabs>
+    <div className="space-y-4">
+      <div className="rounded-sm border border-border bg-muted/20 p-5">
+        <FileCabinetTabRow
+          value={activeTab}
+          onValueChange={setActiveTab}
+          labels={CUSTOMER_DECK_TAB_LABELS}
+          surface="light"
+          underGlowPx={fileCabinetUnderGlowPx}
+          accent={fileCabinetTabAccent}
+          tabTopRadiusPx={fileCabinetTabTopRadiusPx}
+          showLeftLamp={false}
+          noLeftLampBelowStyle="preset-led"
+          tabMotionVariant="sink-rise"
+        />
+        <div className="mt-4 rounded-sm border border-border bg-background px-4 py-5 text-sm text-muted-foreground">
+          Reuses the file-cabinet tab treatment from the table-with-tabs component. Active tab:
+          {" "}
+          <span className="font-medium text-foreground">
+            {CUSTOMER_DECK_TAB_LABELS[activeTab] ?? activeTab}
+          </span>
+          .
+        </div>
       </div>
     </div>
   );
@@ -556,7 +549,15 @@ function renderComponentShowcase(slug: string, label: string) {
             <div className="flex flex-wrap items-center gap-6">
               <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl checked /> Checked</label>
               <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl /> Unchecked</label>
+              <label className="flex items-center gap-2 text-sm">
+                <PortfolioCheckboxControl checked={false} indeterminate aria-label="Indeterminate checkbox state" />
+                Indeterminate
+              </label>
               <label className="flex items-center gap-2 text-sm"><PortfolioCheckboxControl disabled checked /> Disabled</label>
+              <label className="flex items-center gap-2 text-sm">
+                <PortfolioCheckboxControl checked showFocusRing aria-label="Focused checkbox state" />
+                Focused
+              </label>
             </div>
           </div>
           <div className="space-y-3">
@@ -617,18 +618,42 @@ function renderComponentShowcase(slug: string, label: string) {
         <ShowcaseCard className="space-y-8">
           <div className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Basic</p>
-            <RadioGroup defaultValue="high" className="gap-3">
-              {[
-                { value: "high", label: "High priority" },
-                { value: "medium", label: "Medium priority" },
-                { value: "low", label: "Low priority" },
-              ].map((item) => (
-                <label key={item.value} className="flex items-center gap-3 text-sm">
-                  <PortfolioRadioButton value={item.value} id={`radio-${item.value}`} />
-                  {item.label}
+            <div className="flex flex-wrap items-center gap-6">
+              <RadioGroup defaultValue="checked" className="!flex w-auto flex-row items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <PortfolioRadioButton value="checked" id="radio-checked" aria-label="Checked radio state" />
+                  Checked
                 </label>
-              ))}
-            </RadioGroup>
+              </RadioGroup>
+              <RadioGroup defaultValue="checked" className="!flex w-auto flex-row items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <PortfolioRadioButton value="unchecked" id="radio-unchecked" aria-label="Unchecked radio state" />
+                  Unchecked
+                </label>
+              </RadioGroup>
+              <RadioGroup defaultValue="disabled" className="!flex w-auto flex-row items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <PortfolioRadioButton
+                    value="disabled"
+                    id="radio-disabled"
+                    visualDisabled
+                    aria-label="Disabled radio state"
+                  />
+                  Disabled
+                </label>
+              </RadioGroup>
+              <RadioGroup defaultValue="focused" className="!flex w-auto flex-row items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <PortfolioRadioButton
+                    value="focused"
+                    id="radio-focused"
+                    showFocusRing
+                    aria-label="Focused radio state"
+                  />
+                  Focused
+                </label>
+              </RadioGroup>
+            </div>
           </div>
           <div className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">List pattern</p>
@@ -702,7 +727,7 @@ function renderComponentShowcase(slug: string, label: string) {
       return wrapSection(
         slug,
         label,
-        "Line, pill, and telemetry deck tabs with interactive switching.",
+        "File-cabinet tabs used by the table-with-tabs surface.",
         <ShowcaseCard className="space-y-8">
           <InteractiveTabsShowcase />
         </ShowcaseCard>,
@@ -711,32 +736,18 @@ function renderComponentShowcase(slug: string, label: string) {
       return wrapSection(
         slug,
         label,
-        "Data table primitives for compact and default rows.",
+        "Bordered table shell without the file-cabinet tab strip.",
         <ShowcaseCard>
-          <Table className="min-w-[680px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Campaign</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Audience</TableHead>
-                <TableHead className="text-right">Revenue</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>Service Reminder</TableCell>
-                <TableCell><Badge variant="secondary">Active</Badge></TableCell>
-                <TableCell>420</TableCell>
-                <TableCell className="text-right">$18,500</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Battery Health Alert</TableCell>
-                <TableCell><Badge variant="outline">Scheduled</Badge></TableCell>
-                <TableCell>85</TableCell>
-                <TableCell className="text-right">$6,200</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <DesignSystemTableViewPatternNoTabs />
+        </ShowcaseCard>,
+      );
+    case "table-with-tabs":
+      return wrapSection(
+        slug,
+        label,
+        "File-cabinet table shell with sink-rise tabs, sortable rows, and inline pagination.",
+        <ShowcaseCard>
+          <DesignSystemTableViewPattern />
         </ShowcaseCard>,
       );
     case "tooltip":
@@ -1081,18 +1092,6 @@ function renderComponentShowcase(slug: string, label: string) {
           </div>
         </ShowcaseCard>,
       );
-    case "sort-form-controls-reference":
-      return (
-        <section key={slug} id={slug} className="scroll-mt-28 space-y-8">
-          <SectionTitle
-            title={label}
-            description="Portfolio 3.0 form controls: `PortfolioCheckboxControl` (border #ebeced, selected fill #01AC81) and `PortfolioRadioButton` (accent #01AC81). Below: the state reference matrix in `magicpath-form-controls-showcase.tsx`. On `/design-system`, non-segmented checkbox/radio showcases use these Portfolio components; product surfaces may still import `Checkbox` / `RadioGroupItem` from `src/components/ui/` where the standard primitives are required."
-          />
-          <div className="flex justify-center rounded-sm border border-border bg-card p-6">
-            <MagicPathFormControlsShowcase className="rounded-sm shadow-sm" />
-          </div>
-        </section>
-      );
     default:
       return null;
   }
@@ -1108,25 +1107,6 @@ function renderPatternShowcase(slug: string, label: string) {
             description="Interactive shell preview: sidebar, avatar bar, top bar, and main column patterns used across the app."
           />
           <PageLayoutChromeShowcase />
-        </section>
-      );
-    case "table-view":
-      return (
-        <section key={slug} id={slug} className="scroll-mt-28 space-y-8">
-          <SectionTitle
-            title={label}
-            description="File-cabinet table with tabs (sortable grid + paginator) and the simpler bordered table shell."
-          />
-          <div className="space-y-10">
-            <div>
-              <h3 className="ds-doc-font mb-4 text-lg font-medium text-foreground">Table with tabs</h3>
-              <DesignSystemTableViewPattern />
-            </div>
-            <div>
-              <h3 className="ds-doc-font mb-4 text-lg font-medium text-foreground">Table (no tabs)</h3>
-              <DesignSystemTableViewPatternNoTabs />
-            </div>
-          </div>
         </section>
       );
     case "vehicle-details-page":

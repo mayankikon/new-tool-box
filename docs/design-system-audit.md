@@ -10,15 +10,11 @@ This document inventories the current design system page (`src/app/design-system
 
 | # | Section | Line range (approx) | Sub-sections / content |
 |---|--------|---------------------|-------------------------|
-| 1 | **Theme tokens** | ~376–425 | Cards per theme group (Background, Text, Stroke, Button, Interaction States) with swatches from `themeTokenGroups` |
-| 2 | **Foundation tokens** | ~427–556 | Semantic colors (colorTokenGroups), Radius (radiusTokens), Spacing (spacingTokens), Stroke (strokeTokens) |
-| 3 | **Typography** | ~559–660 | Font family cards, Font size samples, Font weight, Line height, Letter spacing |
-| 4 | **Components** | ~663–2520 | Single large section containing all component showcases (see below) |
-| 5 | **AI TextArea** | ~2521–2767 | Style variants (default/shadow/soft), multiple composition examples |
-| 6 | **Inline Tips** | ~2769–2815 | Variants (default, info, success, warning, error), custom title |
-| 7 | **Empty State** | ~2817–2935 | Layout variants (default, icon, illustration), with/without actions |
-| 8 | **Dropdown Menu** | ~2937–3202 | DropdownButton align, MenuItemRow, Userbar, searchable menu, footer action |
-| 9 | **Date Picker** | ~3204–end | Single/range, styles (default/shadow/soft), states (placeholder/filled/failed/disabled), Calendar panel, presets |
+| 1 | **Colors** (`ColorsSection`) | — | Theme token groups (Background, Text, Stroke, Button, Interaction States) from `themeTokenGroups` |
+| 2 | **Typography** | — | Font family cards, Font size samples, Font weight, Line height, Letter spacing |
+| 3 | **Spacing** / **Radius** / **Shadows & Elevations** / **Stroke** | — | Separate foundation sections; data from `design-tokens.ts` (`spacingTokens`, `radiusTokens`, `strokeTokens`, etc.) |
+| 4 | **Components** | — | Single large section containing all component showcases (see below) |
+| 5 | **Patterns** | — | Page layout, tables, AI TextArea, empty state, file upload, etc. |
 
 ### Under "Components" — subsections in order
 
@@ -48,8 +44,6 @@ This document inventories the current design system page (`src/app/design-system
 
 ### Organisms to create (from this inventory)
 
-- **ThemeTokensSection**
-- **FoundationTokensSection**
 - **TypographySection**
 - **PageLayoutChromeSection**
 - **ButtonShowcaseSection**
@@ -101,8 +95,8 @@ Optional: **ComponentsSection** organism that only renders the list of component
 
 | Content | Data source | Used by (after refactor) |
 |---------|-------------|---------------------------|
-| Theme token groups | `themeTokenGroups` in `src/lib/design-tokens.ts` | ThemeTokensSection → TokenGroupCard |
-| Color / radius / spacing / stroke | `colorTokenGroups`, `radiusTokens`, `spacingTokens`, `strokeTokens` in `design-tokens.ts` | FoundationTokensSection → TokenGroupCard |
+| Theme token groups (foundations **Colors**) | `themeTokenGroups` in `src/lib/design-tokens.ts` | `ColorsSection` → TokenGroupCard |
+| Radius / spacing / stroke | `radiusTokens`, `spacingTokens`, `strokeTokens` in `design-tokens.ts` | `RadiusSection`, `SpacingSection`, `StrokeSection` (etc.) |
 | Typography samples | `fontFamilyTokens`, `fontSizeTokens`, `fontWeightTokens`, `lineHeightTokens`, `letterSpacingTokens` in `design-tokens.ts` | TypographySection → TokenGroupCard / custom blocks |
 | Button showcase config | BUTTON_SHOWCASE_SIZES, BUTTON_SHOWCASE_VARIANTS, BUTTON_SHOWCASE_STATES, BUTTON_HOVER_LOOK, BUTTON_ACTIVE_LOOK (currently in page) | ButtonShowcaseSection (extract to design-system-constants.ts or keep in organism) |
 | TopBar variants | Inline array (breadcrumbs × description × buttons) in page | PageLayoutChromeSection (keep inline or extract to constant) |
@@ -115,13 +109,16 @@ Optional: **ComponentsSection** organism that only renders the list of component
 
 Used by the design system left panel and section anchor IDs. One source of truth for nav config and slugs.
 
-**Foundations** (3 items)
+**Foundations** (6 items; see `design-system-nav-config.ts`)
 
 | Slug | Label |
 |------|--------|
-| `theme-tokens` | Theme tokens |
-| `foundation-tokens` | Foundation tokens |
+| `colors` | Colors |
 | `typography` | Typography |
+| `spacing` | Spacing |
+| `radius` | Radius |
+| `shadows-elevations` | Shadows & Elevations |
+| `stroke` | Stroke |
 
 **Components** (representative slugs; full list: `design-system-nav-config.ts`; Page layout is under Patterns)
 
@@ -139,6 +136,7 @@ Used by the design system left panel and section anchor IDs. One source of truth
 | `card` | Card |
 | `tabs` | Tabs |
 | `table` | Table |
+| `table-with-tabs` | Table with tabs |
 | `tooltip` | Tooltip |
 | `map-view-tooltip` | Map view tooltip |
 | `sidebar` | Sidebar |
@@ -155,14 +153,12 @@ Used by the design system left panel and section anchor IDs. One source of truth
 | `dropdown-menu` | Dropdown Menu |
 | `alert-dialog` | Alert Dialog |
 | `date-picker` | Date Picker |
-| `magicpath-form-controls` | Portfolio 3.0 form controls |
 
 **Patterns** (representative; full list: `design-system-nav-config.ts`)
 
 | Slug | Label |
 |------|--------|
 | `page-layout-chrome` | Page layout & chrome |
-| `table-view` | **Tables**: **Table with tabs** (file cabinet, `sink-rise` tab motion) and **Table** (simple bordered) |
 
 New sections: add a row here and the same slug/label to `design-system-nav-config.ts`, and add `id="{slug}"` to the section in the page.
 

@@ -159,15 +159,15 @@ export function MarketingAudiencesPage() {
             noLeftLampBelowStyle="preset-led"
             tabMotionVariant="sink-rise"
           >
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pb-2 pt-[4px]">
-              <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+              <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
                 <MarketingAudiencesFileCabinetTable
                   rows={pagedRows}
                   sortConfig={sortConfig}
                   setSortConfig={setSortConfig}
                 />
               </div>
-              <div className="flex min-w-0 shrink-0 justify-end pt-2">
+              <div className="flex min-w-0 shrink-0 justify-end px-2 pt-2">
                 <Paginator
                   variant="inline"
                   currentPage={safeCurrentPage}

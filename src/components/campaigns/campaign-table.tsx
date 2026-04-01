@@ -26,6 +26,10 @@ import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { Paginator } from "@/components/ui/paginator";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+} from "@/lib/data-table-row-hover";
 import type { Campaign, CampaignStatus, CampaignType, Channel } from "@/lib/campaigns/types";
 import { cn } from "@/lib/utils";
 import {
@@ -460,7 +464,10 @@ function CampaignTableView({
                   <TableRow
                     key={campaign.id}
                     size="default"
-                    className="!border-0 !bg-transparent hover:!bg-transparent"
+                    className={cn(
+                      DATA_TABLE_ROW_GROUP_CLASS,
+                      "!border-0 !bg-transparent hover:!bg-transparent",
+                    )}
                     style={{ minHeight: bodyCellHeightPx }}
                   >
                     <TableCell
@@ -469,7 +476,13 @@ function CampaignTableView({
                       onMouseEnter={() => setHoveredRowId(campaign.id)}
                       onMouseLeave={() => setHoveredRowId(null)}
                     >
-                      <div className="flex items-center" style={innerRowStyle}>
+                      <div
+                        className={cn(
+                          "flex items-center",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
+                        )}
+                        style={innerRowStyle}
+                      >
                         <div className="inline-flex max-w-full items-center gap-2">
                           <span
                             className="inline-flex size-7 shrink-0 items-center justify-center text-[var(--theme-text-secondary)]"
@@ -493,7 +506,13 @@ function CampaignTableView({
                       onMouseEnter={() => setHoveredRowId(campaign.id)}
                       onMouseLeave={() => setHoveredRowId(null)}
                     >
-                      <div className="flex items-center" style={innerRowStyle}>
+                      <div
+                        className={cn(
+                          "flex items-center",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
+                        )}
+                        style={innerRowStyle}
+                      >
                         <Badge
                           variant="soft"
                           tone={STATUS_BADGE_TONES[campaign.status]}
@@ -518,7 +537,11 @@ function CampaignTableView({
                             ? formatCompactNumber(campaign.audienceSize)
                             : "—"
                         }
-                        className={cn(slotClass, "tabular-nums")}
+                        className={cn(
+                          slotClass,
+                          "tabular-nums",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
+                        )}
                         style={innerRowStyle}
                       />
                     </TableCell>
@@ -528,7 +551,13 @@ function CampaignTableView({
                       onMouseEnter={() => setHoveredRowId(campaign.id)}
                       onMouseLeave={() => setHoveredRowId(null)}
                     >
-                      <div className="flex items-center" style={innerRowStyle}>
+                      <div
+                        className={cn(
+                          "flex items-center",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
+                        )}
+                        style={innerRowStyle}
+                      >
                         <div className="inline-flex max-w-full items-center gap-2">
                           {activeChannels.length > 0 ? (
                             activeChannels.map((ch) => {
@@ -563,6 +592,7 @@ function CampaignTableView({
                         className={cn(
                           slotClass,
                           "tabular-nums",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
                           isStrongConversion
                             ? "text-[var(--theme-text-success)] font-medium"
                             : "",
@@ -582,7 +612,7 @@ function CampaignTableView({
                             campaign.scheduledAt ??
                             campaign.createdAt
                         )}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerRowStyle}
                       />
                     </TableCell>
@@ -592,7 +622,10 @@ function CampaignTableView({
                       onMouseLeave={() => setHoveredRowId(null)}
                     >
                       <div
-                        className="flex items-center justify-center"
+                        className={cn(
+                          "flex items-center justify-center",
+                          DATA_TABLE_CELL_INNER_HOVER_CLASS,
+                        )}
                         style={innerRowStyle}
                       >
                         <CampaignRowActions
@@ -671,14 +704,14 @@ export function CampaignTable({
         noLeftLampBelowStyle="preset-led"
         tabMotionVariant="sink-rise"
       >
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2 pb-2 pt-[4px]">
-          <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain pr-px">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+          <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
             <CampaignTableView
               campaigns={pagedCampaigns}
               onViewCampaign={onViewCampaign}
             />
           </div>
-          <div className="flex min-w-0 shrink-0 justify-end pt-2">
+          <div className="flex min-w-0 shrink-0 justify-end px-2 pt-2">
             <Paginator
               variant="inline"
               currentPage={safeCurrentPage}

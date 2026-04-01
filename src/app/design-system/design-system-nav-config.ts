@@ -42,6 +42,7 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
     { slug: "card", label: "Card" },
     { slug: "tabs", label: "Tabs" },
     { slug: "table", label: "Table" },
+    { slug: "table-with-tabs", label: "Table with tabs" },
     { slug: "tooltip", label: "Tooltip" },
     { slug: "map-view-tooltip", label: "Map view tooltip" },
     { slug: "progress-bar", label: "Progress Bar" },
@@ -56,10 +57,6 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
     { slug: "dropdown-menu", label: "Dropdown Menu" },
     { slug: "alert-dialog", label: "Alert Dialog" },
     { slug: "date-picker", label: "Date Picker" },
-    {
-      slug: "sort-form-controls-reference",
-      label: "Portfolio 3.0 form controls",
-    },
   ],
   patterns: [
     { slug: "page-layout-chrome", label: "Page layout & chrome" },
@@ -73,6 +70,5 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
     { slug: "vehicle-list-item", label: "Vehicle List Item" },
     { slug: "vehicle-list-panel", label: "Vehicle List Panel" },
     { slug: "vehicle-details-page", label: "Vehicle Details Page" },
-    { slug: "table-view", label: "Tables" },
   ],
 };

@@ -19,14 +19,14 @@
 | `src/components/ui/portfolio-radio.tsx` | Portfolio 3.0 **`PortfolioRadioButton`** (Base UI): border `#ebeced`, accent `#02C495` when selected; optional **`showFocusRing`**. |
 | `src/components/ui/checkbox-group.tsx`, `checkbox-list.tsx`, `checkbox-card.tsx` | Checkbox group/list/card wrappers for the design system: compose **`PortfolioCheckboxControl`** with **`CheckboxGroup`** (Base UI). Segmented patterns use **`checkbox-segmented.tsx`** + stock **`Checkbox`** instead. |
 | `src/components/ui/radio-list.tsx`, `radio-card.tsx` | Radio list/card wrappers: **`RadioGroup`** + **`PortfolioRadioButton`**. Segmented radios use **`radio-segmented.tsx`** + stock **`RadioGroupItem`**. |
-| `src/components/ui/magicpath-form-controls-showcase.tsx` | Portfolio 3.0 checkbox + radio state reference matrix; documented on `/design-system` **`#sort-form-controls-reference`**. |
 | `src/components/app/` | App shell: TopBar (page header with optional title, subtitle, right slot). Design system showcases TopBar and main content area pattern at `/design-system`. |
 | `src/components/geofences/` | Geofence management: GeofenceSettingsPage (list + map), GeofenceWizard (2-step: draw then name/address), GeofenceDrawStep (polygon/circle tools, undo/redo, reset, move via simple_select), GeofenceDetailsStep (name + optional address), GeofenceListPanel, GeofenceDrawingToolbar. |
 | `src/lib/geofences/geofence-store.tsx` | GeofenceProvider and useGeofences: in-memory FeatureCollection, addGeofence, removeGeofence. Initial features from dealership main lot. |
 | `src/lib/inventory/dealership-geofences.ts` | GeofenceProperties, MainLotProperties, DEALERSHIP_CENTER, mainLotGeoJSON (single main lot polygon). |
 | `src/lib/utils.ts` | `cn()` and shared utilities |
+| `src/lib/data-table-row-hover.ts` | Data table row hover: `group/data-row` on `<tr>` and cell-inner `scale-[1.015]`. |
 | `src/lib/media-paths.ts` | `MEDIA_BASE` (`/media`) and `mediaUrl()` for static assets under `public/media/` |
-| `src/lib/design-tokens.ts` | Token definitions for the design system page (colors, radius) |
+| `src/lib/design-tokens.ts` | Design system showcase data: `themeTokenGroups` (theme colors), radius/spacing/stroke/typography token arrays — not a duplicate of shadcn `--background` / `--primary` maps (those live only in `globals.css`) |
 | `public/media/` | Static assets (icons, logos, tooltips, map markers, OEM images, audio); URLs prefixed `/media/` |
 | `design-tokens/` | Figma JSON exports (`colors.json`, `themes.json`, `spacing.json`, `radius.json`, `stroke.json`, `font-family.json`, `font-size.json`) consumed by `scripts/generate-*-primitives.js` |
 | `src/lib/campaigns/types.ts` | Campaign domain types (Campaign, CampaignStatus, AudienceSegment, CampaignTrigger, CampaignMessage, ChannelConfig, CampaignMetrics, CampaignTemplate, DashboardMetrics, PersonalizationVariable, WizardMessage, ImageAttachment with optional kind `image`/`video` and gifPreviewUrl for video) |

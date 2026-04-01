@@ -21,6 +21,10 @@ import {
   formatVoltageVolts,
 } from "@/lib/inventory/report-table-helpers";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+} from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
 
 import { ReportStatusIcons } from "./report-status-icons";
@@ -203,13 +207,19 @@ function InventoryReportTableRow({
   return (
     <TableRow
       size="default"
-      className="!border-0 !bg-transparent hover:!bg-transparent"
+      className={cn(
+        DATA_TABLE_ROW_GROUP_CLASS,
+        "!border-0 !bg-transparent hover:!bg-transparent",
+      )}
       style={{ minHeight: bodyCellHeightPx }}
     >
       {columns.map((col) => (
         <TableCell key={col.key} className={cellFrame}>
           {col.key === "evoxImage" ? (
-            <div className="flex items-center" style={innerStyle}>
+            <div
+              className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+              style={innerStyle}
+            >
               {String(record.evoxImage ?? "").trim() ? (
                 <Image
                   src={String(record.evoxImage)}
@@ -226,7 +236,10 @@ function InventoryReportTableRow({
               )}
             </div>
           ) : col.key === "statusIcons" ? (
-            <div className="flex items-center" style={innerStyle}>
+            <div
+              className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+              style={innerStyle}
+            >
               <ReportStatusIcons
                 deviceStatus={String(record.deviceStatus ?? "")}
                 keyStatus={String(record.keyStatus ?? "")}
@@ -236,7 +249,7 @@ function InventoryReportTableRow({
           ) : (
             <TableSlotCell
               label={formatCellDisplay(col, record)}
-              className={slotClass}
+              className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
               style={innerStyle}
             />
           )}
