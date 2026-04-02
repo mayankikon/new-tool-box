@@ -16,6 +16,7 @@ import {
   MessageSquareText,
   Send,
   Star,
+  Sparkles,
   Zap,
 } from "lucide-react";
 
@@ -86,6 +87,7 @@ interface InventoryVehicleDetailPanelProps {
   vehicle: InventoryVehicleRecord;
   statusIcons: VehicleStatusIcons;
   onBack: () => void;
+  onShowSimilarVehicles?: () => void;
 }
 
 function getStockTypeTextClassName(
@@ -234,6 +236,7 @@ export function InventoryVehicleDetailPanel({
   vehicle,
   statusIcons,
   onBack,
+  onShowSimilarVehicles,
 }: InventoryVehicleDetailPanelProps) {
   const { resolvedTheme } = useTheme();
   const previewSurface: DashPreviewSurface =
@@ -261,7 +264,7 @@ export function InventoryVehicleDetailPanel({
 
   return (
     <div className="flex h-full flex-col overflow-hidden border border-border bg-sidebar">
-      <div className="flex h-10 shrink-0 items-center border-b border-border bg-sidebar px-4">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-sidebar px-3">
         <Button
           type="button"
           variant="ghost"
@@ -272,6 +275,18 @@ export function InventoryVehicleDetailPanel({
           <ChevronLeft className="size-4" aria-hidden />
           <span>Back</span>
         </Button>
+        {onShowSimilarVehicles ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="xs"
+            className="shrink-0"
+            onClick={onShowSimilarVehicles}
+          >
+            <Sparkles className="size-3 shrink-0" aria-hidden />
+            Show similar vehicles
+          </Button>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto cursor-default select-none bg-background">

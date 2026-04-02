@@ -28,8 +28,8 @@ const VEHICLE_MARKER_STROKE_PATH_D =
 const PHOTO_WELL_X = 10;
 const PHOTO_WELL_Y = 0;
 const PHOTO_WELL_SIZE = 54;
-/** Drawn image viewport: 1.1× the 52×52 baseline, centered in the 54×54 Figma clip (`meet`; slight edge crop). */
-const PHOTO_IMAGE_SIZE = 52 * 1.1;
+/** Drawn image viewport: 1.1× the 56×56 baseline, centered in the 54×54 Figma clip (`meet`; slight edge crop). */
+const PHOTO_IMAGE_SIZE = 56 * 1.1;
 const PHOTO_IMAGE_X =
   PHOTO_WELL_X + (PHOTO_WELL_SIZE - PHOTO_IMAGE_SIZE) / 2;
 const PHOTO_IMAGE_Y =
@@ -69,7 +69,7 @@ export interface VehicleMapMarkerChipProps {
   /** Index into {@link vehicleMarkerChipAssets} / {@link VEHICLE_MARKER_CHIP_STROKE_HEX} (clamped). */
   variantIndex?: number;
   className?: string;
-  /** When set, renders the Figma frame as vector SVG with this photo in a centered viewport (52×52 at 1.1× scale; `meet`; same URLs as vehicle list). */
+  /** When set, renders the Figma frame as vector SVG with this photo in a centered viewport (56×56 at 1.1× scale; `meet`; same URLs as vehicle list). */
   imageSrc?: string;
   imageAlt?: string;
   title?: string;

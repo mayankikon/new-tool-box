@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   Square,
   Sparkles,
+  TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
 
@@ -169,6 +170,7 @@ const homeModuleIcons: Record<string, LucideIcon> = {
   route: Route,
   map: MapPinned,
   phone: PhoneCall,
+  "triangle-alert": TriangleAlert,
 };
 
 const composerLayoutTransition = {
@@ -383,7 +385,22 @@ function buildLoadingSteps(query: string): AtlasAiLoadingStep[] {
   steps.push(foundationSteps[0]);
   steps.push(pickStep([foundationSteps[1], foundationSteps[2]], seed >> 1));
 
-  if (normalizedQuery.includes("recall")) {
+  if (normalizedQuery.includes("dtc") || normalizedQuery.includes("error code") || normalizedQuery.includes("diagnostic trouble")) {
+    steps.push(
+      {
+        id: "dtc-scan",
+        label: "Scanning recent diagnostic trouble code activity across your fleet",
+        detail: "Checking VIN-level DTC triggers from the past week.",
+        durationMs: 1700 + ((seed >> 2) % 3) * 200,
+      },
+      {
+        id: "dtc-severity",
+        label: "Ranking DTC severity and service urgency",
+        detail: "Mapping codes to repair categories and estimating diagnostic revenue.",
+        durationMs: 1500 + ((seed >> 3) % 3) * 180,
+      },
+    );
+  } else if (normalizedQuery.includes("recall")) {
     steps.push(...recallSteps);
   } else if (normalizedQuery.includes("warranty")) {
     steps.push(...warrantySteps);

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useTheme } from "@/components/theme/app-theme-provider";
@@ -18,6 +17,8 @@ import {
   Satellite,
   Box,
   Square,
+  ChevronLeft,
+  ChevronsLeft,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import mapboxgl from "mapbox-gl";
@@ -73,11 +74,14 @@ import {
   mainLotGeoJSON,
 } from "@/lib/inventory/dealership-geofences";
 import { resolveIconHeadquartersFromMap } from "@/lib/inventory/icon-headquarters-building";
-import { mediaUrl } from "@/lib/media-paths";
 import {
   INVENTORY_PANEL_VEHICLES,
   type InventoryVehicleRecord,
 } from "@/lib/inventory/vehicle-list-data";
+import {
+  formatSimilarVehiclesListTitle,
+  listSimilarVehicles,
+} from "@/lib/inventory/similar-vehicles";
 import {
   buildInventoryVehicleFeatureCollection,
   INVENTORY_LOT_AGE_TIER_HEX,
@@ -93,30 +97,9 @@ function inventoryMapAppearanceFromTheme(
   return resolvedTheme === "light" ? "light" : "dark";
 }
 
-const MAP_FILTER_ICONS = {
-  stockType: mediaUrl("icons/lead-icon-car.svg"),
-  inventoryAge: mediaUrl("icons/lead-icon-inventory-age.svg"),
-  batteryStatus: mediaUrl("icons/lead-icon-battery-full.svg"),
-} as const;
-
-function MapFilterIcon({ src, alt }: { src: string; alt: string }) {
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={16}
-      height={16}
-      className="size-4 shrink-0 object-contain"
-      draggable={false}
-      unoptimized
-    />
-  );
-}
-
 interface InventoryContentProps {
   className?: string;
   viewMode?: InventoryViewMode;
-  onViewModeChange?: (viewMode: InventoryViewMode) => void;
 }
 
 export type InventoryViewMode = "map" | "table";
@@ -239,6 +222,12 @@ const inventoryMapMarkerHighlightRef: { selectedVin: string | null } = {
 
 function scheduleInventoryVehicleMarkersReconcile() {
   inventoryVehicleMarkersReconcile?.();
+}
+
+/** Keep marker highlight/dimming in sync before React commits (reconcile reads this ref synchronously). */
+function syncInventoryMapSelectedVinRef(vin: string | null) {
+  inventoryMapMarkerHighlightRef.selectedVin = vin;
+  scheduleInventoryVehicleMarkersReconcile();
 }
 
 /** Resolves lot coordinates for a VIN from the last built inventory vehicle GeoJSON. */
@@ -439,7 +428,7 @@ function inventoryVehicleMarkerSelectionFlags(vin: string): {
   return { isSelected, dimPeerMarkers };
 }
 
-/** Selected vehicle scales up (~1.1–1.2×); peers use {@link inventoryVehicleMarkerSelectionFlags} dimming. */
+/** Selected vehicle scales up (~1.15×); peers stay slightly subdued (opacity/saturation ~0.9). */
 const INVENTORY_MAP_SELECTED_MARKER_SCALE_CLASS = "scale-[1.15]";
 
 function InventoryVehicleMapMarkerBody({
@@ -466,7 +455,7 @@ function InventoryVehicleMapMarkerBody({
       className={cn(
         "pointer-events-none inline-flex origin-center items-center justify-center",
         motionClass,
-        dimPeerMarkers && "opacity-[0.48] saturate-[0.62]",
+        dimPeerMarkers && "opacity-[0.9] saturate-[0.9]",
         isSelected && INVENTORY_MAP_SELECTED_MARKER_SCALE_CLASS
       )}
     >
@@ -698,7 +687,8 @@ function reconcileInventoryVehicleHtmlMarkers(
     inventoryVehicleMarkerEntries.clear();
     return;
   }
-  const markerMode = zoom >= INVENTORY_MAP_VEHICLE_IMAGE_ZOOM ? "chip" : "pin";
+  /** Always chip when HTML markers are shown (zoom ≥ pin threshold). A pin “tier” here caused image→pin→image during easeTo zoom ramps and fly arcs. */
+  const markerMode = "chip" as const;
 
   const titleColor = inventoryMapUsesLightBasemapUi(appearance)
     ? "#0a0a0a"
@@ -1312,9 +1302,16 @@ function setupInventoryMap(
 }
 
 const PANEL_WIDTH_PX = 400;
+/** List / selection-driven focus: Mapbox easeTo (no flyTo zoom arc — avoids chip↔pin flicker mid-move). */
+const INVENTORY_MAP_SELECTION_FLY_DURATION_MS = 900;
 const FILTER_PANEL_WIDTH_PX = 320;
 const PANEL_DURATION_S = 0.25;
 const PANEL_EASE = [0.32, 0.72, 0, 1] as const;
+/** Staggered map ↔ table crossfade: fast exit, short delay then ease-in */
+const INVENTORY_VIEW_OUT_DURATION_S = 0.2;
+const INVENTORY_VIEW_IN_DELAY_S = 0.06;
+const INVENTORY_VIEW_TABLE_IN_DURATION_S = 0.28;
+const INVENTORY_VIEW_MAP_IN_DURATION_S = 0.3;
 const INVENTORY_PAGE_SIZE = 14;
 /** Map + outer chrome — matches dark basemap letterboxing and app shell. */
 const MAP_SURFACE_CLASS_DARK = "bg-[#1a1f26]";
@@ -2362,6 +2359,10 @@ export function InventoryContent({
   const [searchQuery, setSearchQuery] = useState("");
   const [isListPanelOpen, setIsListPanelOpen] = useState(true);
   const [selectedVehicleVin, setSelectedVehicleVin] = useState<string | null>(null);
+  const [similarVehiclesSession, setSimilarVehiclesSession] = useState<{
+    anchor: InventoryVehicleRecord;
+    results: InventoryVehicleRecord[];
+  } | null>(null);
   const { resolvedTheme } = useTheme();
   const [mapAppearanceOverride, setMapAppearanceOverride] =
     useState<InventoryMapAppearance | null>(null);
@@ -2411,11 +2412,11 @@ export function InventoryContent({
     ? vehicleRecordByVin.get(selectedVehicleVin) ?? null
     : null;
 
-  const selectedVehicleMapLngLat = ((): [number, number] | null => {
+  const selectedVehicleMapLngLat = useMemo((): [number, number] | null => {
     void mapVehicleGeoTick;
     if (!selectedVehicleVin) return null;
     return getInventoryMapVehicleLngLatByVin(selectedVehicleVin);
-  })();
+  }, [selectedVehicleVin, mapVehicleGeoTick]);
 
   const vehicles: VehicleListPanelRow[] = searchFilteredVehicles.map((vehicle, index) => ({
     title: vehicle.title,
@@ -2427,14 +2428,121 @@ export function InventoryContent({
     statusIcons: getVehicleStatusIcons(vehicle.vin, index),
   }));
 
-  const handleVehicleSelect = useCallback((vin: string) => {
-    setSelectedVehicleVin(vin);
-    setIsListPanelOpen(true);
-  }, []);
+  const similarFilteredVehicles = useMemo(() => {
+    if (!similarVehiclesSession) return [];
+    const { results } = similarVehiclesSession;
+    if (!normalizedQuery) return results;
+
+    return results.filter((vehicle) =>
+      [
+        vehicle.title,
+        vehicle.vin,
+        vehicle.make,
+        vehicle.model,
+        vehicle.trim,
+      ].some((value) => value.toLowerCase().includes(normalizedQuery))
+    );
+  }, [similarVehiclesSession, normalizedQuery]);
+
+  const similarVehicleRows: VehicleListPanelRow[] = useMemo(
+    () =>
+      similarFilteredVehicles.map((vehicle) => ({
+        title: vehicle.title,
+        vin: vehicle.vin,
+        price: vehicle.price,
+        mileage: vehicle.mileage,
+        imageSrc: vehicle.imageSrc,
+        imageAlt: vehicle.imageAlt,
+        statusIcons: getVehicleStatusIcons(
+          vehicle.vin,
+          INVENTORY_PANEL_VEHICLES.findIndex((v) => v.vin === vehicle.vin)
+        ),
+      })),
+    [similarFilteredVehicles]
+  );
+
+  /**
+   * Imperative fly so the camera moves in the same turn as the click (useEffect often ran too late
+   * or bailed on `isStyleLoaded` / missing coords timing). Waits for `map.load` if needed.
+   */
+  const flyMapToVehicleVin = useCallback(
+    (vin: string) => {
+      if (viewMode !== "map") return;
+
+      const run = () => {
+        const map = mapRef.current;
+        if (!map?.loaded()) return;
+
+        const ll =
+          getInventoryMapVehicleLngLatByVin(vin) ?? DEALERSHIP_CENTER;
+
+        const durationMs = prefersReducedMotion
+          ? 0
+          : INVENTORY_MAP_SELECTION_FLY_DURATION_MS;
+        const targetZoom = Math.max(
+          map.getZoom(),
+          INVENTORY_MAP_VEHICLE_IMAGE_ZOOM
+        );
+
+        /**
+         * Use easeTo (not flyTo): flyTo’s curved path can temporarily zoom *below*
+         * INVENTORY_MAP_VEHICLE_IMAGE_ZOOM, so reconcileInventoryVehicleHtmlMarkers switches
+         * markers to pin mode until the animation finishes.
+         */
+        map.easeTo({
+          center: ll,
+          zoom: targetZoom,
+          bearing: map.getBearing(),
+          pitch: map.getPitch(),
+          padding: { left: PANEL_WIDTH_PX },
+          retainPadding: false,
+          duration: durationMs,
+          essential: false,
+        });
+      };
+
+      const map = mapRef.current;
+      if (map?.loaded()) {
+        run();
+      } else if (map) {
+        map.once("load", run);
+      }
+    },
+    [viewMode, prefersReducedMotion]
+  );
+
+  const handleVehicleSelect = useCallback(
+    (vin: string) => {
+      setSimilarVehiclesSession(null);
+      syncInventoryMapSelectedVinRef(vin);
+      setSelectedVehicleVin(vin);
+      setIsListPanelOpen(true);
+      flyMapToVehicleVin(vin);
+    },
+    [flyMapToVehicleVin]
+  );
 
   const handleVehicleDetailBack = useCallback(() => {
+    syncInventoryMapSelectedVinRef(null);
     setSelectedVehicleVin(null);
   }, []);
+
+  const handleShowSimilarVehicles = useCallback(() => {
+    if (!selectedVehicle) return;
+    const results = listSimilarVehicles(selectedVehicle, INVENTORY_PANEL_VEHICLES, 40);
+    setSimilarVehiclesSession({ anchor: selectedVehicle, results });
+    syncInventoryMapSelectedVinRef(null);
+    setSelectedVehicleVin(null);
+  }, [selectedVehicle]);
+
+  const handleSimilarVehiclesBack = useCallback(() => {
+    if (!similarVehiclesSession) return;
+    const anchorVin = similarVehiclesSession.anchor.vin;
+    setSimilarVehiclesSession(null);
+    syncInventoryMapSelectedVinRef(anchorVin);
+    setSelectedVehicleVin(anchorVin);
+    flyMapToVehicleVin(anchorVin);
+  }, [similarVehiclesSession, flyMapToVehicleVin]);
 
   const mapPerspectiveDurationMs = prefersReducedMotion ? 0 : 420;
 
@@ -2527,79 +2635,126 @@ export function InventoryContent({
     setTableCurrentPage(1);
   }, []);
 
+  const mapGeofenceButton = (
+    <Button variant="secondary" size="lg" className="min-w-0 shrink-0">
+      <MapPin className="size-4 shrink-0 text-primary" />
+      <span className="whitespace-nowrap">All Geofences</span>
+      <ChevronDown className="size-4 shrink-0" />
+    </Button>
+  );
+
+  const filtersButton = (
+    <Button
+      variant="secondary"
+      size="md"
+      leadingIcon={<Filter />}
+      aria-pressed={isFiltersOpen}
+      onClick={() => setIsFiltersOpen((current) => !current)}
+    >
+      Filters
+    </Button>
+  );
+
+  const searchInput = (
+    <InputContainer size="lg" className="w-full max-w-sm">
+      <InputIcon position="lead">
+        <Search className="size-4" />
+      </InputIcon>
+      <Input
+        standalone={false}
+        size="lg"
+        aria-label="Search vehicles"
+        placeholder="Search vehicles"
+        value={searchQuery}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+          setTableCurrentPage(1);
+        }}
+      />
+    </InputContainer>
+  );
+
+  const mapPanelSearchInput = (
+    <InputContainer size="lg" className="w-full">
+      <InputIcon position="lead">
+        <Search className="size-4" />
+      </InputIcon>
+      <Input
+        standalone={false}
+        size="lg"
+        aria-label="Search vehicles"
+        placeholder="Search vehicles"
+        value={searchQuery}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+          setTableCurrentPage(1);
+        }}
+      />
+    </InputContainer>
+  );
+
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-1 flex-col gap-6 overflow-hidden px-8 pb-8 min-h-0",
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+        viewMode === "table" && "gap-6 px-8 pb-8",
         className
       )}
     >
-      {/* Search row: full width, always visible (Figma / Sort UI 1.3) */}
-      <div className="flex shrink-0 items-center gap-2.5">
-        <InputContainer size="lg" className="w-full max-w-sm">
-          <InputIcon position="lead">
-            <Search className="size-4" />
-          </InputIcon>
-          <Input
-            standalone={false}
-            size="lg"
-            aria-label="Search vehicles"
-            placeholder="Search vehicles"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setTableCurrentPage(1);
-            }}
-          />
-        </InputContainer>
-
-        <Button variant="secondary" size="lg" className="shrink-0">
-          <MapPin className="size-4 shrink-0 text-primary" />
-          <span className="whitespace-nowrap">All Geofences</span>
-          <ChevronDown className="size-4 shrink-0" />
-        </Button>
-
-        <div className="flex-1" />
-
-        {viewMode === "table" && selectedVehicleCount > 0 ? (
-          <DropdownButton
-            label="Actions"
-            variant="secondary"
-            size="lg"
-            align="end"
-            contentClassName="w-48"
-          >
-            <DropdownMenuItem>Mark feature</DropdownMenuItem>
-            <DropdownMenuItem>Add remarks</DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setSendBrochureDialogOpen(true)}
+      {/* Table view: search row above content (Figma / Sort UI 1.3) */}
+      {viewMode === "table" ? (
+        <div className="flex shrink-0 items-center gap-2.5">
+          {searchInput}
+          {mapGeofenceButton}
+          <div className="flex-1" />
+          {selectedVehicleCount > 0 ? (
+            <DropdownButton
+              label="Actions"
+              variant="secondary"
+              size="lg"
+              align="end"
+              contentClassName="w-48"
             >
-              Send brochure
-            </DropdownMenuItem>
-            <DropdownMenuItem>Share location</DropdownMenuItem>
-          </DropdownButton>
-        ) : null}
-
-        <Button
-          variant="secondary"
-          size="md"
-          leadingIcon={<Filter />}
-          aria-pressed={isFiltersOpen}
-          onClick={() => setIsFiltersOpen((current) => !current)}
-        >
-          Filters
-        </Button>
-      </div>
+              <DropdownMenuItem>Mark feature</DropdownMenuItem>
+              <DropdownMenuItem>Add remarks</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setSendBrochureDialogOpen(true)}
+              >
+                Send brochure
+              </DropdownMenuItem>
+              <DropdownMenuItem>Share location</DropdownMenuItem>
+            </DropdownButton>
+          ) : null}
+          {filtersButton}
+        </div>
+      ) : null}
 
       <div className="relative flex min-h-0 flex-1 flex-col">
-        <div
+        <motion.div
+          initial={false}
           className={cn(
-            "absolute inset-0 transition-opacity duration-200 ease-out",
-            viewMode === "table"
-              ? "opacity-100"
-              : "pointer-events-none opacity-0"
+            "absolute inset-0",
+            viewMode !== "table" && "pointer-events-none"
           )}
           aria-hidden={viewMode !== "table"}
+          animate={{
+            opacity: viewMode === "table" ? 1 : 0,
+          }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : viewMode === "table"
+                ? {
+                    duration: INVENTORY_VIEW_TABLE_IN_DURATION_S,
+                    delay: INVENTORY_VIEW_IN_DELAY_S,
+                    ease: PANEL_EASE,
+                  }
+                : {
+                    duration: INVENTORY_VIEW_OUT_DURATION_S,
+                    delay: 0,
+                    ease: PANEL_EASE,
+                  }
+          }
         >
           <InventoryTableView
             vehicles={searchFilteredVehicles}
@@ -2610,85 +2765,46 @@ export function InventoryContent({
             onResetFilters={handleResetFilters}
             onSelectionCountChange={setSelectedVehicleCount}
           />
-        </div>
-        <div
+        </motion.div>
+        <motion.div
+          initial={false}
           className={cn(
-            "absolute inset-0 transition-opacity duration-250 ease-out",
-            viewMode === "map"
-              ? "opacity-100"
-              : "pointer-events-none opacity-0"
+            "absolute inset-0",
+            viewMode !== "map" && "pointer-events-none"
           )}
           aria-hidden={viewMode !== "map"}
+          animate={{
+            opacity: viewMode === "map" ? 1 : 0,
+          }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : viewMode === "map"
+                ? {
+                    duration: INVENTORY_VIEW_MAP_IN_DURATION_S,
+                    delay: INVENTORY_VIEW_IN_DELAY_S,
+                    ease: PANEL_EASE,
+                  }
+                : {
+                    duration: INVENTORY_VIEW_OUT_DURATION_S,
+                    delay: 0,
+                    ease: PANEL_EASE,
+                  }
+          }
         >
           <div
             className={cn(
-              "flex h-full min-h-0 min-w-0 flex-1 gap-0 overflow-hidden rounded-sm",
+              "relative h-full min-h-0 min-w-0 flex-1 overflow-hidden",
               MAP_SURFACE_CLASS_DARK
             )}
           >
-          <AnimatePresence initial={false}>
-            {isListPanelOpen && (
-              <motion.div
-                key="vehicle-side-panel"
-                initial={false}
-                animate={{
-                  width: PANEL_WIDTH_PX,
-                  transition: {
-                    width: { duration, ease: PANEL_EASE },
-                  },
-                }}
-                exit={{
-                  width: 0,
-                  transition: {
-                    width: { duration, ease: PANEL_EASE },
-                  },
-                }}
-                onUpdate={scheduleMapResize}
-                onAnimationComplete={scheduleMapResize}
-                className={cn("shrink-0 overflow-hidden", MAP_SURFACE_CLASS_DARK)}
-                style={{ willChange: "width" }}
-              >
-                {selectedVehicle ? (
-                  <InventoryVehicleDetailPanel
-                    vehicle={selectedVehicle}
-                    statusIcons={getVehicleStatusIcons(
-                      selectedVehicle.vin,
-                      INVENTORY_PANEL_VEHICLES.findIndex(
-                        (vehicle) => vehicle.vin === selectedVehicle.vin
-                      )
-                    )}
-                    onBack={handleVehicleDetailBack}
-                  />
-                ) : (
-                  <VehicleListPanel
-                    vehicles={vehicles}
-                    onCollapse={() => {
-                      setIsListPanelOpen(false);
-                      setSelectedVehicleVin(null);
-                    }}
-                    onVehicleClick={(vehicle) => {
-                      if (vehicle.vin) {
-                        handleVehicleSelect(vehicle.vin);
-                      }
-                    }}
-                    className="h-full"
-                  />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <motion.div
-            ref={mapWrapperRef}
-            transition={{ duration, ease: PANEL_EASE }}
-            onUpdate={scheduleMapResize}
-            onAnimationComplete={scheduleMapResize}
-            className={cn(
-              "relative min-w-0 w-full flex-1 min-h-0 overflow-hidden",
-              mapCanvasSurfaceClass
-            )}
-            style={{ willChange: "width" }}
-          >
+            <div
+              ref={mapWrapperRef}
+              className={cn(
+                "absolute inset-0 min-h-0 overflow-hidden",
+                mapCanvasSurfaceClass
+              )}
+            >
             <MapboxMap
               center={DEALERSHIP_CENTER}
               zoom={INVENTORY_MAP_INITIAL_ZOOM}
@@ -2708,6 +2824,8 @@ export function InventoryContent({
                       type="button"
                       aria-label="Show vehicle list"
                       onClick={() => {
+                        setSimilarVehiclesSession(null);
+                        syncInventoryMapSelectedVinRef(null);
                         setSelectedVehicleVin(null);
                         setIsListPanelOpen(true);
                       }}
@@ -2759,6 +2877,141 @@ export function InventoryContent({
                 </>
               }
             />
+            <AnimatePresence initial={false}>
+              {isListPanelOpen ? (
+                <motion.div
+                  key="vehicle-floating-panel"
+                  initial={false}
+                  animate={{
+                    width: PANEL_WIDTH_PX,
+                    transition: {
+                      width: { duration, ease: PANEL_EASE },
+                    },
+                  }}
+                  exit={{
+                    width: 0,
+                    opacity: 0,
+                    transition: {
+                      width: { duration, ease: PANEL_EASE },
+                      opacity: { duration: duration * 0.5, ease: PANEL_EASE },
+                    },
+                  }}
+                  className="pointer-events-auto absolute bottom-4 left-4 top-4 z-20 flex flex-col overflow-hidden rounded-lg border border-border bg-sidebar shadow-[0_12px_40px_rgba(15,23,32,0.18)]"
+                  style={{ willChange: "width" }}
+                >
+                  <div className="shrink-0 space-y-2.5 border-b border-border p-3">
+                    {mapPanelSearchInput}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {mapGeofenceButton}
+                      {filtersButton}
+                    </div>
+                  </div>
+                  <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <motion.div
+                      key={
+                        similarVehiclesSession
+                          ? "similar"
+                          : selectedVehicle
+                            ? "detail"
+                            : "list"
+                      }
+                      initial={prefersReducedMotion ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={
+                        prefersReducedMotion
+                          ? { duration: 0 }
+                          : { duration: 0.18, ease: PANEL_EASE }
+                      }
+                      className="flex min-h-0 flex-1 flex-col overflow-hidden"
+                    >
+                      {similarVehiclesSession ? (
+                        <VehicleListPanel
+                          vehicles={similarVehicleRows}
+                          listHeader={
+                            <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border bg-sidebar px-3">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 shrink-0 gap-1 px-1.5 text-muted-foreground hover:text-foreground"
+                                onClick={handleSimilarVehiclesBack}
+                              >
+                                <ChevronLeft className="size-4" aria-hidden />
+                                Back
+                              </Button>
+                              <p className="min-w-0 flex-1 truncate text-center font-headline text-[12px] font-medium leading-snug text-foreground">
+                                {formatSimilarVehiclesListTitle(
+                                  similarVehiclesSession.anchor
+                                )}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsListPanelOpen(false);
+                                  setSimilarVehiclesSession(null);
+                                  syncInventoryMapSelectedVinRef(null);
+                                  setSelectedVehicleVin(null);
+                                }}
+                                className="flex size-4 shrink-0 items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
+                                aria-label="Collapse panel"
+                              >
+                                <ChevronsLeft className="size-4" />
+                              </button>
+                            </div>
+                          }
+                          emptyState={
+                            <div className="flex min-h-[120px] flex-col items-center justify-center gap-1 px-4 py-8 text-center">
+                              <p className="text-sm text-muted-foreground">
+                                {normalizedQuery
+                                  ? "No vehicles match your search."
+                                  : "No similar vehicles found."}
+                              </p>
+                            </div>
+                          }
+                          onVehicleClick={(vehicle) => {
+                            if (vehicle.vin) {
+                              handleVehicleSelect(vehicle.vin);
+                            }
+                          }}
+                          className="min-h-0 flex-1 border-0 bg-transparent"
+                        />
+                      ) : selectedVehicle ? (
+                        <div className="min-h-0 flex-1 overflow-y-auto">
+                          <InventoryVehicleDetailPanel
+                            key={selectedVehicle.vin}
+                            vehicle={selectedVehicle}
+                            statusIcons={getVehicleStatusIcons(
+                              selectedVehicle.vin,
+                              INVENTORY_PANEL_VEHICLES.findIndex(
+                                (vehicle) => vehicle.vin === selectedVehicle.vin
+                              )
+                            )}
+                            onBack={handleVehicleDetailBack}
+                            onShowSimilarVehicles={handleShowSimilarVehicles}
+                          />
+                        </div>
+                      ) : (
+                        <VehicleListPanel
+                          vehicles={vehicles}
+                          onCollapse={() => {
+                            setIsListPanelOpen(false);
+                            syncInventoryMapSelectedVinRef(null);
+                            setSelectedVehicleVin(null);
+                            setSimilarVehiclesSession(null);
+                          }}
+                          onVehicleClick={(vehicle) => {
+                            if (vehicle.vin) {
+                              handleVehicleSelect(vehicle.vin);
+                            }
+                          }}
+                          className="min-h-0 flex-1 border-0 bg-transparent"
+                        />
+                      )}
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             <InventoryMapSelectionSpotlight
               map={spotlightMap}
               lngLat={selectedVehicleMapLngLat}
@@ -2780,7 +3033,7 @@ export function InventoryContent({
                     opacity: 0,
                     transition: { duration: PANEL_DURATION_S, ease: PANEL_EASE },
                   }}
-                  className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[320px] flex-col overflow-hidden border border-border bg-background shadow-[-12px_0_32px_rgba(15,23,32,0.16)]"
+                  className="absolute inset-y-0 right-0 z-40 flex w-full max-w-[320px] flex-col overflow-hidden border border-border bg-background shadow-[-12px_0_32px_rgba(15,23,32,0.16)]"
                 >
                   <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
                     <h3 className="text-sm font-medium tracking-[0.02em] text-foreground">
@@ -2817,71 +3070,9 @@ export function InventoryContent({
                 </motion.aside>
               ) : null}
             </AnimatePresence>
-            <AnimatePresence initial={false}>
-              <motion.div
-                key="inventory-floating-actions"
-                initial={false}
-                animate={{
-                  opacity: 1,
-                  transition: {
-                    duration: duration * 0.5,
-                    delay: duration * 0.3,
-                    ease: PANEL_EASE,
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: { duration: duration * 0.25, ease: PANEL_EASE },
-                }}
-                className="absolute left-3 top-3 z-10 flex flex-wrap gap-2"
-              >
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  leadingIcon={
-                    <MapFilterIcon
-                      src={MAP_FILTER_ICONS.stockType}
-                      alt="Stock type"
-                    />
-                  }
-                  className="bg-background shadow-sm hover:bg-background"
-                >
-                  Stock Type
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  leadingIcon={
-                    <MapFilterIcon
-                      src={MAP_FILTER_ICONS.inventoryAge}
-                      alt="Inventory age"
-                    />
-                  }
-                  className="bg-background shadow-sm hover:bg-background"
-                >
-                  Inventory Age
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  leadingIcon={
-                    <MapFilterIcon
-                      src={MAP_FILTER_ICONS.batteryStatus}
-                      alt="Battery status"
-                    />
-                  }
-                  className="bg-background shadow-sm hover:bg-background"
-                >
-                  Battery Status
-                </Button>
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
       <SendVehicleBrochureDialog
         open={sendBrochureDialogOpen}
