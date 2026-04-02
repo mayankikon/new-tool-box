@@ -164,19 +164,32 @@ function applyUserCouponLibraryToFormData(data: WizardFormData): WizardFormData 
 function mergeInitialFormData(
   initialData?: Partial<WizardFormData> & {
     atlasSuggestedOffer?: Partial<CampaignOffer>;
+    atlasSuggestedOffers?: Partial<CampaignOffer>[];
   },
 ): WizardFormData {
   if (!initialData) {
     return applyUserCouponLibraryToFormData(INITIAL_FORM_DATA);
   }
 
-  const { atlasSuggestedOffer, ...rest } = initialData;
+  const { atlasSuggestedOffer, atlasSuggestedOffers, ...rest } = initialData;
 
   const baseMessages = rest.messages ?? INITIAL_FORM_DATA.messages;
   let offers = rest.offers ?? INITIAL_FORM_DATA.offers;
   let messages = baseMessages;
 
-  if (atlasSuggestedOffer) {
+  if (atlasSuggestedOffers?.length) {
+    const mergedTierOffers = atlasSuggestedOffers.map((partial) =>
+      mergePartialCampaignOffer({
+        id: createNewCampaignOfferId(),
+        ...partial,
+      }),
+    );
+    offers = [...mergedTierOffers, ...(rest.offers ?? createDefaultOfferLibrary())];
+    const firstOfferId = mergedTierOffers[0]?.id;
+    messages = baseMessages.map((m, i) =>
+      i === 0 && firstOfferId ? { ...m, offerId: firstOfferId } : m,
+    );
+  } else if (atlasSuggestedOffer) {
     const atlas = mergePartialCampaignOffer({
       id: createNewCampaignOfferId(),
       ...atlasSuggestedOffer,
@@ -213,6 +226,7 @@ interface CampaignWizardProps {
   onComplete: (data: WizardFormData) => void;
   initialData?: Partial<WizardFormData> & {
     atlasSuggestedOffer?: Partial<CampaignOffer>;
+    atlasSuggestedOffers?: Partial<CampaignOffer>[];
   };
 }
 

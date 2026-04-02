@@ -249,7 +249,7 @@ function AiTextAreaActionButton({
 
 /* ---------------------------------------------------------------------------
  * AiTextAreaSubmit — primary branded submit/send button
- * Primary submit: bg-primary (dark #02B689), shadow 0px 1px 2px rgba(0,0,0,0.05), inner highlight.
+ * Primary submit: bg-primary (dark #1AB994), shadow 0px 1px 2px rgba(0,0,0,0.05), inner highlight.
  * Icon shape: 28px circle. Pill: h=28px px=8px py=4px rounded-xs (4px).
  * Pill-sm: px=6px py=4px text-xs rounded-xs.
  * -------------------------------------------------------------------------*/

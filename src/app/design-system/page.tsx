@@ -892,7 +892,7 @@ function renderComponentShowcase(slug: string, label: string) {
         <ShowcaseCard>
           <div className="flex flex-wrap items-end gap-8">
             <VehicleMapMarkerPin tone="teal" hoverable />
-            <VehicleMapMarkerChip variantIndex={0} hoverOverlayColor="#00B397" />
+            <VehicleMapMarkerChip variantIndex={0} hoverOverlayColor="#1A9375" />
             <VehicleMapClusterMarker countLabel="142" hoverable />
             <VehicleMapClusterMarker variant="group-active" countLabel="32" hoverable />
           </div>

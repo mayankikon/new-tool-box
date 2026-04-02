@@ -58,7 +58,7 @@ export interface InventoryDevicesSoldTableRow {
 
 /** Lot age tier colors (fresh / moderate / aged) for inventory aging widgets. */
 export const lotAgeTierColors = {
-  fresh: "#2D8A75",
+  fresh: "#1A9375",
   moderate: "#F5A623",
   aged: "#E74C3C",
 } as const;

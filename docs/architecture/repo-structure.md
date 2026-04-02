@@ -15,8 +15,10 @@
 | `src/app/` | App Router routes (layout, page, globals.css). Root page (`/`) is the product app shell with sidebar navigation. |
 | `src/app/design-system/page.tsx` | Design system showcase: foundation tokens + UI components |
 | `src/components/ui/` | shadcn components (button, card, badge, input, sidebar, table, tabs, dialog, select, dropdown-menu, textarea, switch, radio-group, checkbox, separator, tooltip, progress, avatar, skeleton, sheet, label, popover, scroll-area, empty-state, mapbox-map) |
-| `src/components/ui/portfolio-checkbox.tsx` | Portfolio 3.0 **`PortfolioCheckboxControl`** (Base UI): border `#ebeced`, fill `#05B389` when checked/indeterminate; optional **`showFocusRing`** for documentation. |
-| `src/components/ui/portfolio-radio.tsx` | Portfolio 3.0 **`PortfolioRadioButton`** (Base UI): border `#ebeced`, accent `#02C495` when selected; optional **`showFocusRing`**. |
+| `src/components/customers/register-customer-page.tsx` | Inventory **Customers → Register Customer**: full-page registration form (registration type, customer info, address, device details, terms checkbox, cancel/register) using design-system inputs; shell navigates from `CustomersPage` via `src/app/page.tsx`. |
+| `src/components/ui/portfolio-checkbox.tsx` | Portfolio 3.0 **`PortfolioCheckboxControl`** (Base UI): border `#ebeced`, fill `#1A9375` when checked/indeterminate; optional **`showFocusRing`** for documentation. Root is a **24×24px** hit box (`size-6`); the painted control remains **16×16px** (`size-4`) centered inside. |
+| `src/components/ui/portfolio-radio.tsx` | Portfolio 3.0 **`PortfolioRadioButton`** (Base UI): border `#ebeced`, accent `#1A9375` when selected; optional **`showFocusRing`**. Same **24×24px** outer / **16×16px** inner layout as **`PortfolioCheckboxControl`**. |
+| `src/components/ui/checkbox.tsx`, `radio-group.tsx` | Stock **`Checkbox`** / **`RadioGroupItem`**: same **24×24px** interactive box with **16×16px** visual, for tables, filters, and segmented controls. |
 | `src/components/ui/checkbox-group.tsx`, `checkbox-list.tsx`, `checkbox-card.tsx` | Checkbox group/list/card wrappers for the design system: compose **`PortfolioCheckboxControl`** with **`CheckboxGroup`** (Base UI). Segmented patterns use **`checkbox-segmented.tsx`** + stock **`Checkbox`** instead. |
 | `src/components/ui/radio-list.tsx`, `radio-card.tsx` | Radio list/card wrappers: **`RadioGroup`** + **`PortfolioRadioButton`**. Segmented radios use **`radio-segmented.tsx`** + stock **`RadioGroupItem`**. |
 | `src/components/app/` | App shell: TopBar (page header with optional title, subtitle, right slot). Design system showcases TopBar and main content area pattern at `/design-system`. |
@@ -25,6 +27,9 @@
 | `src/lib/inventory/dealership-geofences.ts` | GeofenceProperties, MainLotProperties, DEALERSHIP_CENTER, mainLotGeoJSON (single main lot polygon). |
 | `src/lib/utils.ts` | `cn()` and shared utilities |
 | `src/lib/data-table-row-hover.ts` | Data table row hover: `group/data-row` on `<tr>` and cell-inner `scale-[1.015]`. |
+| `src/lib/atlas-ai/coupon-strategy.ts` | Intelligent couponing helpers: retention → tier/discount, engage KPI estimates, tiered `CampaignOffer` drafts for the wizard. |
+| `src/components/atlas-ai/atlas-ai-page.tsx` | Ask Atlas conversation shell: shared `max-w-5xl` content width (empty state, composer, user/assistant messages, thinking) so the audience preview table has room for coupon/value columns without layout jump. |
+| `src/components/atlas-ai/atlas-ai-engage-flow.tsx` | Ask Atlas **Engage** UI: retention score ring gauge, conservative/balanced/aggressive incentive presets, engage table with Intelligent Coupon column, deploy stepper, success state (inline with conversation, no heavy panel card). |
 | `src/lib/media-paths.ts` | `MEDIA_BASE` (`/media`) and `mediaUrl()` for static assets under `public/media/` |
 | `src/lib/design-tokens.ts` | Design system showcase data: `themeTokenGroups` (theme colors), radius/spacing/stroke/typography token arrays — not a duplicate of shadcn `--background` / `--primary` maps (those live only in `globals.css`) |
 | `public/media/` | Static assets (icons, logos, tooltips, map markers, OEM images, audio); URLs prefixed `/media/` |
@@ -64,7 +69,7 @@
 - **Route**: `/` (root)
 - **Purpose**: Main product application with sidebar navigation and product switching
 - **Products**:
-  - **Inventory Management** — Home, Dashboard, Customers, Billing, Reports, Staff; Settings: General, Geofences, Alerts, Marketing, Configurations
+  - **Inventory Management** — Home, Dashboard, Customers (list + **Register Customer** full-page form from the top bar), Billing, Reports, Staff; Settings: General, Geofences, Alerts, Marketing, Configurations
   - **Smart Marketing** — Atlas AI, Campaigns, Customers; Settings: Analytics, Channels, Automations
 - **Behavior**: A product switcher dropdown in the sidebar lets users switch between products. The account selector (dealership) stays constant across products; only the nav items and settings section change. When Smart Marketing > Campaigns is active, the main content area renders the Campaign Dashboard. The dashboard shows a loading skeleton on initial load, then either an empty state (no campaigns) or the full view: KPI cards, dismissible AI recommendation banner, AI-suggested campaigns section, and a status-tabbed campaign table with row actions. Clicking a campaign row navigates to the Campaign Detail view (with its own loading skeleton transition). The "Create Campaign" button opens a 4-step Campaign Creation Wizard with framer-motion animated transitions: (1) Campaign Setup with template selection, (2) Audience & Triggers with AI Assist and human-readable trigger labels, (3) Message & Channels with image upload and realistic device previews (phone/email mockups), (4) Review & Launch with animated revenue impact estimator, summary cards with edit-back links, and device preview.
 - **Key components**: `Sidebar` (with `products`, `activeProductId`, `onProductChange`, `onNavItemClick` props), `SidebarProductSwitcher` (internal dropdown)

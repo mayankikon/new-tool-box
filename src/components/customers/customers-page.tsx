@@ -19,9 +19,13 @@ import { Paginator } from "@/components/ui/paginator";
 interface CustomersPageProps {
   /** Shown in the page TopBar; Smart Marketing uses "Audiences". */
   pageTitle?: string;
+  onRegisterCustomer?: () => void;
 }
 
-export function CustomersPage({ pageTitle = "Customers" }: CustomersPageProps) {
+export function CustomersPage({
+  pageTitle = "Customers",
+  onRegisterCustomer,
+}: CustomersPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{
@@ -74,7 +78,12 @@ export function CustomersPage({ pageTitle = "Customers" }: CustomersPageProps) {
             <Button variant="secondary" size="header" leadingIcon={<Download />}>
               Export
             </Button>
-            <Button size="header" leadingIcon={<UserPlus />}>
+            <Button
+              type="button"
+              size="header"
+              leadingIcon={<UserPlus />}
+              onClick={onRegisterCustomer}
+            >
               Register Customer
             </Button>
           </>

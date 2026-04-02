@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfigurationsPage } from "@/components/settings/configurations-page";
 import { GeneralSettingsContent } from "@/components/settings/general-settings-content";
 import { CustomersPage } from "@/components/customers/customers-page";
+import { RegisterCustomerPage } from "@/components/customers/register-customer-page";
 import { BillingPage } from "@/components/billing/billing-page";
 import { StaffPage } from "@/components/staff/staff-page";
 import { InventoryDashboardPage } from "@/components/inventory/inventory-dashboard";
@@ -50,6 +51,7 @@ import {
   Plus,
   Save,
   Activity,
+  Wand2,
   TicketPercent,
   type LucideIcon,
 } from "lucide-react";
@@ -57,6 +59,7 @@ import { CouponLibraryPage } from "@/components/campaigns/coupon-builder";
 import { CampaignWizard } from "@/components/campaigns/campaign-wizard";
 import { MarketingMonitorPage } from "@/components/marketing/marketing-monitor-page";
 import { MarketingAudiencesPage } from "@/components/marketing/marketing-audiences-page";
+import type { MarketingAudienceTabValue } from "@/components/marketing/marketing-audiences-table-model";
 import {
   InventoryContent,
   type InventoryViewMode,
@@ -74,8 +77,6 @@ type NavItemDef =
   | { label: string; icon: LucideIcon }
   | { label: string; iconSrc: string };
 
-const SWITCH_TO_SMART_MARKETING_LABEL = "Switch to Smart Marketing";
-const SWITCH_TO_INVENTORY_LABEL = "Switch to Inventory Management";
 const DEV_CONSOLE_LABEL = "Dev Console";
 
 const inventoryMainItems: NavItemDef[] = [
@@ -97,12 +98,12 @@ const inventorySettingsItems: NavItemDef[] = [
 ];
 
 const marketingMainItems: NavItemDef[] = [
-  { label: "Atlas AI", icon: Globe },
+  { label: "Ask Atlas", icon: Wand2 },
   { label: "Monitor", icon: Activity },
-  { label: "Campaigns", icon: Target },
-  { label: "Coupon", icon: TicketPercent },
   { label: "Audiences", icon: Users },
+  { label: "Campaigns", icon: Target },
   { label: "Templates", icon: FileText },
+  { label: "Coupons", icon: TicketPercent },
 ];
 
 const marketingSettingsItems: NavItemDef[] = [
@@ -115,7 +116,7 @@ const marketingSettingsItems: NavItemDef[] = [
 
 const defaultActiveByProduct: Record<string, string> = {
   inventory: "Inventory",
-  marketing: "Atlas AI",
+  marketing: "Ask Atlas",
 };
 
 function buildSections(
@@ -190,6 +191,7 @@ export default function ProductPage() {
   const [activeProduct, setActiveProduct] = useState("marketing");
   const [activeItem, setActiveItem] = useState("Campaigns");
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
+  const [isRegisteringCustomer, setIsRegisteringCustomer] = useState(false);
   const [inventoryHomeView, setInventoryHomeView] =
     useState<InventoryViewMode>("map");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(
@@ -198,32 +200,29 @@ export default function ProductPage() {
   const [campaignWizardInitialData, setCampaignWizardInitialData] = useState<
     | (Partial<WizardFormData> & {
         atlasSuggestedOffer?: Partial<CampaignOffer>;
+        atlasSuggestedOffers?: Partial<CampaignOffer>[];
       })
     | undefined
+  >(undefined);
+  const [audienceInitialTab, setAudienceInitialTab] = useState<
+    MarketingAudienceTabValue | undefined
   >(undefined);
 
   const handleProductChange = useCallback((productId: string) => {
     setActiveProduct(productId);
     setActiveItem(defaultActiveByProduct[productId] ?? "Inventory");
     setSelectedCampaignId(null);
+    setIsRegisteringCustomer(false);
   }, []);
 
   const handleNavItemClick = useCallback((label: string) => {
-    if (label === SWITCH_TO_SMART_MARKETING_LABEL) {
-      handleProductChange("marketing");
-      return;
-    }
-
-    if (label === SWITCH_TO_INVENTORY_LABEL) {
-      handleProductChange("inventory");
-      return;
-    }
-
     setActiveItem(label);
     setSelectedCampaignId(null);
     setIsCreatingCampaign(false);
     setCampaignWizardInitialData(undefined);
-  }, [handleProductChange]);
+    setIsRegisteringCustomer(false);
+    setAudienceInitialTab(undefined);
+  }, []);
 
   const handleViewCampaign = useCallback((campaignId: string) => {
     setSelectedCampaignId(campaignId);
@@ -242,6 +241,7 @@ export default function ProductPage() {
       audienceSize: number;
       trigger?: WizardFormData["trigger"];
       suggestedOffer?: Partial<CampaignOffer>;
+      suggestedOffers?: Partial<CampaignOffer>[];
     }) => {
       setActiveItem("Campaigns");
       setSelectedCampaignId(null);
@@ -252,16 +252,25 @@ export default function ProductPage() {
         audienceSegments: draft.audienceSegments,
         audienceSize: draft.audienceSize,
         trigger: draft.trigger,
-        ...(draft.suggestedOffer
-          ? { atlasSuggestedOffer: draft.suggestedOffer }
-          : {}),
+        ...(draft.suggestedOffers?.length
+          ? { atlasSuggestedOffers: draft.suggestedOffers }
+          : draft.suggestedOffer
+            ? { atlasSuggestedOffer: draft.suggestedOffer }
+            : {}),
       });
       setIsCreatingCampaign(true);
     },
     []
   );
 
-  /** Monitor > service defection: opens wizard with a competitor-specific win-back draft. */
+  const handleNavigateToAudiences = useCallback(
+    (tab: MarketingAudienceTabValue) => {
+      setAudienceInitialTab(tab);
+      setActiveItem("Audiences");
+    },
+    [],
+  );
+
   const handleCreateCampaignFromMonitor = useCallback(
     (suggestion: CampaignRecommendation) => {
       setActiveItem("Campaigns");
@@ -285,12 +294,9 @@ export default function ProductPage() {
     : marketingSettingsItems;
 
   const mainSections = buildSections(mainItems, activeItem);
-  const switchProductItem: NavItemDef = isInventory
-    ? { label: SWITCH_TO_SMART_MARKETING_LABEL, icon: Megaphone }
-    : { label: SWITCH_TO_INVENTORY_LABEL, icon: Package };
 
   const settingsSections = buildSections(
-    [...settingsItems, switchProductItem],
+    settingsItems,
     activeItem,
     "Settings"
   );
@@ -466,12 +472,19 @@ export default function ProductPage() {
             </div>
           ) : activeInventoryPage != null && activeItem === "Dashboard" ? (
             <InventoryDashboardPage />
+          ) : isInventory &&
+            activeItem === "Customers" &&
+            isRegisteringCustomer ? (
+            <RegisterCustomerPage
+              onCancel={() => setIsRegisteringCustomer(false)}
+            />
           ) : isInventory && activeItem === "Customers" ? (
             <CustomersPage
               pageTitle="Customers"
+              onRegisterCustomer={() => setIsRegisteringCustomer(true)}
             />
           ) : activeProduct === "marketing" && activeItem === "Audiences" ? (
-            <MarketingAudiencesPage />
+            <MarketingAudiencesPage initialTab={audienceInitialTab} />
           ) : activeItem === "Billing" ? (
             <BillingPage />
           ) : activeItem === "Staff" ? (
@@ -627,10 +640,16 @@ export default function ProductPage() {
           ) : activeProduct === "marketing" && activeItem === "Monitor" ? (
             <MarketingMonitorPage
               onCreateCampaignFromSuggestion={handleCreateCampaignFromMonitor}
+              onNavigateToAudiences={handleNavigateToAudiences}
             />
-          ) : activeProduct === "marketing" && activeItem === "Atlas AI" ? (
-            <AtlasAiPage onCreateCampaign={handleCreateCampaignFromAtlas} />
-          ) : activeProduct === "marketing" && activeItem === "Coupon" ? (
+          ) : activeProduct === "marketing" && activeItem === "Ask Atlas" ? (
+            <AtlasAiPage
+              onCreateCampaign={handleCreateCampaignFromAtlas}
+              onNavigateToCampaigns={() => {
+                setActiveItem("Campaigns");
+              }}
+            />
+          ) : activeProduct === "marketing" && activeItem === "Coupons" ? (
             <CouponLibraryPage />
           ) : activeProduct === "marketing" && activeItem === "Templates" ? (
             <TemplatesPage

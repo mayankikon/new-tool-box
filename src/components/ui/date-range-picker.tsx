@@ -48,7 +48,7 @@ const DEFAULT_PRESETS: DateRangePreset[] = (() => {
  *   Container: w-[160px], shrink-0, h-full, border-r border-default,
  *              flex flex-col gap-1 (4px) p-2 (8px)
  *   Each item: px-2 (8px) py-1 (4px), rounded-xs, w-full
- *   Selected:  bg-primary (theme; dark #02B689), text white
+ *   Selected:  bg-primary (theme; dark #1AB994), text white
  *   Default:   text-muted, hover: bg-muted
  * -------------------------------------------------------------------------*/
 

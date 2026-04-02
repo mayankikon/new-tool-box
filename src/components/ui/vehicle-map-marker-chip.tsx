@@ -12,7 +12,7 @@ import {
 
 /** Stroke colors aligned with {@link vehicleMarkerChipAssets} order (Figma default / variant 1 / variant 2). */
 export const VEHICLE_MARKER_CHIP_STROKE_HEX = [
-  "#00B397",
+  "#1A9375",
   "#E6B117",
   "#E50C0C",
 ] as const;

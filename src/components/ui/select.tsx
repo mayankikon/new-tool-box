@@ -60,10 +60,12 @@ function SelectContent({
   className,
   children,
   side = "bottom",
+  /** Gap between the trigger and the menu (Tailwind spacing token: 4px). */
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  /** When false, the list opens below/above the field with `sideOffset` instead of overlapping the trigger to align the active item. */
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<

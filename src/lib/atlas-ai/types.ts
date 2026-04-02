@@ -5,6 +5,20 @@ import type {
   CampaignType,
 } from "@/lib/campaigns/types";
 
+export type AtlasAiCouponTier = "aggressive" | "moderate" | "light";
+
+export interface AtlasAiCouponStrategy {
+  totalCustomers: number;
+  tiers: {
+    tier: AtlasAiCouponTier;
+    count: number;
+    discountPercent: number;
+  }[];
+  estimatedCouponCost: string;
+  estimatedRecoveryRevenue: string;
+  estimatedWinBackRate: string;
+}
+
 export type AtlasAiIntent =
   | "oil-change"
   | "overdue-service"
@@ -46,6 +60,8 @@ export interface AtlasAiCustomerPreviewRow {
   id: string;
   name: string;
   vehicle: string;
+  /** 0–100; lower = higher churn risk, drives intelligent coupon tier. */
+  retentionScore: number;
   lastServiceDate?: string;
   mileage?: number;
   serviceDueReason?: string;
@@ -80,6 +96,8 @@ export interface AtlasAiCampaignSuggestion {
   trigger?: CampaignTrigger;
   /** Intelligent coupon draft merged into the campaign wizard when creating from Atlas */
   suggestedOffer?: Partial<CampaignOffer>;
+  /** Tiered offers for wizard when engaging with intelligent couponing (one per retention band). */
+  suggestedOffers?: Partial<CampaignOffer>[];
 }
 
 export interface AtlasAiResponse {
@@ -93,6 +111,8 @@ export interface AtlasAiResponse {
   insightTags?: string[];
   nextBestActionLabel?: string;
   audiencePreview?: AtlasAiAudiencePreview;
+  /** Baseline intelligent-coupon aggregates (offset 0); live KPIs use the same math with slider. */
+  couponStrategy?: AtlasAiCouponStrategy;
   recommendedActions: AtlasAiRecommendedAction[];
   followUpPrompts: AtlasAiPromptSuggestion[];
   campaignSuggestion?: AtlasAiCampaignSuggestion;

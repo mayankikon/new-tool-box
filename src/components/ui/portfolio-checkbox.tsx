@@ -27,6 +27,7 @@ export interface PortfolioCheckboxControlProps
 /**
  * Portfolio 3.0 checkbox: light border, brand green fill when checked or indeterminate,
  * neutral disabled fill. Uses Base UI Checkbox for behavior and a11y.
+ * The root is a 24×24px hit target (`size-6`); the drawn control stays 16×16px (`size-4`) centered inside.
  */
 function PortfolioCheckboxControl({
   className,
@@ -45,11 +46,11 @@ function PortfolioCheckboxControl({
       data-visual-disabled={visualDisabled ? "true" : undefined}
       disabled={disabled}
       className={cn(
-        "group peer relative flex size-4 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[4px] outline-none transition-colors",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#01AC81]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none transition-colors",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#1A9375]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         "disabled:cursor-not-allowed disabled:opacity-65",
         "data-checked:text-white data-indeterminate:text-white",
-        showFocusRing && "ring-1 ring-[#01AC81]/32 ring-offset-1 ring-offset-background",
+        showFocusRing && "ring-1 ring-[#1A9375]/32 ring-offset-1 ring-offset-background",
         isVisuallyDisabled && "opacity-65",
         className
       )}
@@ -62,51 +63,53 @@ function PortfolioCheckboxControl({
       }}
       {...props}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-[4px]"
-        style={{
-          background: `linear-gradient(to bottom right, ${visualSpec.gradientStartColor} 0%, ${visualSpec.gradientMidColor} 50%, ${visualSpec.gradientEndColor} 100%)`,
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-px z-0 rounded-[3px] bg-[color:var(--portfolio-checkbox-surface)] transition-colors group-data-checked:bg-black group-data-indeterminate:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-disabled:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)]"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-[0.775px] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:opacity-0 group-data-[visual-disabled=true]:opacity-0"
-        style={{
-          width: visualSpec.glowSizePx,
-          height: visualSpec.glowSizePx,
-          backgroundColor: hexToRgbaString(
-            visualSpec.accentColor,
-            visualSpec.glowOpacity
-          ),
-          filter: `blur(${visualSpec.glowBlurPx}px)`,
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-3 -translate-x-1/2 -translate-y-1/2 bg-[color:var(--portfolio-checkbox-green)] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[color:var(--portfolio-checkbox-disabled)]"
-        style={{
-          borderRadius: visualSpec.fillRadiusPx,
-        }}
-      />
-      <CheckboxPrimitive.Indicator
-        data-slot="portfolio-checkbox-indicator"
-        keepMounted
-        className="relative z-10 grid place-content-center text-current group-disabled:text-white/70 group-data-[visual-disabled=true]:text-white/70 [&_svg]:size-2.5"
-        render={(indicatorProps, state) => (
-          <span {...indicatorProps}>
-            {state.indeterminate ? (
-              <MinusIcon className="text-white" strokeWidth={2.25} aria-hidden />
-            ) : state.checked ? (
-              <CheckIcon className="text-white" strokeWidth={2.25} aria-hidden />
-            ) : null}
-          </span>
-        )}
-      />
+      <span className="relative size-4 shrink-0 overflow-hidden rounded-[4px]">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 rounded-[4px]"
+          style={{
+            background: `linear-gradient(to bottom right, ${visualSpec.gradientStartColor} 0%, ${visualSpec.gradientMidColor} 50%, ${visualSpec.gradientEndColor} 100%)`,
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-px z-0 rounded-[3px] bg-[color:var(--portfolio-checkbox-surface)] transition-colors group-data-checked:bg-black group-data-indeterminate:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-disabled:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:group-data-indeterminate:bg-[color:var(--portfolio-checkbox-disabled)]"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-[0.775px] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:opacity-0 group-data-[visual-disabled=true]:opacity-0"
+          style={{
+            width: visualSpec.glowSizePx,
+            height: visualSpec.glowSizePx,
+            backgroundColor: hexToRgbaString(
+              visualSpec.accentColor,
+              visualSpec.glowOpacity
+            ),
+            filter: `blur(${visualSpec.glowBlurPx}px)`,
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 z-10 size-3 -translate-x-1/2 -translate-y-1/2 bg-[color:var(--portfolio-checkbox-green)] opacity-0 transition-opacity group-data-checked:opacity-100 group-data-indeterminate:opacity-100 group-disabled:bg-[color:var(--portfolio-checkbox-disabled)] group-data-[visual-disabled=true]:bg-[color:var(--portfolio-checkbox-disabled)]"
+          style={{
+            borderRadius: visualSpec.fillRadiusPx,
+          }}
+        />
+        <CheckboxPrimitive.Indicator
+          data-slot="portfolio-checkbox-indicator"
+          keepMounted
+          className="relative z-10 grid place-content-center text-current group-disabled:text-white/70 group-data-[visual-disabled=true]:text-white/70 [&_svg]:size-2.5"
+          render={(indicatorProps, state) => (
+            <span {...indicatorProps}>
+              {state.indeterminate ? (
+                <MinusIcon className="text-white" strokeWidth={2.25} aria-hidden />
+              ) : state.checked ? (
+                <CheckIcon className="text-white" strokeWidth={2.25} aria-hidden />
+              ) : null}
+            </span>
+          )}
+        />
+      </span>
     </CheckboxPrimitive.Root>
   );
 }
