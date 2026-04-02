@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils"
  *               text-xs font-medium, centered
  *     Default:  text-foreground, bg transparent
  *     Today:    21px red circle (#e74341) absolutely positioned, white text
- *     Selected: full cell fill bg-primary (#02B689 dark / theme), white text — NOT a circle
+ *     Selected: full cell fill bg-primary (#1AB994 dark / theme), white text — NOT a circle
  *     Range middle: bg-primary/10 full cell, text-primary
  *     Outside:  text-foreground/30 (hint opacity)
  *     Hover:    bg-muted

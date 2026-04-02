@@ -270,19 +270,19 @@
   --card-foreground: rgb(17 17 17);
   --popover: rgb(255 255 255);
   --popover-foreground: rgb(17 17 17);
-  --primary: rgb(24 147 117);
+  --primary: rgb(26 147 117);
   --primary-foreground: rgb(255 255 255);
   --secondary: rgb(244 244 244);
   --secondary-foreground: rgb(17 17 17);
   --muted: rgb(220 220 220);
   --muted-foreground: rgb(130 130 130);
-  --accent: rgb(240 250 247);
-  --accent-foreground: rgb(24 147 117);
+  --accent: rgb(235 250 245);
+  --accent-foreground: rgb(26 147 117);
   --destructive: rgb(231 67 65);
   --border: rgb(220 220 220);
   --input: rgb(220 220 220);
   --input-hover: rgb(180 180 180);
-  --ring: rgb(74 207 174);
+  --ring: rgb(74 200 166);
 }
 
 .dark {
@@ -296,7 +296,7 @@
   --theme-stroke-hover: rgb(72 72 80);
   --theme-stroke-destructive: rgb(196 86 84);
   --theme-stroke-informative: rgb(48 158 198);
-  --theme-stroke-success: rgb(2 182 137);
+  --theme-stroke-success: rgb(26 185 148);
   --theme-stroke-warning: rgb(200 158 18);
   /* Sidebar rail + secondary actions + aligned inputs (file-cabinet chrome) */
   --theme-background-sidebar: #1b1b1c;
@@ -313,15 +313,15 @@
   --theme-background-card-hover: rgba(255 255 255 / 0.06);
   --theme-background-account-selector: rgb(40 40 44);
 
-  /* Brand primary dark: #02B689 — fills, rings, and interactive accents */
-  --theme-background-button-primary-default: rgb(2 182 137);
-  --theme-background-button-primary-hover: rgb(10 205 162);
-  --theme-background-button-pressed: rgb(1 148 112);
-  --theme-text-interactive: rgb(72 220 186);
-  --theme-icon-interactive: rgb(64 214 178);
-  --theme-stroke-accent: rgb(2 182 137);
-  --theme-stroke-focus: rgb(64 214 178);
-  --theme-background-accent: rgb(12 46 40);
+  /* Brand primary dark: #1AB994 — fills, rings, and interactive accents */
+  --theme-background-button-primary-default: rgb(26 185 148);
+  --theme-background-button-primary-hover: rgb(34 208 170);
+  --theme-background-button-pressed: rgb(21 150 120);
+  --theme-text-interactive: rgb(80 220 188);
+  --theme-icon-interactive: rgb(70 214 180);
+  --theme-stroke-accent: rgb(26 185 148);
+  --theme-stroke-focus: rgb(70 214 180);
+  --theme-background-accent: rgb(10 42 36);
 
   --background: var(--theme-background-page);
   --foreground: var(--theme-text-primary);

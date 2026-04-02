@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TableHeaderCell } from "@/components/ui/table-header-cell";
-import { ProgressBar } from "@/components/ui/progress";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import {
   DATA_TABLE_CELL_INNER_HOVER_CLASS,
@@ -23,36 +22,73 @@ import { cn } from "@/lib/utils";
 import type {
   MarketingAudienceRow,
   MarketingAudienceSortKey,
+  MarketingAudienceTabValue,
 } from "./marketing-audiences-table-model";
-import { vehicleStatusLabel } from "./marketing-audiences-table-model";
+import {
+  campaignsLabel,
+  vehicleLabel,
+  vehicleStatusLabel,
+} from "./marketing-audiences-table-model";
 
-const AUDIENCE_HEADERS: {
+interface ColumnDef {
   key: MarketingAudienceSortKey;
   label: string;
   widthClassName: string;
-}[] = [
+}
+
+const BASE_HEADERS: ColumnDef[] = [
   {
     key: "customerName",
-    label: "Customer Name",
-    widthClassName: "min-w-[220px] w-[320px]",
+    label: "Customer",
+    widthClassName: "min-w-[180px] w-[220px]",
+  },
+  {
+    key: "vehicle",
+    label: "Vehicle",
+    widthClassName: "min-w-[190px] w-[230px]",
   },
   {
     key: "vehicleStatus",
-    label: "Vehicle Status",
-    widthClassName: "min-w-[200px] w-[260px]",
+    label: "Status",
+    widthClassName: "min-w-[140px] w-[170px]",
   },
   {
-    key: "retentionScore",
-    label: "Retention Score",
-    widthClassName: "min-w-[240px] w-[320px]",
+    key: "campaigns",
+    label: "Campaigns",
+    widthClassName: "min-w-[200px] w-[260px]",
   },
 ];
 
-const {
-  headerCellHeightPx,
-  bodyCellHeightPx,
-  cellPaddingXPx,
-} = FILE_CABINET_BILLING_TABLE_DEFAULTS;
+const CONDITIONAL_COLUMN: Partial<Record<MarketingAudienceTabValue, ColumnDef>> = {
+  due: {
+    key: "milesUntilService",
+    label: "Miles Until Service",
+    widthClassName: "min-w-[160px] w-[190px]",
+  },
+  "defection-risk": {
+    key: "defectedDealership",
+    label: "Defected To",
+    widthClassName: "min-w-[180px] w-[220px]",
+  },
+  "open-recall": {
+    key: "recallUrgency",
+    label: "Urgency",
+    widthClassName: "min-w-[120px] w-[150px]",
+  },
+  "ownership-change": {
+    key: "transferDate",
+    label: "Date Transferred",
+    widthClassName: "min-w-[160px] w-[190px]",
+  },
+  "geographically-relocated": {
+    key: "relocatedState",
+    label: "Relocated To",
+    widthClassName: "min-w-[140px] w-[170px]",
+  },
+};
+
+const { headerCellHeightPx, bodyCellHeightPx, cellPaddingXPx } =
+  FILE_CABINET_BILLING_TABLE_DEFAULTS;
 
 const ROW_STROKE_LIGHT =
   "var(--theme-stroke-subtle, var(--theme-stroke-default))";
@@ -60,17 +96,59 @@ const ROW_STROKE_LIGHT =
 const BODY_CELL_DIVIDER =
   "border-b border-solid border-[var(--theme-stroke-subtle,var(--theme-stroke-default))]";
 
+function conditionalCellContent(
+  row: MarketingAudienceRow,
+  key: MarketingAudienceSortKey,
+): string {
+  switch (key) {
+    case "milesUntilService":
+      return row.milesUntilService != null
+        ? `${row.milesUntilService.toLocaleString()} mi`
+        : "\u2014";
+    case "defectedDealership":
+      return row.defectedDealership ?? "\u2014";
+    case "recallUrgency":
+      if (!row.recallUrgency) return "\u2014";
+      return row.recallUrgency === "urgent" ? "Urgent" : "Open";
+    case "transferDate": {
+      if (!row.transferDate) return "\u2014";
+      const date = new Date(row.transferDate + "T00:00:00");
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+    case "relocatedState":
+      return row.relocatedState ?? "\u2014";
+    default:
+      return "\u2014";
+  }
+}
+
 export function MarketingAudiencesFileCabinetTable({
   rows,
+  activeTab,
   sortConfig,
   setSortConfig,
 }: {
   rows: MarketingAudienceRow[];
+  activeTab: MarketingAudienceTabValue;
   sortConfig: { key: MarketingAudienceSortKey; direction: "asc" | "desc" };
   setSortConfig: Dispatch<
-    SetStateAction<{ key: MarketingAudienceSortKey; direction: "asc" | "desc" }>
+    SetStateAction<{
+      key: MarketingAudienceSortKey;
+      direction: "asc" | "desc";
+    }>
   >;
 }) {
+  const conditionalCol = CONDITIONAL_COLUMN[activeTab] ?? null;
+
+  const headers = useMemo(
+    () => (conditionalCol ? [...BASE_HEADERS, conditionalCol] : BASE_HEADERS),
+    [conditionalCol],
+  );
+
   const headerThStyle = useMemo(
     (): CSSProperties => ({
       backgroundColor: "transparent",
@@ -107,11 +185,17 @@ export function MarketingAudiencesFileCabinetTable({
           )}
         >
           <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
-            <TableRow size="compact" className="!border-0 hover:bg-transparent">
-              {AUDIENCE_HEADERS.map((header) => (
+            <TableRow
+              size="compact"
+              className="!border-0 hover:bg-transparent"
+            >
+              {headers.map((header) => (
                 <TableHead
                   key={header.key}
-                  className={cn(header.widthClassName, "h-auto p-0 align-middle")}
+                  className={cn(
+                    header.widthClassName,
+                    "h-auto p-0 align-middle",
+                  )}
                   style={headerThStyle}
                 >
                   <TableHeaderCell
@@ -139,7 +223,8 @@ export function MarketingAudiencesFileCabinetTable({
                       setSortConfig((current) => ({
                         key: header.key,
                         direction:
-                          current.key === header.key && current.direction === "asc"
+                          current.key === header.key &&
+                          current.direction === "asc"
                             ? "desc"
                             : "asc",
                       }));
@@ -154,6 +239,7 @@ export function MarketingAudiencesFileCabinetTable({
               <AudienceTableRow
                 key={row.id}
                 row={row}
+                conditionalColumnKey={conditionalCol?.key ?? null}
                 bodyCellHeightPx={bodyCellHeightPx}
                 cellPaddingXPx={cellPaddingXPx}
                 cellTextClassName={cellTextClassName}
@@ -169,12 +255,14 @@ export function MarketingAudiencesFileCabinetTable({
 
 function AudienceTableRow({
   row,
+  conditionalColumnKey,
   bodyCellHeightPx,
   cellPaddingXPx,
   cellTextClassName,
   isLastRow,
 }: {
   row: MarketingAudienceRow;
+  conditionalColumnKey: MarketingAudienceSortKey | null;
   bodyCellHeightPx: number;
   cellPaddingXPx: number;
   cellTextClassName: string;
@@ -200,9 +288,13 @@ function AudienceTableRow({
       )}
       style={{ minHeight: bodyCellHeightPx }}
     >
+      {/* Customer Name */}
       <TableCell className={cellFrame}>
         <div
-          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          className={cn(
+            "flex items-center",
+            DATA_TABLE_CELL_INNER_HOVER_CLASS,
+          )}
           style={innerStyle}
         >
           <span
@@ -216,36 +308,102 @@ function AudienceTableRow({
         </div>
       </TableCell>
 
+      {/* Vehicle (year make model) */}
       <TableCell className={cellFrame}>
         <div
-          className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+          className={cn(
+            "flex items-center",
+            DATA_TABLE_CELL_INNER_HOVER_CLASS,
+          )}
           style={innerStyle}
         >
-          <span className={cn("truncate leading-5 text-foreground", cellTextClassName)}>
+          <span
+            className={cn(
+              "truncate leading-5 text-foreground",
+              cellTextClassName,
+            )}
+          >
+            {vehicleLabel(row)}
+          </span>
+        </div>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell className={cellFrame}>
+        <div
+          className={cn(
+            "flex items-center",
+            DATA_TABLE_CELL_INNER_HOVER_CLASS,
+          )}
+          style={innerStyle}
+        >
+          <span
+            className={cn(
+              "truncate leading-5 text-foreground",
+              cellTextClassName,
+            )}
+          >
             {vehicleStatusLabel(row.vehicleStatus)}
           </span>
         </div>
       </TableCell>
 
+      {/* Campaigns */}
       <TableCell className={cellFrame}>
         <div
           className={cn(
-            "flex items-center gap-3",
+            "flex items-center gap-1.5",
             DATA_TABLE_CELL_INNER_HOVER_CLASS,
           )}
           style={innerStyle}
         >
-          <span className="w-9 shrink-0 text-right text-sm tabular-nums text-foreground">
-            {row.retentionScore}
+          <span
+            className={cn(
+              "truncate leading-5 text-foreground",
+              cellTextClassName,
+            )}
+          >
+            {campaignsLabel(row.campaigns)}
           </span>
-          <ProgressBar
-            value={row.retentionScore}
-            hideValue
-            className="min-w-[120px] flex-1"
-            aria-label={`${row.customerName} retention score`}
-          />
+          {row.campaigns.length > 1 && (
+            <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] font-medium leading-none text-muted-foreground">
+              +{row.campaigns.length - 1}
+            </span>
+          )}
         </div>
       </TableCell>
+
+      {/* Conditional column */}
+      {conditionalColumnKey && (
+        <TableCell className={cellFrame}>
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              DATA_TABLE_CELL_INNER_HOVER_CLASS,
+            )}
+            style={innerStyle}
+          >
+            {conditionalColumnKey === "recallUrgency" && row.recallUrgency && (
+              <span
+                className={cn(
+                  "size-2 shrink-0 rounded-full",
+                  row.recallUrgency === "urgent"
+                    ? "bg-red-500"
+                    : "bg-amber-400",
+                )}
+              />
+            )}
+            <span
+              className={cn(
+                "truncate leading-5 text-foreground",
+                cellTextClassName,
+              )}
+            >
+              {conditionalCellContent(row, conditionalColumnKey)}
+            </span>
+          </div>
+        </TableCell>
+      )}
     </TableRow>
   );
 }

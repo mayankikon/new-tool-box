@@ -11,7 +11,7 @@ export const VEHICLE_MAP_PIN_SOURCES = {
 } as const;
 
 const VEHICLE_MAP_PIN_ACCENT_HEX = {
-  teal: "#00B397",
+  teal: "#1A9375",
   gold: "#E6B117",
   red: "#E64B17",
 } as const;

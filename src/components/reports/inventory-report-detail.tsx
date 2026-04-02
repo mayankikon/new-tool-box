@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 import { LocateFixed, Search } from "lucide-react";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";

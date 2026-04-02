@@ -8,6 +8,10 @@ import type {
   CampaignTrigger,
   CampaignType,
 } from "@/lib/campaigns/types";
+import {
+  buildAtlasTieredOffers,
+  buildCouponStrategyFromRows,
+} from "@/lib/atlas-ai/coupon-strategy";
 import type {
   AtlasAiCampaignSuggestion,
   AtlasAiCustomerPreviewRow,
@@ -620,13 +624,27 @@ function buildCampaignSuggestion({
   };
 }
 
+function retentionScoreFromCustomer(customer: AtlasAiMockCustomer, index: number): number {
+  const hash =
+    customer.id.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) + index * 17;
+  const seed = hash % 100;
+  if (customer.priority === "high") {
+    return 10 + (seed % 45);
+  }
+  if (customer.priority === "medium") {
+    return 35 + (seed % 40);
+  }
+  return 55 + (seed % 42);
+}
+
 function toPreviewRows(customers: AtlasAiMockCustomer[]): AtlasAiCustomerPreviewRow[] {
   const expandedCustomers = expandCustomersForPreview(customers, PREVIEW_ROW_COUNT);
 
-  return expandedCustomers.map((customer) => ({
+  return expandedCustomers.map((customer, index) => ({
     id: customer.id,
     name: customer.name,
     vehicle: `${customer.year} ${customer.make} ${customer.model}`,
+    retentionScore: retentionScoreFromCustomer(customer, index),
     lastServiceDate: customer.lastServiceDate,
     mileage: customer.mileage,
     serviceDueReason: customer.serviceDueReason,
@@ -1334,7 +1352,29 @@ function buildResponse(
   }
 }
 
+function enrichAtlasResponse(response: AtlasAiResponse): AtlasAiResponse {
+  const rows = response.audiencePreview?.rows;
+  if (!rows?.length) {
+    return response;
+  }
+
+  const couponStrategy = buildCouponStrategyFromRows(rows, 0);
+  let campaignSuggestion = response.campaignSuggestion;
+  if (campaignSuggestion) {
+    campaignSuggestion = {
+      ...campaignSuggestion,
+      suggestedOffers: buildAtlasTieredOffers(0),
+    };
+  }
+
+  return {
+    ...response,
+    couponStrategy,
+    ...(campaignSuggestion ? { campaignSuggestion } : {}),
+  };
+}
+
 export function getAtlasAiResponse(query: string): AtlasAiResponse {
   const intent = detectIntent(query);
-  return buildResponse(query, intent);
+  return enrichAtlasResponse(buildResponse(query, intent));
 }

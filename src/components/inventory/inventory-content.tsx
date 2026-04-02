@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 import {
   Search,
   MapPin,
@@ -87,7 +87,6 @@ import {
 } from "@/lib/inventory/inventory-map-vehicle-features";
 import type { InventoryMapBasemapAppearance } from "@/lib/inventory/inventory-map-highlight";
 import { InventoryMapSelectionSpotlight } from "@/components/inventory/inventory-map-selection-spotlight";
-import { InventoryViewModeToggle } from "@/components/inventory/inventory-view-mode-toggle";
 function inventoryMapAppearanceFromTheme(
   resolvedTheme: string | undefined
 ): InventoryMapAppearance {
@@ -207,7 +206,6 @@ const INVENTORY_MAP_SHIELD_DISCOVERY_ZOOM = 17.7;
 type InventoryVehicleMarkerEntry = {
   vin: string;
   marker: mapboxgl.Marker;
-  hoverPopup: mapboxgl.Popup;
   root: Root;
   props: InventoryVehicleMapFeatureProperties;
   mode: "chip" | "pin";
@@ -413,11 +411,6 @@ function removeInventoryVehicleMapOverlays(map: mapboxgl.Map) {
   }
 }
 
-function removeInventoryVehicleHoverPopups() {
-  for (const entry of inventoryVehicleMarkerEntries.values()) {
-    entry.hoverPopup.remove();
-  }
-}
 
 /** Maps lot-age tier to vehicle marker stroke variant (teal / gold / red). */
 function inventoryMapChipVariantIndexForAgeTier(
@@ -522,9 +515,6 @@ function mountInventoryVehicleMapMarker(
   return { wrap, root };
 }
 
-function inventoryVehiclePopupBottomOffset(markerMode: "chip" | "pin"): [number, number] {
-  return markerMode === "chip" ? [0, -34] : [0, -33];
-}
 
 function renderInventoryVehicleMapMarker(
   root: Root,
@@ -588,7 +578,6 @@ function expandInventoryCluster(
     INVENTORY_VEHICLES_SOURCE_ID
   ) as mapboxgl.GeoJSONSource | undefined;
   if (!src) return;
-  removeInventoryVehicleHoverPopups();
   src.getClusterExpansionZoom(clusterId, (err, expansionZoom) => {
     if (err) return;
     const expansionBase = (expansionZoom ?? map.getZoom()) + 0.35;
@@ -702,8 +691,7 @@ function reconcileInventoryVehicleHtmlMarkers(
   const fc = lastInventoryVehicleFeatureCollection;
   const zoom = map.getZoom();
   if (!fc || zoom < INVENTORY_MAP_VEHICLE_PIN_ZOOM) {
-    for (const { marker, hoverPopup, root } of inventoryVehicleMarkerEntries.values()) {
-      hoverPopup.remove();
+    for (const { marker, root } of inventoryVehicleMarkerEntries.values()) {
       root.unmount();
       marker.remove();
     }
@@ -740,10 +728,6 @@ function reconcileInventoryVehicleHtmlMarkers(
       existing.marker.setLngLat([lng, lat]);
       existing.props = props;
       if (existing.mode !== markerMode) {
-        existing.hoverPopup.remove();
-        existing.hoverPopup.setOffset({
-          bottom: inventoryVehiclePopupBottomOffset(markerMode),
-        });
         renderInventoryVehicleMapMarker(existing.root, props, markerMode);
         existing.mode = markerMode;
         existing.renderKey = nextRenderKey;
@@ -769,38 +753,6 @@ function reconcileInventoryVehicleHtmlMarkers(
         .setLngLat([lng, lat])
         .addTo(map);
 
-      const hoverPopup = new mapboxgl.Popup({
-        anchor: "bottom",
-        offset: { bottom: inventoryVehiclePopupBottomOffset(markerMode) },
-        closeButton: false,
-        closeOnClick: false,
-        className: inventoryMapUsesLightBasemapUi(appearance)
-          ? "inventory-vehicle-hover-popup inventory-vehicle-hover-popup--light"
-          : "inventory-vehicle-hover-popup",
-      });
-
-      el.addEventListener("mouseenter", () => {
-        const current = inventoryVehicleMarkerEntries.get(props.vin)?.props ?? props;
-        const markerLngLat = marker.getLngLat();
-        const priceAndMileage = [current.price, current.mileage]
-          .filter(Boolean)
-          .join(" • ");
-        hoverPopup
-          .setLngLat([markerLngLat.lng, markerLngLat.lat])
-          .setHTML(
-            `<div style="font-family:var(--font-saira),var(--font-headline),sans-serif;padding:12px;max-width:240px;line-height:1.4">
-              <div style="font-weight:500;font-size:14px;color:${titleColor}">${escapeHtml(current.title)}</div>
-              <div style="font-size:14px;color:${subColor};margin-top:4px">${escapeHtml(current.vin)}</div>
-              ${priceAndMileage ? `<div style="font-size:14px;color:${subColor};margin-top:2px">${escapeHtml(priceAndMileage)}</div>` : ""}
-            </div>`
-          )
-          .addTo(map);
-      });
-
-      el.addEventListener("mouseleave", () => {
-        hoverPopup.remove();
-      });
-
       const selectedVin = inventoryMapMarkerHighlightRef.selectedVin;
       el.style.zIndex =
         selectedVin != null && props.vin === selectedVin
@@ -812,7 +764,6 @@ function reconcileInventoryVehicleHtmlMarkers(
       inventoryVehicleMarkerEntries.set(props.vin, {
         vin: props.vin,
         marker,
-        hoverPopup,
         root,
         props,
         mode: markerMode,
@@ -824,20 +775,11 @@ function reconcileInventoryVehicleHtmlMarkers(
 
   for (const [vin, entry] of inventoryVehicleMarkerEntries.entries()) {
     if (!nextVisibleVins.has(vin)) {
-      entry.hoverPopup.remove();
       entry.root.unmount();
       entry.marker.remove();
       inventoryVehicleMarkerEntries.delete(vin);
     }
   }
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function addInventoryVehicleMapOverlays(
@@ -900,7 +842,6 @@ function addInventoryVehicleMapOverlays(
   if (vehicleFc.features.length === 0) {
     lastInventoryVehicleFeatureCollection = vehicleFc;
     const reconcile = () => {
-      removeInventoryVehicleHoverPopups();
       reconcileInventoryVehicleClusterMarkers(map);
       reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
     };
@@ -1036,7 +977,6 @@ function addInventoryVehicleMapOverlays(
   }
 
   const reconcile = () => {
-    removeInventoryVehicleHoverPopups();
     reconcileInventoryVehicleClusterMarkers(map);
     reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
   };
@@ -1761,27 +1701,6 @@ function setupIconHeadquartersInteraction(
 
   if (!useGeoFootprint && hqIds.length === 0) return;
 
-  const popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-    className: inventoryMapUsesLightBasemapUi(appearance)
-      ? "inventory-vehicle-hover-popup inventory-vehicle-hover-popup--light"
-      : "inventory-vehicle-hover-popup",
-    offset: 12,
-  });
-
-  const setGeoPopup = (lngLat: mapboxgl.LngLatLike) => {
-    popup
-      .setLngLat(lngLat)
-      .setHTML(
-        `<div style="font-family:var(--font-saira),var(--font-headline),sans-serif;padding:8px;max-width:240px;line-height:1.4">
-          <div style="font-weight:500;font-size:14px;color:inherit">${escapeHtml(ICON_HEADQUARTERS_DISPLAY_NAME)}</div>
-          <div style="font-size:14px;color:var(--theme-text-secondary, #a1a1aa);margin-top:4px">Inside main geofence</div>
-        </div>`
-      )
-      .addTo(map);
-  };
-
   if (useGeoFootprint) {
     const hitLayers: string[] = [];
     if (is3D && map.getLayer(ICON_HQ_GEO_EXTRUSION_LAYER_ID)) {
@@ -1791,7 +1710,6 @@ function setupIconHeadquartersInteraction(
       hitLayers.push(ICON_HQ_GEO_FILL_LAYER_ID);
     }
     if (hitLayers.length === 0) {
-      popup.remove();
       return;
     }
 
@@ -1806,7 +1724,6 @@ function setupIconHeadquartersInteraction(
         }
         geoHovered = false;
         map.getCanvas().style.cursor = "";
-        popup.remove();
         return;
       }
 
@@ -1815,7 +1732,6 @@ function setupIconHeadquartersInteraction(
       }
       geoHovered = true;
       map.getCanvas().style.cursor = "pointer";
-      setGeoPopup(e.lngLat);
     };
 
     const handleLeave = () => {
@@ -1824,7 +1740,6 @@ function setupIconHeadquartersInteraction(
       }
       geoHovered = false;
       map.getCanvas().style.cursor = "";
-      popup.remove();
     };
 
     const handleClick = (e: mapboxgl.MapMouseEvent) => {
@@ -1834,14 +1749,12 @@ function setupIconHeadquartersInteraction(
         geoSelected = true;
         applyIconHqGeoLayerPaints(map, appearance, is3D, "selected");
         ensureIconHeadquartersMarker(map, anchorLngLat);
-        setGeoPopup(e.lngLat);
         return;
       }
 
       geoSelected = false;
       applyIconHqGeoLayerPaints(map, appearance, is3D, geoHovered ? "hover" : "idle");
       removeIconHeadquartersMarker();
-      popup.remove();
     };
 
     map.on("mousemove", handleMove);
@@ -1852,7 +1765,6 @@ function setupIconHeadquartersInteraction(
       map.off("mousemove", handleMove);
       map.off("click", handleClick);
       map.getCanvas().removeEventListener("mouseleave", handleLeave);
-      popup.remove();
       removeIconHeadquartersMarker();
       if (map.getLayer(ICON_HQ_GEO_EXTRUSION_LAYER_ID) || map.getLayer(ICON_HQ_GEO_FILL_LAYER_ID)) {
         applyIconHqGeoLayerPaints(map, appearance, is3D, "idle");
@@ -1893,13 +1805,11 @@ function setupIconHeadquartersInteraction(
     if (!hit || hit.id === undefined) {
       clearHoverFeatureState();
       map.getCanvas().style.cursor = "";
-      popup.remove();
       return;
     }
     const id = hit.id;
     if (iconHqHoveredId === id) {
       map.getCanvas().style.cursor = "pointer";
-      setGeoPopup(e.lngLat);
       return;
     }
     clearHoverFeatureState();
@@ -1911,13 +1821,11 @@ function setupIconHeadquartersInteraction(
     }
     iconHqHoveredId = id;
     map.getCanvas().style.cursor = "pointer";
-    setGeoPopup(e.lngLat);
   };
 
   const handleLeave = () => {
     clearHoverFeatureState();
     map.getCanvas().style.cursor = "";
-    popup.remove();
   };
 
   const handleClick = (e: mapboxgl.MapMouseEvent) => {
@@ -1946,7 +1854,6 @@ function setupIconHeadquartersInteraction(
       );
       clearHoverFeatureState();
       ensureIconHeadquartersMarker(map, anchorLngLat);
-      setGeoPopup(e.lngLat);
       return;
     }
     if (iconHqSelectedId != null) {
@@ -1965,7 +1872,6 @@ function setupIconHeadquartersInteraction(
       iconHqSelectedId = null;
       removeIconHeadquartersMarker();
     }
-    popup.remove();
   };
 
   map.on("mousemove", handleMove);
@@ -1976,7 +1882,6 @@ function setupIconHeadquartersInteraction(
     map.off("mousemove", handleMove);
     map.off("click", handleClick);
     map.getCanvas().removeEventListener("mouseleave", handleLeave);
-    popup.remove();
     clearHoverFeatureState();
     handleLeave();
     if (iconHqSelectedId != null) {
@@ -2453,7 +2358,6 @@ function InventoryTableView({
 export function InventoryContent({
   className,
   viewMode = "map",
-  onViewModeChange,
 }: InventoryContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isListPanelOpen, setIsListPanelOpen] = useState(true);
@@ -2978,16 +2882,6 @@ export function InventoryContent({
           </motion.div>
           </div>
         </div>
-        {onViewModeChange ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-6 z-30 flex justify-center">
-            <InventoryViewModeToggle
-              className="pointer-events-auto"
-              aria-label="Inventory view mode"
-              value={viewMode}
-              onValueChange={onViewModeChange}
-            />
-          </div>
-        ) : null}
       </div>
       <SendVehicleBrochureDialog
         open={sendBrochureDialogOpen}

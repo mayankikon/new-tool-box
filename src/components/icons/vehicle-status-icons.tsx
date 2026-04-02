@@ -73,7 +73,7 @@ function KeyIconSvg({ variant = "inactive", className }: StatusIconProps) {
 
 function BatteryIconSvg({ variant = "inactive", className }: StatusIconProps) {
   const isActive = variant === "active";
-  const innerColor = isActive ? "#00B397" : "#E50C0C";
+  const innerColor = isActive ? "#1A9375" : "#E50C0C";
 
   return (
     <svg

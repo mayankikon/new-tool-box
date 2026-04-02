@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 
 function subscribeHtmlDarkClass(onStoreChange: () => void) {
   const root = document.documentElement;

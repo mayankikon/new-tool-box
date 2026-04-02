@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import {
-  Building2,
+  ArrowLeftRight,
+  CalendarDays,
   ChevronRight,
-  CircleDollarSign,
   Flame,
   MapPinned,
-  Megaphone,
   Moon,
   Satellite,
+  ShieldAlert,
   Store,
   Sun,
   Users,
@@ -20,11 +20,19 @@ import {
 } from "lucide-react";
 
 import { TopBar } from "@/components/app/top-bar";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   InventoryKpiCard,
   inventoryDashboardShowcaseWidgetSettings,
   type DashboardKpiMetric,
 } from "@/components/inventory/inventory-dashboard-widgets";
+import type { MarketingAudienceTabValue } from "@/components/marketing/marketing-audiences-table-model";
 import {
   ensureActivityHeatmapSourceAndLayer,
   removeActivityHeatmapFromMap,
@@ -44,12 +52,64 @@ import type { CampaignRecommendation } from "@/lib/campaigns/mock-data";
 import {
   buildWinBackCampaignRecommendation,
   getRankedServiceDefectionCompetitors,
-  getServiceDefectionKpiSnapshot,
   type CompetitorVenueKind,
 } from "@/lib/marketing/service-defection-mock";
 import { cn } from "@/lib/utils";
 
 const KPI_ICON_CLASS = "!text-foreground";
+
+interface AudienceKpiDef {
+  tab: MarketingAudienceTabValue;
+  metric: DashboardKpiMetric;
+}
+
+const AUDIENCE_KPI_DEFS: AudienceKpiDef[] = [
+  {
+    tab: "due",
+    metric: {
+      label: "Service Due",
+      value: "47",
+      icon: Wrench,
+      iconClassName: KPI_ICON_CLASS,
+    },
+  },
+  {
+    tab: "defection-risk",
+    metric: {
+      label: "Active Defector",
+      value: "23",
+      icon: Users,
+      iconClassName: KPI_ICON_CLASS,
+    },
+  },
+  {
+    tab: "open-recall",
+    metric: {
+      label: "Open Recall",
+      value: "18",
+      icon: ShieldAlert,
+      iconClassName: KPI_ICON_CLASS,
+    },
+  },
+  {
+    tab: "ownership-change",
+    metric: {
+      label: "Ownership Change",
+      value: "12",
+      icon: ArrowLeftRight,
+      iconClassName: KPI_ICON_CLASS,
+    },
+  },
+  {
+    tab: "geographically-relocated",
+    metric: {
+      label: "Geo. Relocated",
+      value: "8",
+      icon: MapPinned,
+      iconClassName: KPI_ICON_CLASS,
+    },
+  },
+];
 
 /** Dark gray basemap — buildings/roads read clearly; geofences stay fully saturated (no canvas filter). */
 const MONITOR_MAP_STYLE_DARK = "mapbox://styles/mapbox/dark-v11";
@@ -73,46 +133,19 @@ function competitorKindIcon(kind: CompetitorVenueKind): LucideIcon {
   return Zap;
 }
 
-function useServiceDefectionKpiMetrics(): DashboardKpiMetric[] {
-  return useMemo(() => {
-    const k = getServiceDefectionKpiSnapshot();
-    return [
-      {
-        label: "Active Defectors (30d)",
-        value: String(k.serviceDefectors30d),
-        icon: Users,
-        iconClassName: KPI_ICON_CLASS,
-      },
-      {
-        label: "Revenue at Risk (Annual Est.)",
-        value: currencyCompact.format(k.revenueAtRiskAnnual),
-        icon: CircleDollarSign,
-        iconClassName: KPI_ICON_CLASS,
-      },
-      {
-        label: "Competitors Tracked",
-        value: String(k.competitorsTracked),
-        icon: Building2,
-        iconClassName: KPI_ICON_CLASS,
-      },
-      {
-        label: "Win-Back Campaigns Active",
-        value: String(k.winBackCampaignsActive),
-        icon: Megaphone,
-        iconClassName: KPI_ICON_CLASS,
-      },
-    ];
-  }, []);
-}
-
 export interface MarketingMonitorPageProps {
   onCreateCampaignFromSuggestion?: (suggestion: CampaignRecommendation) => void;
+  onNavigateToAudiences?: (tab: MarketingAudienceTabValue) => void;
 }
 
 export function MarketingMonitorPage({
   onCreateCampaignFromSuggestion,
+  onNavigateToAudiences,
 }: MarketingMonitorPageProps) {
-  const kpiMetrics = useServiceDefectionKpiMetrics();
+  const [monitorDate, setMonitorDate] = useState<Date | undefined>(
+    new Date(2026, 3, 1),
+  );
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const rankedCompetitors = useMemo(
     () => getRankedServiceDefectionCompetitors(),
     []
@@ -318,15 +351,54 @@ export function MarketingMonitorPage({
       <TopBar
         title="Monitor"
         subtitle="Defection Monitoring — rank competitor pull, preview on the map, and draft win-backs."
+        right={
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="secondary"
+                  size="header"
+                  leadingIcon={<CalendarDays />}
+                >
+                  {(monitorDate ?? new Date()).toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </Button>
+              }
+            />
+            <PopoverContent
+              align="end"
+              sideOffset={4}
+              className="w-auto overflow-clip rounded-lg border-0 bg-card p-0 shadow-lg ring-0"
+            >
+              <Calendar
+                mode="single"
+                selected={monitorDate}
+                onSelect={(date) => {
+                  setMonitorDate(date);
+                  setDatePickerOpen(false);
+                }}
+                defaultMonth={monitorDate}
+              />
+            </PopoverContent>
+          </Popover>
+        }
       />
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pb-[var(--spacing-32)] pl-[var(--spacing-32)] pr-[var(--spacing-32)] pt-6">
-        <section className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
-          {kpiMetrics.map((metric) => (
-            <InventoryKpiCard
-              key={metric.label}
-              metric={metric}
-              settings={inventoryDashboardShowcaseWidgetSettings}
-            />
+        <section className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-5">
+          {AUDIENCE_KPI_DEFS.map(({ tab, metric }) => (
+            <button
+              key={tab}
+              type="button"
+              className="cursor-pointer rounded-sm text-left transition-shadow hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              onClick={() => onNavigateToAudiences?.(tab)}
+            >
+              <InventoryKpiCard
+                metric={metric}
+                settings={inventoryDashboardShowcaseWidgetSettings}
+              />
+            </button>
           ))}
         </section>
 

@@ -1,27 +1,41 @@
 export type AudienceStatus =
   | "due"
-  | "active"
   | "defection-risk"
   | "open-recall"
   | "ownership-change"
   | "geographically-relocated";
 
+export type RecallUrgency = "open" | "urgent";
+
 export interface MarketingAudienceRow {
   id: string;
   customerName: string;
+  vehicleYear: number;
+  vehicleMake: string;
+  vehicleModel: string;
   vehicleStatus: AudienceStatus;
-  retentionScore: number;
+  campaigns: string[];
+  milesUntilService?: number;
+  defectedDealership?: string;
+  recallUrgency?: RecallUrgency;
+  transferDate?: string;
+  relocatedState?: string;
 }
 
 export type MarketingAudienceSortKey =
   | "customerName"
+  | "vehicle"
   | "vehicleStatus"
-  | "retentionScore";
+  | "campaigns"
+  | "milesUntilService"
+  | "defectedDealership"
+  | "recallUrgency"
+  | "transferDate"
+  | "relocatedState";
 
 export const MARKETING_AUDIENCE_TAB_VALUES = [
   "all-services",
   "due",
-  "active",
   "defection-risk",
   "open-recall",
   "ownership-change",
@@ -35,22 +49,20 @@ export const MARKETING_AUDIENCE_TAB_LABELS: Record<
   MarketingAudienceTabValue,
   string
 > = {
-  "all-services": "All Services",
-  due: "Due",
-  active: "Active",
-  "defection-risk": "Defection Risk",
+  "all-services": "All",
+  due: "Service Due",
+  "defection-risk": "Active Defector",
   "open-recall": "Open Recall",
   "ownership-change": "Ownership Change",
-  "geographically-relocated": "Geographically Relocated",
+  "geographically-relocated": "Geo. Relocated",
 };
 
 export const AUDIENCE_STATUS_LABELS: Record<AudienceStatus, string> = {
-  due: "Due",
-  active: "Active",
+  due: "Service Due",
   "defection-risk": "Defection Risk",
   "open-recall": "Open Recall",
   "ownership-change": "Ownership Change",
-  "geographically-relocated": "Geographically Relocated",
+  "geographically-relocated": "Geo. Relocated",
 };
 
 export const MARKETING_AUDIENCE_TAB_FILTER: Record<
@@ -59,7 +71,6 @@ export const MARKETING_AUDIENCE_TAB_FILTER: Record<
 > = {
   "all-services": () => true,
   due: (row) => row.vehicleStatus === "due",
-  active: (row) => row.vehicleStatus === "active",
   "defection-risk": (row) => row.vehicleStatus === "defection-risk",
   "open-recall": (row) => row.vehicleStatus === "open-recall",
   "ownership-change": (row) => row.vehicleStatus === "ownership-change",
@@ -71,79 +82,117 @@ export const MARKETING_AUDIENCE_ROWS: MarketingAudienceRow[] = [
   {
     id: "aud-1",
     customerName: "Ryan Parker",
+    vehicleYear: 2022,
+    vehicleMake: "Toyota",
+    vehicleModel: "Camry",
     vehicleStatus: "due",
-    retentionScore: 77,
-  },
-  {
-    id: "aud-2",
-    customerName: "Emma Thompson",
-    vehicleStatus: "active",
-    retentionScore: 92,
+    campaigns: ["Spring Service Special"],
+    milesUntilService: 1200,
   },
   {
     id: "aud-3",
     customerName: "Benjamin Foster",
+    vehicleYear: 2023,
+    vehicleMake: "Ford",
+    vehicleModel: "F-150",
     vehicleStatus: "defection-risk",
-    retentionScore: 36,
+    campaigns: ["Win-Back Campaign"],
+    defectedDealership: "AutoNation Ford",
   },
   {
     id: "aud-4",
     customerName: "Harper Butler",
+    vehicleYear: 2020,
+    vehicleMake: "Chevrolet",
+    vehicleModel: "Equinox",
     vehicleStatus: "open-recall",
-    retentionScore: 44,
+    campaigns: ["Recall Awareness"],
+    recallUrgency: "urgent",
   },
   {
     id: "aud-5",
     customerName: "Liam Garcia",
+    vehicleYear: 2019,
+    vehicleMake: "BMW",
+    vehicleModel: "X5",
     vehicleStatus: "ownership-change",
-    retentionScore: 61,
+    campaigns: ["Trade-In Bonus", "Loyalty Rewards Q2", "New Owner Intro"],
+    transferDate: "2025-12-15",
   },
   {
     id: "aud-6",
     customerName: "Ava Martinez",
+    vehicleYear: 2024,
+    vehicleMake: "Tesla",
+    vehicleModel: "Model 3",
     vehicleStatus: "geographically-relocated",
-    retentionScore: 29,
+    campaigns: ["Market Expansion"],
+    relocatedState: "TX",
   },
   {
     id: "aud-7",
     customerName: "Ethan Davis",
+    vehicleYear: 2021,
+    vehicleMake: "Hyundai",
+    vehicleModel: "Tucson",
     vehicleStatus: "due",
-    retentionScore: 70,
-  },
-  {
-    id: "aud-8",
-    customerName: "Chloe Hall",
-    vehicleStatus: "active",
-    retentionScore: 88,
+    campaigns: ["Spring Service Special", "Oil Change Reminder"],
+    milesUntilService: 3400,
   },
   {
     id: "aud-9",
     customerName: "James Taylor",
+    vehicleYear: 2020,
+    vehicleMake: "Jeep",
+    vehicleModel: "Grand Cherokee",
     vehicleStatus: "defection-risk",
-    retentionScore: 42,
+    campaigns: ["Win-Back Campaign", "Service Recovery"],
+    defectedDealership: "Hendrick Chrysler",
   },
   {
     id: "aud-10",
     customerName: "Charlotte Anderson",
+    vehicleYear: 2023,
+    vehicleMake: "Subaru",
+    vehicleModel: "Outback",
     vehicleStatus: "open-recall",
-    retentionScore: 48,
+    campaigns: ["Recall Awareness", "Safety First", "Urgent Recall Notice"],
+    recallUrgency: "open",
   },
   {
     id: "aud-11",
     customerName: "Oliver Thomas",
+    vehicleYear: 2018,
+    vehicleMake: "Audi",
+    vehicleModel: "Q5",
     vehicleStatus: "ownership-change",
-    retentionScore: 58,
+    campaigns: ["New Owner Welcome"],
+    transferDate: "2026-01-22",
   },
   {
     id: "aud-12",
     customerName: "Amelia White",
+    vehicleYear: 2022,
+    vehicleMake: "Mazda",
+    vehicleModel: "CX-5",
     vehicleStatus: "geographically-relocated",
-    retentionScore: 31,
+    campaigns: ["Market Expansion", "Regional Promo"],
+    relocatedState: "FL",
   },
 ];
 
 export function vehicleStatusLabel(status: AudienceStatus): string {
   return AUDIENCE_STATUS_LABELS[status];
+}
+
+export function vehicleLabel(row: MarketingAudienceRow): string {
+  return `${row.vehicleYear} ${row.vehicleMake} ${row.vehicleModel}`;
+}
+
+export function campaignsLabel(campaigns: string[]): string {
+  if (campaigns.length === 0) return "\u2014";
+  if (campaigns.length === 1) return campaigns[0];
+  return `${campaigns[0]} +${campaigns.length - 1}`;
 }
 
 export function compareMarketingAudienceValues(
@@ -154,19 +203,62 @@ export function compareMarketingAudienceValues(
 ): number {
   const multiplier = direction === "asc" ? 1 : -1;
 
-  if (sortKey === "retentionScore") {
-    return (left.retentionScore - right.retentionScore) * multiplier;
-  }
+  switch (sortKey) {
+    case "vehicle":
+      return vehicleLabel(left).localeCompare(vehicleLabel(right)) * multiplier;
 
-  if (sortKey === "vehicleStatus") {
-    return (
-      vehicleStatusLabel(left.vehicleStatus).localeCompare(
-        vehicleStatusLabel(right.vehicleStatus),
-      ) * multiplier
-    );
-  }
+    case "vehicleStatus":
+      return (
+        vehicleStatusLabel(left.vehicleStatus).localeCompare(
+          vehicleStatusLabel(right.vehicleStatus),
+        ) * multiplier
+      );
 
-  return left.customerName.localeCompare(right.customerName) * multiplier;
+    case "campaigns":
+      return (left.campaigns.length - right.campaigns.length) * multiplier;
+
+    case "milesUntilService":
+      return (
+        ((left.milesUntilService ?? 0) - (right.milesUntilService ?? 0)) *
+        multiplier
+      );
+
+    case "defectedDealership":
+      return (
+        (left.defectedDealership ?? "").localeCompare(
+          right.defectedDealership ?? "",
+        ) * multiplier
+      );
+
+    case "recallUrgency": {
+      const urgencyRank: Record<RecallUrgency, number> = {
+        urgent: 0,
+        open: 1,
+      };
+      const leftRank = left.recallUrgency
+        ? urgencyRank[left.recallUrgency]
+        : 2;
+      const rightRank = right.recallUrgency
+        ? urgencyRank[right.recallUrgency]
+        : 2;
+      return (leftRank - rightRank) * multiplier;
+    }
+
+    case "transferDate":
+      return (
+        (left.transferDate ?? "").localeCompare(right.transferDate ?? "") *
+        multiplier
+      );
+
+    case "relocatedState":
+      return (
+        (left.relocatedState ?? "").localeCompare(right.relocatedState ?? "") *
+        multiplier
+      );
+
+    default:
+      return left.customerName.localeCompare(right.customerName) * multiplier;
+  }
 }
 
 export function filterMarketingAudienceRows(
@@ -185,7 +277,11 @@ export function filterMarketingAudienceRows(
   return filteredByTab.filter((row) => {
     return (
       row.customerName.toLowerCase().includes(normalizedQuery) ||
-      vehicleStatusLabel(row.vehicleStatus).toLowerCase().includes(normalizedQuery)
+      vehicleLabel(row).toLowerCase().includes(normalizedQuery) ||
+      vehicleStatusLabel(row.vehicleStatus)
+        .toLowerCase()
+        .includes(normalizedQuery) ||
+      row.campaigns.some((c) => c.toLowerCase().includes(normalizedQuery))
     );
   });
 }
@@ -193,12 +289,28 @@ export function filterMarketingAudienceRows(
 export function serializeMarketingAudienceRowsToCsv(
   rows: MarketingAudienceRow[],
 ): string {
-  const header = ["Customer Name", "Vehicle Status", "Retention Score"];
+  const header = [
+    "Customer Name",
+    "Vehicle",
+    "Status",
+    "Campaigns",
+    "Miles Until Service",
+    "Defected To",
+    "Recall Urgency",
+    "Date Transferred",
+    "Relocated To",
+  ];
   const body = rows.map((row) =>
     [
       row.customerName,
+      vehicleLabel(row),
       vehicleStatusLabel(row.vehicleStatus),
-      String(row.retentionScore),
+      row.campaigns.join("; "),
+      row.milesUntilService != null ? String(row.milesUntilService) : "",
+      row.defectedDealership ?? "",
+      row.recallUrgency ?? "",
+      row.transferDate ?? "",
+      row.relocatedState ?? "",
     ]
       .map((value) => `"${value.replace(/"/g, '""')}"`)
       .join(","),

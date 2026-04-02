@@ -44,6 +44,10 @@ export interface FileCabinetTableChromeProps {
   tabValues?: readonly string[];
   /** Passed through to {@link FileCabinetTabRow} (e.g. center vehicle detail tabs). */
   centerTabList?: boolean;
+  /** Optional shared fill applied to the tab strip and the active folder surface. */
+  tabBackgroundClassName?: string;
+  /** Optional override for the outer SVG chrome stroke. */
+  strokeClassName?: string;
   children: React.ReactNode;
 }
 
@@ -408,6 +412,8 @@ export function FileCabinetTableChrome({
   tabMotionVariant = "layout-slide",
   tabValues = OUTLINE_GLOW_TAB_VALUES,
   centerTabList = false,
+  tabBackgroundClassName,
+  strokeClassName,
   children,
 }: FileCabinetTableChromeProps) {
   const light = surface === "light";
@@ -547,7 +553,8 @@ export function FileCabinetTableChrome({
     borderBottomRightRadius: tabTopRadiusPx,
   };
 
-  const strokeClass = light ? "stroke-zinc-300/80" : "stroke-zinc-600/80";
+  const strokeClass =
+    strokeClassName ?? (light ? "stroke-zinc-300/80" : "stroke-zinc-600/80");
 
   const showStroke =
     layout.mergedStrokePathD || layout.tabPathD || layout.cardPathD;
@@ -572,6 +579,7 @@ export function FileCabinetTableChrome({
                 tabMotionVariant={tabMotionVariant}
                 tabValues={tabValues}
                 centerTabList={centerTabList}
+                backgroundClassName={tabBackgroundClassName}
               />
             </div>
             <div className="flex shrink-0 items-center">{tabRowEnd}</div>
@@ -591,13 +599,14 @@ export function FileCabinetTableChrome({
             tabMotionVariant={tabMotionVariant}
             tabValues={tabValues}
             centerTabList={centerTabList}
+            backgroundClassName={tabBackgroundClassName}
           />
         )}
       </div>
       <div
         ref={tableCardRef}
         className={cn(
-          "relative flex min-h-0 min-w-0 flex-1 flex-col border-0 motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
+          "relative flex min-h-0 min-w-0 flex-1 flex-col border-x border-b border-border border-t-0 motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
           light ? "bg-white" : "bg-sidebar",
         )}
         style={cardRadiusStyle}

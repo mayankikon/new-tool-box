@@ -73,6 +73,8 @@ export interface FileCabinetTabRowProps {
   tabValues?: readonly string[];
   /** When true, tab buttons are grouped in the horizontal center (e.g. vehicle detail deck). */
   centerTabList?: boolean;
+  /** Optional shared fill applied to the tab strip and the active folder surface. */
+  backgroundClassName?: string;
 }
 
 /**
@@ -94,6 +96,7 @@ export function FileCabinetTabRow({
   tabMotionVariant = "layout-slide",
   tabValues = OUTLINE_GLOW_TAB_VALUES,
   centerTabList = false,
+  backgroundClassName,
 }: FileCabinetTabRowProps) {
   const light = surface === "light";
   const reduceMotion = useReducedMotion();
@@ -214,7 +217,8 @@ export function FileCabinetTabRow({
   const vfdCapsuleTone: TelemetryDeckLedTone =
     accent === "amber" ? "amber" : "vfd";
 
-  const folderBgClass = light ? "bg-white" : "bg-sidebar";
+  const folderBgClass =
+    backgroundClassName ?? (light ? "bg-white" : "bg-sidebar");
 
   /** Full sink-rise choreography (folder + label + lamp crossfade); false when reduced-motion or keyboard activation. */
   const sinkRisePointerMotion =
@@ -593,7 +597,12 @@ export function FileCabinetTabRow({
   );
 
   return (
-    <div className="relative flex w-full min-w-0 items-end gap-0 bg-transparent px-0 pt-1">
+    <div
+      className={cn(
+        "relative flex w-full min-w-0 items-end gap-0 bg-transparent px-0 pt-1",
+        backgroundClassName,
+      )}
+    >
       {usesPresenceMotion ? (
         tablist
       ) : (

@@ -10,18 +10,32 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer relative flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-input transition-colors outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 hover:border-input-hover hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-transparent aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary dark:bg-input/30 dark:hover:border-input-hover dark:hover:bg-accent/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground data-checked:hover:bg-[var(--primary-hover)] data-checked:hover:border-[var(--primary-hover)] dark:data-checked:bg-primary",
+        "peer group relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none",
+        "focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "group-has-disabled/field:opacity-50",
         className
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
+      <span
+        className={cn(
+          "relative flex size-4 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[4px] border border-input transition-colors outline-none",
+          "group-hover:border-input-hover group-hover:bg-accent/50",
+          "group-focus-visible:border-ring",
+          "group-disabled:cursor-not-allowed group-disabled:opacity-50 group-disabled:hover:border-input group-disabled:hover:bg-transparent",
+          "group-aria-invalid:border-destructive group-aria-invalid:ring-3 group-aria-invalid:ring-destructive/20 group-aria-invalid:group-data-checked:border-primary",
+          "dark:bg-input/30 dark:group-hover:border-input-hover dark:group-hover:bg-accent/30 dark:group-aria-invalid:border-destructive/50 dark:group-aria-invalid:ring-destructive/40",
+          "group-data-checked:border-primary group-data-checked:bg-primary group-data-checked:text-primary-foreground group-data-checked:hover:bg-[var(--primary-hover)] group-data-checked:hover:border-[var(--primary-hover)] dark:group-data-checked:bg-primary",
+        )}
       >
-        <CheckIcon
-        />
-      </CheckboxPrimitive.Indicator>
+        <CheckboxPrimitive.Indicator
+          data-slot="checkbox-indicator"
+          className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
+        >
+          <CheckIcon
+          />
+        </CheckboxPrimitive.Indicator>
+      </span>
     </CheckboxPrimitive.Root>
   )
 }

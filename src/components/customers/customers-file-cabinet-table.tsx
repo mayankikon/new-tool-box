@@ -16,6 +16,8 @@ import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import {
   DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS,
+  DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
   DATA_TABLE_ROW_GROUP_CLASS,
 } from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
@@ -96,7 +98,10 @@ export function CustomersFileCabinetTable({
           className={cn(cellTextClassName, "border-separate border-spacing-0 bg-transparent")}
         >
           <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
-            <TableRow size="compact" className="!border-0 hover:bg-transparent">
+            <TableRow
+              size="compact"
+              className={cn("!border-0", DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS)}
+            >
               {CUSTOMER_HEADERS.map((header) => (
                 <TableHead
                   key={header.key}
@@ -190,7 +195,8 @@ function CustomerTableRow({
       size="default"
       className={cn(
         DATA_TABLE_ROW_GROUP_CLASS,
-        "!border-0 !bg-transparent hover:!bg-gray-100 dark:hover:!bg-gray-800/50",
+        "!border-0 !bg-transparent",
+        DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
       )}
       style={{ minHeight: bodyCellHeightPx }}
     >

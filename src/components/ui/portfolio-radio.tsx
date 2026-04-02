@@ -60,6 +60,7 @@ function PortfolioRadioBlurLayer() {
 
 /**
  * Portfolio 3.0 radio: light border, teal accent when selected. Uses Base UI Radio.
+ * The root is a 24×24px hit target (`size-6`); the drawn control stays 16×16px (`size-4`) centered inside.
  */
 function PortfolioRadioButton({
   className,
@@ -78,11 +79,11 @@ function PortfolioRadioButton({
       data-visual-disabled={visualDisabled ? "true" : undefined}
       disabled={disabled}
       className={cn(
-        "group peer relative flex size-4 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full outline-none transition-colors",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#01AC81]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none transition-colors",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#1A9375]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         "disabled:cursor-not-allowed disabled:opacity-65",
         "data-disabled:[&_[data-slot=portfolio-radio-inner-dot]]:bg-[color:var(--portfolio-radio-disabled)]",
-        showFocusRing && "ring-1 ring-[#01AC81]/32 ring-offset-1 ring-offset-background",
+        showFocusRing && "ring-1 ring-[#1A9375]/32 ring-offset-1 ring-offset-background",
         isVisuallyDisabled && "opacity-65",
         className
       )}
@@ -102,24 +103,26 @@ function PortfolioRadioButton({
       }}
       {...props}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-full"
-        style={{
-          background: `linear-gradient(to bottom right, ${visualSpec.gradientStartColor} 0%, ${visualSpec.gradientMidColor} 50%, ${visualSpec.gradientEndColor} 100%)`,
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-px z-0 rounded-full bg-[color:var(--portfolio-radio-surface)] transition-colors group-data-checked:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-radio-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-radio-disabled)]"
-      />
-      <PortfolioRadioBlurLayer />
-      <RadioPrimitive.Indicator
-        data-slot="portfolio-radio-indicator"
-        className="flex size-4 items-center justify-center"
-      >
-        <PortfolioRadioInnerDot />
-      </RadioPrimitive.Indicator>
+      <span className="relative size-4 shrink-0 overflow-hidden rounded-full">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 rounded-full"
+          style={{
+            background: `linear-gradient(to bottom right, ${visualSpec.gradientStartColor} 0%, ${visualSpec.gradientMidColor} 50%, ${visualSpec.gradientEndColor} 100%)`,
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-px z-0 rounded-full bg-[color:var(--portfolio-radio-surface)] transition-colors group-data-checked:bg-black group-disabled:bg-[#e3e5e8] group-disabled:group-data-checked:bg-[color:var(--portfolio-radio-disabled)] group-data-[visual-disabled=true]:bg-[#e3e5e8] group-data-[visual-disabled=true]:group-data-checked:bg-[color:var(--portfolio-radio-disabled)]"
+        />
+        <PortfolioRadioBlurLayer />
+        <RadioPrimitive.Indicator
+          data-slot="portfolio-radio-indicator"
+          className="flex size-4 items-center justify-center"
+        >
+          <PortfolioRadioInnerDot />
+        </RadioPrimitive.Indicator>
+      </span>
     </RadioPrimitive.Root>
   );
 }

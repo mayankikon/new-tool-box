@@ -2,7 +2,7 @@
 
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Download, Search, Upload } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
@@ -35,14 +35,19 @@ import {
 const { underGlowPx, tabAccent, tabTopRadiusPx } =
   FILE_CABINET_BILLING_TABLE_DEFAULTS;
 
-export function MarketingAudiencesPage() {
+export function MarketingAudiencesPage({
+  initialTab,
+}: {
+  initialTab?: MarketingAudienceTabValue;
+}) {
   const { resolvedTheme } = useTheme();
   const previewSurface: DashPreviewSurface =
     resolvedTheme === "dark" ? "dark" : "light";
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [deckTab, setDeckTab] =
-    useState<MarketingAudienceTabValue>("all-services");
+  const [deckTab, setDeckTab] = useState<MarketingAudienceTabValue>(
+    initialTab ?? "all-services",
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{
     key: MarketingAudienceSortKey;
@@ -86,6 +91,7 @@ export function MarketingAudiencesPage() {
   const handleDeckTabChange = useCallback((next: string) => {
     setDeckTab(next as MarketingAudienceTabValue);
     setCurrentPage(1);
+    setSortConfig({ key: "customerName", direction: "asc" });
   }, []);
 
   const handleExportCsv = useCallback(() => {
@@ -163,6 +169,7 @@ export function MarketingAudiencesPage() {
               <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
                 <MarketingAudiencesFileCabinetTable
                   rows={pagedRows}
+                  activeTab={deckTab}
                   sortConfig={sortConfig}
                   setSortConfig={setSortConfig}
                 />

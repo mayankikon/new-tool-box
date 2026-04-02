@@ -49,7 +49,7 @@ export function SimpleInventoryTableShell({
   );
 
   const cardBody = (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2">
       <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
         {children}
       </div>
@@ -65,7 +65,7 @@ export function SimpleInventoryTableShell({
         )}
       >
         <div className={cardShellClass}>
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col pt-[4px] pb-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-0">
             <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               {children}
             </div>

@@ -8,17 +8,14 @@ import {
   Check,
   ChevronDown,
   Coins,
-  FileSpreadsheet,
+  Download,
   Gauge,
   MapPinned,
-  Megaphone,
-  MessageSquareShare,
   PhoneCall,
   Route,
   ShieldAlert,
   Square,
   Sparkles,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,20 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardAction,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   EmptyState,
   EmptyStateContent,
@@ -53,7 +38,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  tableRowVariants,
 } from "@/components/ui/table";
 import {
   AiTextArea,
@@ -70,17 +54,27 @@ import {
   ATLAS_AI_HOME_MODULES,
   getAtlasAiResponse,
 } from "@/lib/atlas-ai/mock-data";
-import { mergePartialCampaignOffer } from "@/lib/campaigns/coupon-templates";
 import type {
   AtlasAiCampaignSuggestion,
   AtlasAiCustomerPreviewRow,
   AtlasAiHomeModule,
   AtlasAiMessage,
-  AtlasAiPromptSuggestion,
   AtlasAiResponse,
 } from "@/lib/atlas-ai/types";
-import { CouponCardPreview } from "@/components/campaigns/coupon-builder";
-import type { AudienceSegment } from "@/lib/campaigns/types";
+import type { AudienceSegment, CampaignOffer } from "@/lib/campaigns/types";
+import {
+  ATLAS_DEPLOY_STEPS,
+  AtlasAiDeploySuccess,
+  AtlasAiEngagePanel,
+  IntelligentCouponRevealCell,
+  intelligentCouponTierBadgeClassNames,
+  RetentionScoreRing,
+} from "@/components/atlas-ai/atlas-ai-engage-flow";
+import {
+  buildCouponStrategyFromRows,
+  computeIntelligentCoupon,
+  estimateCouponValueDollars,
+} from "@/lib/atlas-ai/coupon-strategy";
 
 interface AtlasAiCampaignDraft {
   name: string;
@@ -90,14 +84,76 @@ interface AtlasAiCampaignDraft {
   audienceSize: number;
   trigger?: AtlasAiCampaignSuggestion["trigger"];
   suggestedOffer?: AtlasAiCampaignSuggestion["suggestedOffer"];
+  suggestedOffers?: Partial<CampaignOffer>[];
+}
+
+type AtlasEngagePhase = "idle" | "sizzling" | "panel" | "deploying" | "success";
+
+interface AtlasMessageEngageState {
+  phase: AtlasEngagePhase;
+  aggressivenessOffset: number;
+  campaignTitle: string;
+  deployStep: number;
 }
 
 interface AtlasAiPageProps {
-  onCreateCampaign: (draft: AtlasAiCampaignDraft) => void;
+  /** Reserved for future flows that open the campaign wizard from Atlas (e.g. deep links). */
+  onCreateCampaign?: (draft: AtlasAiCampaignDraft) => void;
+  /** Optional: after deploy success, jump to Campaigns tab */
+  onNavigateToCampaigns?: () => void;
 }
 
-/** Full-audience table collapses with a fade when this many or more rows (after priority cards). */
-const ATLAS_AUDIENCE_TABLE_COLLAPSE_ROW_THRESHOLD = 3;
+/** Show this many rows before the gradient + Expand Table control (after row reveal completes). */
+const ATLAS_AUDIENCE_COLLAPSED_VISIBLE_ROWS = 5;
+
+/**
+ * Shared max width for Ask Atlas (home modules, composer, messages, thinking).
+ * Uses `max-w-5xl` so the audience table keeps room when Intelligent Coupon / Est. Value columns appear.
+ */
+const ATLAS_CONTENT_MAX_WIDTH_CLASS = "max-w-5xl";
+
+function downloadAtlasAudiencePreviewCsv(rows: AtlasAiCustomerPreviewRow[]) {
+  const headers = [
+    "Customer",
+    "Vehicle",
+    "Retention score",
+    "Last service",
+    "Reason",
+    "Priority",
+  ] as const;
+
+  const escapeCell = (value: string | number | undefined) => {
+    const raw = value == null ? "" : String(value);
+    if (/[",\n\r]/.test(raw)) {
+      return `"${raw.replace(/"/g, '""')}"`;
+    }
+    return raw;
+  };
+
+  const lines = [
+    headers.join(","),
+    ...rows.map((row) =>
+      [
+        row.name,
+        row.vehicle,
+        row.retentionScore,
+        row.lastServiceDate ?? "",
+        row.serviceDueReason ?? "",
+        row.priority,
+      ]
+        .map(escapeCell)
+        .join(","),
+    ),
+  ];
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `atlas-audience-${new Date().toISOString().slice(0, 10)}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 
 interface AtlasAiLoadingStep {
   id: string;
@@ -113,13 +169,6 @@ const homeModuleIcons: Record<string, LucideIcon> = {
   route: Route,
   map: MapPinned,
   phone: PhoneCall,
-};
-
-const layoutSpringTransition = {
-  type: "spring" as const,
-  stiffness: 280,
-  damping: 28,
-  mass: 0.82,
 };
 
 const composerLayoutTransition = {
@@ -170,24 +219,6 @@ function priorityLabel(priority: AtlasAiCustomerPreviewRow["priority"]) {
     default:
       return "Low priority";
   }
-}
-
-function serializeRowsToCsv(rows: AtlasAiCustomerPreviewRow[]) {
-  const header = ["Name", "Vehicle", "Last Service Date", "Mileage", "Reason", "Priority"];
-  const lines = rows.map((row) =>
-    [
-      row.name,
-      row.vehicle,
-      row.lastServiceDate ?? "",
-      row.mileage ?? "",
-      row.serviceDueReason ?? "",
-      row.priority,
-    ]
-      .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-      .join(","),
-  );
-
-  return [header.join(","), ...lines].join("\n");
 }
 
 function hashQuery(query: string) {
@@ -398,7 +429,7 @@ function buildLoadingSteps(query: string): AtlasAiLoadingStep[] {
   }));
 }
 
-export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
+export function AtlasAiPage({ onNavigateToCampaigns }: AtlasAiPageProps) {
   const [messages, setMessages] = useState<AtlasAiMessage[]>([]);
   const [query, setQuery] = useState("");
   const [isThinking, setIsThinking] = useState(false);
@@ -416,8 +447,9 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
   const [audienceTableExpandedByMessage, setAudienceTableExpandedByMessage] = useState<
     Record<string, boolean>
   >({});
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeResponse, setActiveResponse] = useState<AtlasAiResponse | null>(null);
+  const [engageByMessage, setEngageByMessage] = useState<
+    Record<string, AtlasMessageEngageState>
+  >({});
   const revealTimeoutsRef = useRef<number[]>([]);
   const generationRunIdRef = useRef(0);
 
@@ -461,44 +493,6 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
     };
   }, [headlineIndex, isComposerFocused, isDeletingHeadline, messages.length, typedHeadline]);
 
-  const handleCreateCampaign = useCallback(
-    (suggestion?: AtlasAiCampaignSuggestion) => {
-      if (!suggestion) return;
-
-      onCreateCampaign({
-        name: suggestion.title,
-        type: suggestion.campaignType,
-        templateId: suggestion.templateId ?? null,
-        audienceSegments: suggestion.audienceSegments,
-        audienceSize: suggestion.estimatedReach,
-        trigger: suggestion.trigger,
-        suggestedOffer: suggestion.suggestedOffer,
-      });
-    },
-    [onCreateCampaign],
-  );
-
-  const handleExportCsv = useCallback(() => {
-    if (!activeResponse?.audiencePreview) return;
-
-    const csv = serializeRowsToCsv(activeResponse.audiencePreview.rows);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "atlas-ai-audience.csv";
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setDialogOpen(false);
-  }, [activeResponse]);
-
-  const handleCreateBdcHandoff = useCallback(() => {
-    if (!activeResponse?.audiencePreview) return;
-
-    setDialogOpen(false);
-  }, [activeResponse]);
-
   const handleBackToHome = useCallback(() => {
     generationRunIdRef.current += 1;
     revealTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
@@ -509,11 +503,10 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
     setRevealedSectionsByMessage({});
     setRevealedRowsByMessage({});
     setAudienceTableExpandedByMessage({});
+    setEngageByMessage({});
     setLoadingSteps([]);
     setVisibleLoadingStepCount(0);
     setActiveLoadingStep(0);
-    setActiveResponse(null);
-    setDialogOpen(false);
   }, []);
 
   const handleInterruptGeneration = useCallback(() => {
@@ -526,65 +519,109 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
     setActiveLoadingStep(0);
   }, []);
 
+  const engageSizzleTimersRef = useRef<Record<string, number>>({});
+
+  const handleExportAudiencePreview = useCallback((rows: AtlasAiCustomerPreviewRow[]) => {
+    downloadAtlasAudiencePreviewCsv(rows);
+  }, []);
+
+  const startEngageAudience = useCallback(
+    (messageId: string, response: AtlasAiResponse) => {
+      const rows = response.audiencePreview?.rows;
+      if (!rows?.length) return;
+
+      const title = response.headline.slice(0, 120);
+      setEngageByMessage((prev) => ({
+        ...prev,
+        [messageId]: {
+          phase: "sizzling",
+          aggressivenessOffset: 0,
+          campaignTitle: title,
+          deployStep: 0,
+        },
+      }));
+
+      const ms = Math.min(rows.length * 72 + 800, 3200);
+      const tid = window.setTimeout(() => {
+        setEngageByMessage((prev) => {
+          const cur = prev[messageId];
+          if (!cur || cur.phase !== "sizzling") {
+            return prev;
+          }
+          return {
+            ...prev,
+            [messageId]: { ...cur, phase: "panel" },
+          };
+        });
+      }, ms);
+      engageSizzleTimersRef.current[messageId] = tid;
+    },
+    [],
+  );
+
+  const handleDeployFromEngage = useCallback(async (messageId: string) => {
+    setEngageByMessage((prev) => {
+      const cur = prev[messageId];
+      if (!cur) return prev;
+      return {
+        ...prev,
+        [messageId]: { ...cur, phase: "deploying", deployStep: 0 },
+      };
+    });
+
+    for (let completed = 0; completed < 4; completed += 1) {
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 700);
+      });
+      setEngageByMessage((prev) => {
+        const cur = prev[messageId];
+        if (!cur || cur.phase !== "deploying") {
+          return prev;
+        }
+        return {
+          ...prev,
+          [messageId]: { ...cur, deployStep: completed + 1 },
+        };
+      });
+    }
+
+    setEngageByMessage((prev) => {
+      const cur = prev[messageId];
+      if (!cur) return prev;
+      return {
+        ...prev,
+        [messageId]: { ...cur, phase: "success" },
+      };
+    });
+  }, []);
+
+  const handleBackFromEngageSuccess = useCallback((messageId: string) => {
+    setEngageByMessage((prev) => {
+      const next = { ...prev };
+      delete next[messageId];
+      return next;
+    });
+  }, []);
+
   const scheduleAssistantReveal = useCallback(
     (messageId: string, response: AtlasAiResponse) => {
       setRevealedSectionsByMessage((current) => ({ ...current, [messageId]: 1 }));
 
-      if (response.audiencePreview) {
-        setRevealedRowsByMessage((current) => ({ ...current, [messageId]: 0 }));
-      }
-
-      let delay = 350;
-      const whyTimeoutId = window.setTimeout(() => {
-        setRevealedSectionsByMessage((current) => ({
-          ...current,
-          [messageId]: 2,
-        }));
-      }, delay);
-      revealTimeoutsRef.current.push(whyTimeoutId);
-      delay += 210;
+      const delay = 400;
 
       if (response.audiencePreview) {
+        const rowCount = response.audiencePreview.rows.length;
         const audienceCardTimeoutId = window.setTimeout(() => {
           setRevealedSectionsByMessage((current) => ({
             ...current,
-            [messageId]: 3,
+            [messageId]: 2,
+          }));
+          setRevealedRowsByMessage((current) => ({
+            ...current,
+            [messageId]: rowCount,
           }));
         }, delay);
         revealTimeoutsRef.current.push(audienceCardTimeoutId);
-
-        const rowStartDelay = delay + 140;
-        response.audiencePreview.rows.forEach((_, index) => {
-          const timeoutId = window.setTimeout(() => {
-            setRevealedRowsByMessage((current) => ({
-              ...current,
-              [messageId]: index + 1,
-            }));
-          }, rowStartDelay + index * 75);
-          revealTimeoutsRef.current.push(timeoutId);
-        });
-
-        delay = rowStartDelay + response.audiencePreview.rows.length * 75 + 130;
-      }
-
-      const remainingSectionCount =
-        1 + (response.campaignSuggestion ? 1 : 0) + (response.followUpPrompts.length ? 1 : 0);
-
-      const startingSection = response.audiencePreview ? 4 : 3;
-
-      for (
-        let nextSection = startingSection;
-        nextSection < startingSection + remainingSectionCount;
-        nextSection += 1
-      ) {
-        const timeoutId = window.setTimeout(() => {
-          setRevealedSectionsByMessage((current) => ({
-            ...current,
-            [messageId]: nextSection,
-          }));
-        }, delay);
-        revealTimeoutsRef.current.push(timeoutId);
-        delay += nextSection === startingSection ? 240 : 180;
       }
     },
     [],
@@ -647,49 +684,14 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
     [isThinking, scheduleAssistantReveal],
   );
 
-  const openBdcDialog = useCallback((response: AtlasAiResponse) => {
-    setActiveResponse(response);
-    setDialogOpen(true);
-  }, []);
-
-  const renderPromptChips = useCallback(
-    (
-      prompts: AtlasAiPromptSuggestion[],
-      {
-        compact = false,
-        centered = false,
-      }: { compact?: boolean; centered?: boolean } = {},
-    ) => (
-      <div
-        className={cn(
-          "flex flex-wrap gap-2",
-          centered ? "justify-center" : "justify-start",
-        )}
-      >
-        {prompts.map((prompt) => (
-          <Button
-            key={prompt.id}
-            type="button"
-            variant="outline"
-            size={compact ? "sm" : "default"}
-            onClick={() => void submitQuery(prompt.prompt)}
-            className={cn(
-              "h-auto max-w-full justify-start rounded-xs text-left whitespace-normal",
-              compact ? "px-2 py-1.5 text-xs" : "px-3 py-2 text-sm",
-              centered && "text-center",
-            )}
-          >
-            {prompt.label}
-          </Button>
-        ))}
-      </div>
-    ),
-    [submitQuery],
-  );
-
   const renderHomeModules = useCallback(
     (modules: AtlasAiHomeModule[]) => (
-      <div className="mx-auto grid w-full max-w-3xl gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={cn(
+          "mx-auto grid w-full gap-2.5 sm:grid-cols-2 lg:grid-cols-3",
+          ATLAS_CONTENT_MAX_WIDTH_CLASS,
+        )}
+      >
         {modules.map((module, index) => {
           const Icon = module.iconKey ? homeModuleIcons[module.iconKey] : Sparkles;
           const accentClasses = [
@@ -769,7 +771,11 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
         layout="position"
         layoutId={layoutId}
         transition={composerLayoutTransition}
-        className={cn("mx-auto w-full max-w-3xl flex-none", sticky && "origin-bottom")}
+        className={cn(
+          "mx-auto w-full flex-none",
+          ATLAS_CONTENT_MAX_WIDTH_CLASS,
+          sticky && "origin-bottom",
+        )}
       >
         <AiTextArea variant="default" className="gap-3">
           <form
@@ -828,12 +834,18 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div
             className={cn(
-              "mx-auto flex w-full max-w-5xl flex-col gap-5 px-1 pb-5 pt-1 sm:px-2 sm:pb-8 sm:pt-2",
+              "mx-auto flex w-full flex-col gap-5 px-1 pb-5 pt-1 sm:px-2 sm:pb-8 sm:pt-2",
+              ATLAS_CONTENT_MAX_WIDTH_CLASS,
               messages.length === 0 && "min-h-full justify-start pt-4 sm:pt-6",
             )}
           >
             {messages.length > 0 ? (
-              <div className="mx-auto flex w-full max-w-3xl justify-start px-1">
+              <div
+                className={cn(
+                  "mx-auto flex w-full justify-start px-1",
+                  ATLAS_CONTENT_MAX_WIDTH_CLASS,
+                )}
+              >
                 <Button
                   type="button"
                   variant="ghost"
@@ -851,7 +863,10 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
               <motion.div
                 layout="position"
                 transition={composerLayoutTransition}
-                className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 py-4 text-center sm:px-5 sm:py-5"
+                className={cn(
+                  "mx-auto flex w-full flex-col items-center px-4 py-4 text-center sm:px-5 sm:py-5",
+                  ATLAS_CONTENT_MAX_WIDTH_CLASS,
+                )}
               >
                 <EmptyState className="w-full gap-4 text-center">
                   <EmptyStateIcon className="flex items-center justify-center">
@@ -884,205 +899,68 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
 
             {messages.map((message) =>
               message.role === "user" ? (
-                <motion.div
+                <div
                   key={message.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={layoutSpringTransition}
-                  className="mx-auto flex w-full max-w-3xl justify-end pl-10 sm:pl-16"
+                  className={cn(
+                    "mx-auto flex w-full justify-end pl-10 sm:pl-16",
+                    ATLAS_CONTENT_MAX_WIDTH_CLASS,
+                  )}
                 >
                   <Card
                     size="sm"
-                    className="max-w-2xl border-border/80 bg-card py-0 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+                    className="max-w-3xl border-border/80 bg-card py-0 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
                   >
                     <CardContent className="px-4 py-1 text-sm leading-6 text-foreground">
                       {message.text}
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
+                <div
                   key={message.id}
-                  layout
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={layoutSpringTransition}
-                  className="mx-auto w-full max-w-3xl space-y-4"
+                  className={cn(
+                    "mx-auto w-full min-w-0 space-y-4",
+                    ATLAS_CONTENT_MAX_WIDTH_CLASS,
+                  )}
                 >
-                  <motion.div
-                    layout
-                    layoutId="atlas-assistant-header"
-                    transition={layoutSpringTransition}
-                    className="flex items-center gap-3 pl-[calc(theme(spacing.1)-6px)] pr-1"
-                  >
-                    <motion.div layoutId="atlas-assistant-logo" transition={layoutSpringTransition}>
-                      <AtlasAiLogo className="size-10" imageClassName="size-8" />
-                    </motion.div>
+                  <div className="flex items-center gap-3 pl-[calc(theme(spacing.1)-6px)] pr-1">
+                    <AtlasAiLogo className="size-10" imageClassName="size-8" />
                     <div className="min-w-0">
-                      <motion.p
-                        layoutId="atlas-assistant-title"
-                        transition={layoutSpringTransition}
-                        className="text-sm font-medium text-foreground"
-                      >
-                        Atlas AI
-                      </motion.p>
+                      <p className="text-sm font-medium text-foreground">Atlas AI</p>
                       <p className="text-xs text-muted-foreground">
                         Customer discovery summary
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <motion.div layout transition={layoutSpringTransition} className="grid gap-4">
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...layoutSpringTransition, delay: 0.06 }}
-                    >
-                      <Card
-                        size="sm"
-                        className="overflow-hidden border-border/80 bg-card/80 py-0 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
-                      >
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Atlas found</CardTitle>
-                          <CardDescription>
-                            {message.response?.headline}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4 pb-4">
-                          <p className="text-sm leading-6 text-foreground">{message.response?.summary}</p>
-                          {message.response?.insightTags?.length ? (
-                            <div className="flex flex-wrap gap-2">
-                              {message.response.insightTags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="rounded-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : null}
-                          {message.response?.metrics.length ? (
-                            <div className="flex flex-wrap gap-2">
-                              {message.response.metrics.map((metric) => (
-                                <Badge
-                                  key={metric.id}
-                                  variant="secondary"
-                                  className="h-auto rounded-xs px-2.5 py-1"
-                                >
-                                  <span className="text-muted-foreground">{metric.label}:</span> {metric.value}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : null}
-                        </CardContent>
-                        <AnimatePresence initial={false}>
-                          {(revealedSectionsByMessage[message.id] ?? 999) >= 2 ? (
-                            <motion.div
-                              key={`${message.id}-why-inline`}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
-                              transition={layoutSpringTransition}
-                              className="border-t border-border/60 px-3 py-4"
-                            >
-                              <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                                Why it matters
-                              </p>
-                              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {message.response?.whyItMatters}
-                              </p>
-                            </motion.div>
-                          ) : null}
-                        </AnimatePresence>
-                        <AnimatePresence initial={false}>
-                          {(revealedSectionsByMessage[message.id] ?? 999) >=
-                          (message.response?.audiencePreview ? 4 : 3) ? (
-                            <motion.div
-                              key={`${message.id}-actions-inline`}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
-                              transition={layoutSpringTransition}
-                              className="border-t border-border/60 px-3 py-4"
-                            >
-                              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                                <div className="space-y-1">
-                                  <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                                    What Atlas recommends next
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {message.response?.nextBestActionLabel ?? "Next best action"}
-                                  </p>
-                                </div>
-                                <div className="flex flex-wrap gap-3">
-                                  {message.response?.recommendedActions.map((action) =>
-                                    action.kind === "campaign" ? (
-                                      <Button
-                                        key={action.id}
-                                        variant="secondary"
-                                        leadingIcon={<Megaphone />}
-                                        className="rounded-xs"
-                                        onClick={() =>
-                                          handleCreateCampaign(message.response?.campaignSuggestion)
-                                        }
-                                      >
-                                        {action.label}
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        key={action.id}
-                                        variant={action.emphasis === "primary" ? "default" : "secondary"}
-                                        leadingIcon={<MessageSquareShare />}
-                                        className="rounded-xs"
-                                        onClick={() => openBdcDialog(message.response as AtlasAiResponse)}
-                                      >
-                                        {action.label}
-                                      </Button>
-                                    ),
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          ) : null}
-                        </AnimatePresence>
-                      </Card>
-                    </motion.div>
+                  <div className="grid gap-4">
+                    <div>
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <h3 className="text-base font-semibold text-foreground">Atlas Found</h3>
+                          <p className="text-sm text-muted-foreground">{message.response?.headline}</p>
+                        </div>
+                        <p className="text-sm leading-6 text-foreground">{message.response?.summary}</p>
+                      </div>
+                    </div>
 
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {message.response?.audiencePreview &&
-                      (revealedSectionsByMessage[message.id] ?? 999) >= 3 ? (
-                        <motion.div
-                          key={`${message.id}-audience`}
-                          layout
-                          initial={{ opacity: 0, y: 14 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={layoutSpringTransition}
-                        >
-                          <Card size="sm" className="py-0 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">
-                            Customers to act on
-                          </CardTitle>
-                          <CardDescription>
-                            {message.response.audiencePreview.description}
-                          </CardDescription>
-                          <CardAction>
-                            <Badge variant="outline" className="rounded-xs">
-                              {message.response.audiencePreview.totalCount} matched
-                            </Badge>
-                          </CardAction>
-                        </CardHeader>
-                        <CardContent className="space-y-4 pb-4">
+                    {message.response?.audiencePreview &&
+                    (revealedSectionsByMessage[message.id] ?? 999) >= 2 &&
+                    engageByMessage[message.id]?.phase !== "success" ? (
+                      <div>
                           {(() => {
-                            const visibleRows = message.response.audiencePreview.rows.slice(
+                            const engagePhase = engageByMessage[message.id]?.phase ?? "idle";
+                            const aggressivenessForCoupons =
+                              engagePhase === "panel" || engagePhase === "deploying"
+                                ? (engageByMessage[message.id]?.aggressivenessOffset ?? 0)
+                                : 0;
+
+                            const visibleRows = message.response!.audiencePreview!.rows.slice(
                               0,
                               revealedRowsByMessage[message.id] ??
-                                message.response.audiencePreview.rows.length,
+                                message.response!.audiencePreview!.rows.length,
                             );
-                            const featuredRows = visibleRows.slice(0, 3);
-                            const remainingRows = visibleRows.slice(3);
-                            const totalAudienceRows = message.response.audiencePreview.rows.length;
+                            const totalAudienceRows = message.response!.audiencePreview!.rows.length;
                             const revealedAudienceRowCount =
                               revealedRowsByMessage[message.id] ?? totalAudienceRows;
                             const isAudienceRevealComplete =
@@ -1090,325 +968,281 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
                             const isAudienceTableExpanded =
                               audienceTableExpandedByMessage[message.id] ?? false;
                             const shouldCollapseAudienceTable =
-                              remainingRows.length >= ATLAS_AUDIENCE_TABLE_COLLAPSE_ROW_THRESHOLD &&
+                              visibleRows.length > ATLAS_AUDIENCE_COLLAPSED_VISIBLE_ROWS &&
                               isAudienceRevealComplete &&
                               !isAudienceTableExpanded;
 
-                            return (
-                              <>
-                                <div className="space-y-2">
-                                  <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                                    Priority queue
-                                  </p>
-                                  <div className="grid gap-2">
-                                    {featuredRows.map((row, index) => {
-                                      const isNewestRow = index === featuredRows.length - 1;
+                            const showIntelligentCouponColumn =
+                              engagePhase === "sizzling" ||
+                              engagePhase === "panel" ||
+                              engagePhase === "deploying";
+                            const showEstValueColumn =
+                              engagePhase === "panel" || engagePhase === "deploying";
 
-                                      return (
-                                        <motion.div
-                                          key={`${row.id}-queue`}
-                                          layout="position"
-                                          initial={{ opacity: 0, y: 6 }}
-                                          animate={{
-                                            opacity: 1,
-                                            y: 0,
-                                          }}
-                                          transition={{
-                                            opacity: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-                                            y: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
-                                          }}
-                                          className={cn(
-                                            "rounded-md border border-border/70 bg-card/70 px-3 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.04)]",
-                                            isNewestRow && "border-primary/25",
-                                          )}
-                                        >
-                                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                            <div className="space-y-1">
-                                              <p className="text-sm font-medium text-foreground">
-                                                {row.name}
-                                              </p>
-                                              <p className="text-sm text-muted-foreground">
-                                                {row.vehicle}
-                                              </p>
-                                            </div>
-                                            <Badge
-                                              variant={priorityBadgeVariant(row.priority)}
-                                              className="w-fit rounded-xs"
-                                            >
-                                              {priorityLabel(row.priority)}
-                                            </Badge>
-                                          </div>
-                                          <div className="mt-2 grid gap-2 sm:grid-cols-[140px_1fr]">
-                                            <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                                              Last service
-                                            </div>
-                                            <div className="text-sm text-foreground">
-                                              {row.lastServiceDate ?? "N/A"}
-                                            </div>
-                                            <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                                              Why Atlas surfaced this
-                                            </div>
-                                            <div className="text-sm leading-6 text-muted-foreground">
-                                              {row.serviceDueReason ?? "No additional detail"}
-                                            </div>
-                                          </div>
-                                        </motion.div>
-                                      );
-                                    })}
+                            const totalCount = message.response!.audiencePreview!.totalCount;
+
+                            const showEngageControls =
+                              engagePhase === "panel" || engagePhase === "deploying";
+
+                            return (
+                              <div className="min-w-0 w-full max-w-full space-y-3">
+                                {showEngageControls && message.response ? (
+                                  <AtlasAiEngagePanel
+                                    rows={message.response.audiencePreview!.rows}
+                                    campaignTitle={engageByMessage[message.id]!.campaignTitle}
+                                    onCampaignTitleChange={(value) => {
+                                      setEngageByMessage((prev) => {
+                                        const cur = prev[message.id];
+                                        if (!cur) return prev;
+                                        return {
+                                          ...prev,
+                                          [message.id]: { ...cur, campaignTitle: value },
+                                        };
+                                      });
+                                    }}
+                                    aggressivenessOffset={engageByMessage[message.id]!.aggressivenessOffset}
+                                    onAggressivenessOffsetChange={(value) => {
+                                      setEngageByMessage((prev) => {
+                                        const cur = prev[message.id];
+                                        if (!cur) return prev;
+                                        return {
+                                          ...prev,
+                                          [message.id]: { ...cur, aggressivenessOffset: value },
+                                        };
+                                      });
+                                    }}
+                                    onDeploy={() => void handleDeployFromEngage(message.id)}
+                                    isDeploying={engageByMessage[message.id]!.phase === "deploying"}
+                                    deployCompletedSteps={engageByMessage[message.id]!.deployStep}
+                                    deploySteps={ATLAS_DEPLOY_STEPS}
+                                  />
+                                ) : null}
+
+                                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-start sm:gap-x-6 sm:gap-y-0">
+                                  <div className="min-w-0 space-y-1">
+                                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                                      Customers To Act On
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      <span className="font-medium text-foreground">{totalCount}</span>{" "}
+                                      customers matched
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:justify-end sm:pt-0.5">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="secondary"
+                                      className="rounded-xs"
+                                      leadingIcon={<Download className="size-3.5" />}
+                                      onClick={() =>
+                                        handleExportAudiencePreview(
+                                          message.response!.audiencePreview!.rows,
+                                        )
+                                      }
+                                    >
+                                      Export
+                                    </Button>
+                                    {engagePhase === "idle" || engageByMessage[message.id] == null ? (
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="default"
+                                        className="rounded-xs"
+                                        leadingIcon={<Sparkles className="size-3.5" />}
+                                        onClick={() =>
+                                          message.response &&
+                                          startEngageAudience(message.id, message.response)
+                                        }
+                                      >
+                                        Engage Audience
+                                      </Button>
+                                    ) : engagePhase === "sizzling" ? (
+                                      <span className="flex items-center gap-1.5 text-xs text-primary">
+                                        <Sparkles className="size-3.5 shrink-0 text-primary" />
+                                        Assigning Intelligent Coupons…
+                                      </span>
+                                    ) : null}
                                   </div>
                                 </div>
 
-                                <AnimatePresence initial={false}>
-                                  {remainingRows.length > 0 ? (
-                                    <motion.div
-                                      key={`${message.id}-audience-table`}
-                                      initial={{ opacity: 0, y: 12 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      exit={{ opacity: 0, y: -4 }}
-                                      transition={layoutSpringTransition}
-                                      className="space-y-2"
-                                    >
-                                      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                                        Full audience
-                                      </p>
-                                      <div className="relative">
-                                        <div
-                                          id={`atlas-audience-table-${message.id}`}
-                                          className={cn(
-                                            shouldCollapseAudienceTable &&
-                                              "max-h-[min(11.5rem,45vh)] overflow-hidden",
-                                          )}
-                                        >
-                                          <Table>
-                                            <TableHeader>
-                                              <TableRow size="compact">
-                                                <TableHead>Customer</TableHead>
-                                                <TableHead>Vehicle</TableHead>
-                                                <TableHead>Last Service</TableHead>
-                                                <TableHead>Reason</TableHead>
-                                                <TableHead>Priority</TableHead>
-                                              </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                              {remainingRows.map((row, index) => {
-                                                const isNewestRow = index === remainingRows.length - 1;
+                                {message.response!.couponStrategy &&
+                                isAudienceRevealComplete &&
+                                engagePhase === "idle" ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    Baseline recovery estimate{" "}
+                                    <span className="font-medium text-foreground">
+                                      {message.response.couponStrategy.estimatedRecoveryRevenue}
+                                    </span>{" "}
+                                    at estimated coupon cost{" "}
+                                    <span className="font-medium text-foreground">
+                                      {message.response.couponStrategy.estimatedCouponCost}
+                                    </span>
+                                    . Engage to tune incentives.
+                                  </p>
+                                ) : null}
 
-                                                return (
-                                                  <motion.tr
-                                                    key={row.id}
-                                                    layout="position"
-                                                    initial={{ opacity: 0, y: 8 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{
-                                                      opacity: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-                                                      y: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-                                                    }}
-                                                    className={cn(
-                                                      tableRowVariants({ size: "compact" }),
-                                                      isNewestRow && "bg-primary/3",
+                                <div className="relative min-w-0">
+                                  <div
+                                    id={`atlas-audience-table-${message.id}`}
+                                    className={cn(
+                                      shouldCollapseAudienceTable &&
+                                        "max-h-[min(23rem,68vh)] overflow-hidden",
+                                    )}
+                                  >
+                                    <Table
+                                      containerClassName="min-w-0 max-w-full"
+                                      className="w-full min-w-0 table-auto"
+                                    >
+                                      <TableHeader>
+                                        <TableRow size="compact">
+                                          <TableHead className="min-w-[7rem] max-w-[11rem]">
+                                            Customer
+                                          </TableHead>
+                                          <TableHead className="min-w-[7rem] max-w-[10rem]">
+                                            Vehicle
+                                          </TableHead>
+                                          <TableHead className="w-[4.5rem] min-w-[4.5rem]">
+                                            Retention
+                                          </TableHead>
+                                          <TableHead className="min-w-[7.5rem] whitespace-nowrap">
+                                            Last Service
+                                          </TableHead>
+                                          <TableHead className="min-w-[9rem] max-w-[16rem]">
+                                            Reason
+                                          </TableHead>
+                                          <TableHead className="min-w-[6.5rem] whitespace-nowrap">
+                                            Priority
+                                          </TableHead>
+                                          {showIntelligentCouponColumn ? (
+                                            <TableHead className="min-w-[12rem] max-w-[14rem] whitespace-normal text-left leading-tight">
+                                              Intelligent Coupon
+                                            </TableHead>
+                                          ) : null}
+                                          {showEstValueColumn ? (
+                                            <TableHead className="min-w-[6rem] whitespace-nowrap text-right">
+                                              Est. Value
+                                            </TableHead>
+                                          ) : null}
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {visibleRows.map((row, rowIndex) => {
+                                          const coupon = computeIntelligentCoupon(
+                                            row.retentionScore,
+                                            aggressivenessForCoupons,
+                                          );
+                                          return (
+                                            <TableRow key={row.id} size="compact">
+                                              <TableCell className="max-w-[11rem] truncate font-medium">
+                                                {row.name}
+                                              </TableCell>
+                                              <TableCell className="max-w-[10rem] truncate">
+                                                {row.vehicle}
+                                              </TableCell>
+                                              <TableCell className="w-[4.5rem]">
+                                                <RetentionScoreRing score={row.retentionScore} />
+                                              </TableCell>
+                                              <TableCell className="min-w-[7.5rem] whitespace-nowrap tabular-nums text-muted-foreground">
+                                                {row.lastServiceDate ?? "N/A"}
+                                              </TableCell>
+                                              <TableCell className="max-w-[16rem] whitespace-normal text-muted-foreground">
+                                                {row.serviceDueReason ?? "No additional detail"}
+                                              </TableCell>
+                                              <TableCell className="min-w-[6.5rem] whitespace-nowrap align-middle">
+                                                <Badge
+                                                  variant={priorityBadgeVariant(row.priority)}
+                                                  className="rounded-xs whitespace-nowrap"
+                                                >
+                                                  {priorityLabel(row.priority)}
+                                                </Badge>
+                                              </TableCell>
+                                              {showIntelligentCouponColumn ? (
+                                                <TableCell className="min-w-[12rem] max-w-[14rem] align-middle">
+                                                  <IntelligentCouponRevealCell
+                                                    discountPercent={coupon.discountPercent}
+                                                    tier={coupon.tier}
+                                                    badgeClassName={intelligentCouponTierBadgeClassNames(
+                                                      coupon.tier,
                                                     )}
-                                                  >
-                                                    <TableCell className="font-medium">
-                                                      <motion.div
-                                                        initial={isNewestRow ? { opacity: 0, clipPath: "inset(0 100% 0 0)" } : false}
-                                                        animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                                                        transition={{ duration: 0.28, delay: 0.02, ease: [0.22, 1, 0.36, 1] }}
-                                                      >
-                                                        {row.name}
-                                                      </motion.div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                      <motion.div
-                                                        initial={isNewestRow ? { opacity: 0, clipPath: "inset(0 100% 0 0)" } : false}
-                                                        animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                                                        transition={{ duration: 0.28, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                                                      >
-                                                        {row.vehicle}
-                                                      </motion.div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                      <motion.div
-                                                        initial={isNewestRow ? { opacity: 0, clipPath: "inset(0 100% 0 0)" } : false}
-                                                        animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                                                        transition={{ duration: 0.28, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
-                                                      >
-                                                        {row.lastServiceDate ?? "N/A"}
-                                                      </motion.div>
-                                                    </TableCell>
-                                                    <TableCell className="max-w-[240px] whitespace-normal text-muted-foreground">
-                                                      <motion.div
-                                                        initial={isNewestRow ? { opacity: 0, clipPath: "inset(0 100% 0 0)" } : false}
-                                                        animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                                                        transition={{ duration: 0.28, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                                      >
-                                                        {row.serviceDueReason ?? "No additional detail"}
-                                                      </motion.div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                      <motion.div
-                                                        initial={isNewestRow ? { opacity: 0, clipPath: "inset(0 100% 0 0)" } : false}
-                                                        animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
-                                                        transition={{ duration: 0.28, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
-                                                      >
-                                                        <Badge
-                                                          variant={priorityBadgeVariant(row.priority)}
-                                                          className="rounded-xs"
-                                                        >
-                                                          {priorityLabel(row.priority)}
-                                                        </Badge>
-                                                      </motion.div>
-                                                    </TableCell>
-                                                  </motion.tr>
-                                                );
-                                              })}
-                                            </TableBody>
-                                          </Table>
-                                        </div>
-                                        {shouldCollapseAudienceTable ? (
-                                          <div
-                                            className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-card via-card/85 to-transparent pb-1 pt-16"
-                                            aria-hidden
-                                          >
-                                            <div className="pointer-events-auto flex justify-center px-2">
-                                              <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="rounded-xs text-muted-foreground hover:text-foreground"
-                                                aria-expanded={false}
-                                                aria-controls={`atlas-audience-table-${message.id}`}
-                                                leadingIcon={<ChevronDown className="size-4" />}
-                                                onClick={() =>
-                                                  setAudienceTableExpandedByMessage((current) => ({
-                                                    ...current,
-                                                    [message.id]: true,
-                                                  }))
-                                                }
-                                              >
-                                                Expand table
-                                                <span className="ml-1.5 text-xs font-normal text-muted-foreground tabular-nums">
-                                                  · {remainingRows.length} rows
-                                                </span>
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        ) : null}
+                                                    rowIndex={rowIndex}
+                                                    variant={
+                                                      engagePhase === "sizzling" ? "sizzle" : "static"
+                                                    }
+                                                  />
+                                                </TableCell>
+                                              ) : null}
+                                              {showEstValueColumn ? (
+                                                <TableCell className="min-w-[6rem] whitespace-nowrap text-right tabular-nums text-muted-foreground">
+                                                  ${estimateCouponValueDollars(row, aggressivenessForCoupons)}
+                                                </TableCell>
+                                              ) : null}
+                                            </TableRow>
+                                          );
+                                        })}
+                                      </TableBody>
+                                    </Table>
+                                  </div>
+                                  {shouldCollapseAudienceTable ? (
+                                    <div
+                                      className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-background via-background/90 to-transparent pb-1 pt-16"
+                                      aria-hidden
+                                    >
+                                      <div className="pointer-events-auto flex justify-center px-2">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          className="rounded-xs text-muted-foreground hover:text-foreground"
+                                          aria-expanded={false}
+                                          aria-controls={`atlas-audience-table-${message.id}`}
+                                          leadingIcon={<ChevronDown className="size-4" />}
+                                          onClick={() =>
+                                            setAudienceTableExpandedByMessage((current) => ({
+                                              ...current,
+                                              [message.id]: true,
+                                            }))
+                                          }
+                                        >
+                                          Expand Table
+                                          <span className="ml-1.5 text-xs font-normal text-muted-foreground tabular-nums">
+                                            · {visibleRows.length} Rows
+                                          </span>
+                                        </Button>
                                       </div>
-                                    </motion.div>
+                                    </div>
                                   ) : null}
-                                </AnimatePresence>
-                              </>
+                                </div>
+                              </div>
                             );
                           })()}
-                        </CardContent>
-                      </Card>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                      </div>
+                    ) : null}
 
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {message.response?.campaignSuggestion &&
-                      (revealedSectionsByMessage[message.id] ?? 999) >=
-                        (message.response?.audiencePreview ? 5 : 4) ? (
-                        <motion.div
-                          key={`${message.id}-campaign`}
-                          layout
-                          initial={{ opacity: 0, y: 14 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={layoutSpringTransition}
-                        >
-                          <Card
-                            size="sm"
-                            className="border-primary/15 bg-primary/5 py-0 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
-                          >
-                        <CardHeader className="pb-2">
-                          <CardTitle className="flex items-center gap-2 text-base">
-                            <Sparkles className="size-4 text-primary" />
-                            Campaign recommendation
-                          </CardTitle>
-                          <CardDescription>
-                            Suggested follow-up campaign based on this audience.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4 pb-4">
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">
-                              {message.response.campaignSuggestion.title}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {message.response.campaignSuggestion.description}
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="rounded-xs">
-                              Reach: {message.response.campaignSuggestion.estimatedReach}
-                            </Badge>
-                            {message.response.campaignSuggestion.estimatedRevenue != null ? (
-                              <Badge variant="secondary" className="rounded-xs">
-                                Revenue: $
-                                {message.response.campaignSuggestion.estimatedRevenue.toLocaleString()}
-                              </Badge>
-                            ) : null}
-                          </div>
-                          {message.response.campaignSuggestion.suggestedOffer ? (
-                            <div className="space-y-1.5">
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Suggested coupon
-                              </p>
-                              <div className="max-w-[280px] rounded-md border bg-background/80 p-2">
-                                <CouponCardPreview
-                                  offer={mergePartialCampaignOffer({
-                                    id: "atlas-preview",
-                                    ...message.response.campaignSuggestion.suggestedOffer,
-                                  })}
-                                  compact
-                                />
-                              </div>
-                            </div>
-                          ) : null}
-                          <Button
-                            variant="secondary"
-                            leadingIcon={<Megaphone />}
-                            className="rounded-xs"
-                            onClick={() => handleCreateCampaign(message.response?.campaignSuggestion)}
-                          >
-                            Create campaign for this audience
-                          </Button>
-                        </CardContent>
-                      </Card>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
-
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {message.response?.followUpPrompts.length &&
-                      (revealedSectionsByMessage[message.id] ?? 999) >=
-                        (message.response?.campaignSuggestion
-                          ? message.response?.audiencePreview
-                            ? 6
-                            : 4
-                          : message.response?.audiencePreview
-                            ? 5
-                            : 3) ? (
-                        <motion.div
-                          key={`${message.id}-followups`}
-                          layout
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={layoutSpringTransition}
-                          className="space-y-2 px-1"
-                        >
-                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                          Suggested next question
-                        </p>
-                        {renderPromptChips(message.response.followUpPrompts, { compact: true })}
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
-                  </motion.div>
-                </motion.div>
+                    {message.response?.audiencePreview &&
+                    engageByMessage[message.id]?.phase === "success" ? (
+                      <div className="px-1">
+                        <AtlasAiDeploySuccess
+                          campaignTitle={
+                            engageByMessage[message.id]?.campaignTitle ?? "Atlas campaign"
+                          }
+                          audienceSize={message.response.audiencePreview.rows.length}
+                          tierSummaryLine={buildCouponStrategyFromRows(
+                            message.response.audiencePreview.rows,
+                            engageByMessage[message.id]?.aggressivenessOffset ?? 0,
+                          )
+                            .tiers.map((t) => `${t.count} ${t.tier} (${t.discountPercent}%)`)
+                            .join(" · ")}
+                          onViewCampaigns={() => {
+                            onNavigateToCampaigns?.();
+                            handleBackFromEngageSuccess(message.id);
+                          }}
+                          onBack={() => handleBackFromEngageSuccess(message.id)}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
               ),
             )}
 
@@ -1416,21 +1250,15 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
               {isThinking ? (
                 <motion.div
                   key="atlas-thinking"
-                  layout
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={layoutSpringTransition}
-                  className="mx-auto w-full max-w-3xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className={cn("mx-auto w-full", ATLAS_CONTENT_MAX_WIDTH_CLASS)}
                 >
                   <div className="w-full py-4">
-                    <motion.div layout transition={layoutSpringTransition} className="space-y-4">
-                    <motion.div
-                      layout
-                      layoutId="atlas-assistant-header"
-                      transition={layoutSpringTransition}
-                      className="flex items-center gap-3 pl-[calc(theme(spacing.1)-6px)] pr-1"
-                    >
+                    <div className="space-y-4">
+                    <div className="flex items-center gap-3 pl-[calc(theme(spacing.1)-6px)] pr-1">
                       <div className="relative flex size-10 items-center justify-center">
                         {[0, 1, 2].map((ring) => (
                           <motion.span
@@ -1456,42 +1284,29 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
                             repeat: Infinity,
                           }}
                         />
-                        <motion.div
-                          layoutId="atlas-assistant-logo"
-                          transition={layoutSpringTransition}
-                        >
-                          <AtlasAiLogo
-                            className="relative z-10 size-10"
-                            imageClassName="size-8 drop-shadow-[0_0_16px_rgba(26,147,117,0.28)]"
-                          />
-                        </motion.div>
+                        <AtlasAiLogo
+                          className="relative z-10 size-10"
+                          imageClassName="size-8 drop-shadow-[0_0_16px_rgba(26,147,117,0.28)]"
+                        />
                       </div>
                       <div className="min-w-0">
-                        <motion.p
-                          layoutId="atlas-assistant-title"
-                          transition={layoutSpringTransition}
-                          className="text-sm font-medium text-foreground"
-                        >
+                        <p className="text-sm font-medium text-foreground">
                           Atlas AI is generating your result
-                        </motion.p>
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           Thinking through your audience and building the response
                         </p>
                       </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.div layout transition={layoutSpringTransition} className="pl-1">
+                    <div className="pl-1">
                       <p className="text-sm leading-6 text-muted-foreground">
                         Reading dealership signals, sizing opportunity, and lining up the
                         next best move for your team.
                       </p>
-                    </motion.div>
+                    </div>
 
-                    <motion.div
-                      layout="position"
-                      transition={layoutSpringTransition}
-                      className="w-full max-w-xl space-y-2 text-left"
-                    >
+                    <div className="w-full max-w-3xl space-y-2 text-left">
                       {(() => {
                         const visibleSteps = loadingSteps.slice(0, visibleLoadingStepCount);
                         const activeStepDetail = visibleSteps[activeLoadingStep]?.detail;
@@ -1520,11 +1335,10 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
                                     isActive ? "text-foreground" : "text-muted-foreground",
                                   )}
                                 >
-                                  {/* pt-0.5 + size-4 = circle bottom; line runs to next row's circle (span row paddings). */}
                                   <div className="relative flex w-4 shrink-0 flex-col items-center self-stretch pt-0.5">
                                     {!isLast ? (
                                       <div
-                                        className="pointer-events-none absolute left-1/2 top-[calc(0.125rem+1rem)] bottom-[-0.875rem] w-px -translate-x-1/2 overflow-hidden rounded-full"
+                                        className="pointer-events-none absolute left-1/2 top-[calc(0.125rem+1rem-1px)] bottom-[-1.5rem] w-px -translate-x-1/2 overflow-hidden rounded-full"
                                         aria-hidden
                                       >
                                         <span className="absolute inset-0 bg-border/50" />
@@ -1628,8 +1442,8 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
                           </>
                         );
                       })()}
-                    </motion.div>
-                  </motion.div>
+                    </div>
+                  </div>
                 </div>
                 </motion.div>
               ) : null}
@@ -1651,61 +1465,6 @@ export function AtlasAiPage({ onCreateCampaign }: AtlasAiPageProps) {
           ) : null}
         </AnimatePresence>
       </div>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Send to BDC / Export list</DialogTitle>
-            <DialogDescription>
-              Package this audience for your team or export the preview rows as a CSV.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-3">
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              className="rounded-xs border border-border p-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xs bg-primary/10 text-primary">
-                  <FileSpreadsheet className="size-5" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Export CSV</p>
-                  <p className="text-sm text-muted-foreground">
-                    Download the preview list for ops, reporting, or your BDC workflow.
-                  </p>
-                </div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCreateBdcHandoff}
-              className="rounded-xs border border-border p-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xs bg-primary/10 text-primary">
-                  <Users className="size-5" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Create BDC handoff</p>
-                  <p className="text-sm text-muted-foreground">
-                    Log this audience as a handoff so your BDC team can work the list next.
-                  </p>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

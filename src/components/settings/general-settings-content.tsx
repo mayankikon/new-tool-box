@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 import {
   Card,
   CardContent,

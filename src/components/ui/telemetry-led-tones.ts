@@ -23,8 +23,8 @@ export type TelemetryDeckLedTone = (typeof TELEMETRY_LED_TONE_IDS)[number];
 /** sRGB 0–1 — tuned for small emissive capsules on dark bezels */
 export const TELEMETRY_LED_TONE_RGB: Record<TelemetryDeckLedTone, [number, number, number]> =
   {
-    /** Theme primary #02B689 (dark brand green) */
-    primary: [3 / 255, 145 / 255, 129 / 255],
+    /** Theme primary #1A9375 (brand green) */
+    primary: [26 / 255, 147 / 255, 117 / 255],
     /** Check engine, ABS, traction */
     amber: [1.0, 0.62, 0.12],
     /** Oil, brake, battery fault */

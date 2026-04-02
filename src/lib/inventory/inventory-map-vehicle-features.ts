@@ -12,7 +12,7 @@ export type InventoryLotAgeTier = "fresh" | "aging" | "stale";
 
 /** Stroke / circle colors aligned with status-sheet greens / amber / orange-red. */
 export const INVENTORY_LOT_AGE_TIER_HEX: Record<InventoryLotAgeTier, string> = {
-  fresh: "#00B397",
+  fresh: "#1A9375",
   aging: "#E6B117",
   stale: "#E64B17",
 };

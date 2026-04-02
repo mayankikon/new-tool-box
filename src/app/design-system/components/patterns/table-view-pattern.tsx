@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/app-theme-provider";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
@@ -15,6 +15,7 @@ import {
   type CustomerSortKey,
 } from "@/components/customers/customers-table-model";
 import { Paginator } from "@/components/ui/paginator";
+import { DATA_TABLE_HEADER_BACKGROUND_CLASS } from "@/lib/data-table-row-hover";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 
 const { underGlowPx, tabAccent, tabTopRadiusPx } = FILE_CABINET_BILLING_TABLE_DEFAULTS;
@@ -76,8 +77,9 @@ export function DesignSystemTableViewPattern() {
         showLeftLamp={false}
         noLeftLampBelowStyle="preset-led"
         tabMotionVariant="sink-rise"
+        tabBackgroundClassName={DATA_TABLE_HEADER_BACKGROUND_CLASS}
       >
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2">
           <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
             <CustomersFileCabinetTable
               rows={pagedCustomers}
