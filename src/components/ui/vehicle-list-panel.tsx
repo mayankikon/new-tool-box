@@ -67,12 +67,18 @@ interface VehicleListPanelProps extends React.ComponentProps<"div"> {
   vehicles: VehicleListPanelRow[];
   onCollapse?: () => void;
   onVehicleClick?: (vehicle: VehicleListPanelRow) => void;
+  /** Replaces the default “Showing N vehicles” header row. */
+  listHeader?: React.ReactNode;
+  /** Shown when `vehicles` is empty (e.g. filtered similar matches). */
+  emptyState?: React.ReactNode;
 }
 
 function VehicleListPanel({
   vehicles,
   onCollapse,
   onVehicleClick,
+  listHeader,
+  emptyState,
   className,
   ...props
 }: VehicleListPanelProps) {
@@ -84,18 +90,24 @@ function VehicleListPanel({
       )}
       {...props}
     >
-      <VehicleListPanelHeader
-        vehicleCount={vehicles.length}
-        onCollapse={onCollapse}
-      />
+      {listHeader ?? (
+        <VehicleListPanelHeader
+          vehicleCount={vehicles.length}
+          onCollapse={onCollapse}
+        />
+      )}
       <div className="flex-1 overflow-y-auto">
-        {vehicles.map((vehicle, index) => (
-          <VehicleListItem
-            key={vehicle.vin ?? index}
-            {...vehicle}
-            onClick={onVehicleClick ? () => onVehicleClick(vehicle) : undefined}
-          />
-        ))}
+        {vehicles.length === 0 && emptyState ? (
+          emptyState
+        ) : (
+          vehicles.map((vehicle, index) => (
+            <VehicleListItem
+              key={vehicle.vin ?? index}
+              {...vehicle}
+              onClick={onVehicleClick ? () => onVehicleClick(vehicle) : undefined}
+            />
+          ))
+        )}
       </div>
     </div>
   );

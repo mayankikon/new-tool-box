@@ -140,15 +140,15 @@ export const ATLAS_AI_HOME_MODULES: AtlasAiHomeModule[] = [
     iconKey: "map",
   },
   {
-    id: "atlas-home-bdc",
-    title: "BDC Priorities",
-    description: "Package the customers worth calling first this week.",
-    prompt: "Which customers should BDC call first this week?",
+    id: "atlas-home-dtc",
+    title: "DTC Diagnostics",
+    description: "See how many diagnostic trouble codes fired recently.",
+    prompt: "How many DTC error codes were triggered last week?",
     examples: [
-      "Who should the team call first this week?",
-      "Which owners combine urgency with revenue upside?",
+      "Which vehicles had the most DTC events recently?",
+      "What are the top diagnostic trouble codes this month?",
     ],
-    iconKey: "phone",
+    iconKey: "triangle-alert",
   },
 ];
 
@@ -462,6 +462,11 @@ const FOLLOW_UPS = {
     "Which of these BDC targets have recall urgency too?",
     "Which BDC targets should move into a campaign next?",
   ],
+  dtc: [
+    "Which DTC codes are tied to the highest-value repair orders?",
+    "Which vehicles had repeat DTC triggers in the last 30 days?",
+    "Show the customers with the most urgent DTC-driven service need.",
+  ],
   relocation: [
     "Which relocated owners should be suppressed from local service offers?",
     "Which relocated customers still have strong revenue value?",
@@ -743,6 +748,13 @@ function detectIntent(query: string): AtlasAiIntent {
   }
   if (normalized.includes("defection") || normalized.includes("defect")) {
     return "defection";
+  }
+  if (
+    normalized.includes("dtc") ||
+    normalized.includes("diagnostic trouble code") ||
+    normalized.includes("error code")
+  ) {
+    return "dtc-codes";
   }
   if (normalized.includes("bdc") || normalized.includes("call this week")) {
     return "bdc-list";
@@ -1264,6 +1276,55 @@ function buildResponse(
           audienceSegments: [
             createAudienceSegment("atlas-save-1", "Defection Risk", "equals", "High"),
           ],
+        }),
+      };
+    }
+    case "dtc-codes": {
+      const matches = ATLAS_AI_CUSTOMERS.filter(
+        (customer) => customer.daysSinceLastService >= 180 || customer.hasRecall,
+      );
+      const previewRows = toPreviewRows(matches);
+      return {
+        intent,
+        userQuery,
+        headline: `${previewRows.length} vehicles triggered DTC codes last week`,
+        summary:
+          `I found ${previewRows.length} vehicles with recent diagnostic trouble code activity. The most common codes point to powertrain, emissions, and sensor faults, which makes this a strong proactive-outreach audience before issues escalate into roadside breakdowns.`,
+        whyItMatters:
+          "DTC alerts give the dealership an early signal to reach out before the customer notices a problem or takes the vehicle elsewhere for diagnosis.",
+        metrics: [
+          { id: "matched", label: "Vehicles with DTCs", value: String(previewRows.length) },
+          { id: "high-priority", label: "High priority", value: String(previewRows.filter((customer) => customer.priority === "high").length) },
+          { id: "revenue", label: "Estimated diagnostic revenue", value: "$5.6K" },
+        ],
+        insightCategory: "DTC Diagnostics",
+        insightTags: ["DTC alert", "Proactive outreach"],
+        nextBestActionLabel: "BDC first",
+        audiencePreview: {
+          label: "DTC alert audience",
+          description: "Vehicles that triggered diagnostic trouble codes in the past week.",
+          totalCount: previewRows.length,
+          rows: previewRows,
+        },
+        recommendedActions: createRecommendedActions(true),
+        followUpPrompts: toPromptSuggestions(FOLLOW_UPS.dtc),
+        campaignSuggestion: buildCampaignSuggestion({
+          title: "DTC Proactive Outreach Campaign",
+          description: "Contact owners whose vehicles triggered diagnostic codes before they seek service elsewhere.",
+          campaignType: "service-reminder",
+          templateId: "tpl-002",
+          estimatedReach: previewRows.length,
+          estimatedRevenue: 5600,
+          audienceLabel: "Vehicles with recent DTC activity",
+          audienceSegments: [
+            createAudienceSegment("atlas-dtc-1", "DTC Trigger", "equals", "Yes"),
+            createAudienceSegment("atlas-dtc-2", "DTC Trigger Date", "within", "7 days"),
+          ],
+          trigger: {
+            type: "health",
+            isRecurring: false,
+            config: { threshold: "dtc-triggered" },
+          },
         }),
       };
     }

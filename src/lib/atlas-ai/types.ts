@@ -33,6 +33,7 @@ export type AtlasAiIntent =
   | "relocation"
   | "defection"
   | "competitor-visit"
+  | "dtc-codes"
   | "unknown";
 
 export interface AtlasAiHomeModule {

@@ -13,6 +13,8 @@ interface InventoryViewModeToggleProps {
   onValueChange: (value: InventoryViewModeToggleValue) => void;
   className?: string;
   disabled?: boolean;
+  /** When false, rich hover tooltips (MapViewTooltip) are not shown. Default true. */
+  showHoverTooltips?: boolean;
   "aria-label"?: string;
 }
 
@@ -36,6 +38,7 @@ export function InventoryViewModeToggle({
   onValueChange,
   className,
   disabled = false,
+  showHoverTooltips = true,
   "aria-label": ariaLabel = "Inventory view mode",
 }: InventoryViewModeToggleProps) {
   const [hoveredOption, setHoveredOption] =
@@ -84,7 +87,9 @@ export function InventoryViewModeToggle({
           {OPTIONS.map((option) => {
             const isActive = value === option.value;
             const showTooltip =
-              hoveredOption === option.value && option.value !== value;
+              showHoverTooltips &&
+              hoveredOption === option.value &&
+              option.value !== value;
             return (
               <div key={option.value} className="relative inline-flex">
                 <AnimatePresence mode="wait" initial={false}>
