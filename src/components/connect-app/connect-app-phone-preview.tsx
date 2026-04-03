@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Battery,
   Calendar,
@@ -61,12 +60,6 @@ function QuickIcon({ name }: { name: ConnectQuickActionIcon }) {
   }
 }
 
-const CONTENT_TRANSITION = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-};
-
 export function ConnectAppPhonePreview({
   config,
   profile,
@@ -84,6 +77,7 @@ export function ConnectAppPhonePreview({
   galleryUrls: string[];
 }) {
   const [gallerySlideIndex, setGallerySlideIndex] = useState(0);
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
   const firstCouponMeasureRef = useRef<HTMLDivElement>(null);
   const secondCouponMeasureRef = useRef<HTMLDivElement>(null);
   const [firstCouponHeightPx, setFirstCouponHeightPx] = useState(0);
@@ -124,18 +118,35 @@ export function ConnectAppPhonePreview({
       ? config.heroImageUrl?.trim() || undefined
       : undefined;
 
-  useEffect(() => {
-    if (galleryUrls.length <= 1) return;
-    const t = window.setInterval(() => {
-      setGallerySlideIndex((i) => (i + 1) % galleryUrls.length);
-    }, 4000);
-    return () => window.clearInterval(t);
-  }, [galleryUrls.length]);
+  useLayoutEffect(() => {
+    const el = galleryScrollRef.current;
+    if (el) {
+      el.scrollLeft = 0;
+    }
+    setGallerySlideIndex(0);
+  }, [galleryUrls]);
 
   useEffect(() => {
     setGallerySlideIndex((i) =>
       galleryUrls.length === 0 ? 0 : Math.min(i, galleryUrls.length - 1),
     );
+  }, [galleryUrls.length]);
+
+  useEffect(() => {
+    if (galleryUrls.length <= 1) return;
+    const t = window.setInterval(() => {
+      const el = galleryScrollRef.current;
+      if (!el) return;
+      setGallerySlideIndex((i) => {
+        const next = (i + 1) % galleryUrls.length;
+        const w = el.clientWidth;
+        if (w > 0) {
+          el.scrollTo({ left: next * w, behavior: "smooth" });
+        }
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(t);
   }, [galleryUrls.length]);
 
   const navIcon =
@@ -319,29 +330,44 @@ export function ConnectAppPhonePreview({
                     {promotionOffers.slice(0, 4).map((offer, index) => (
                       <div
                         key={offer.id}
-                        className="flex h-64 w-[240px] max-w-[calc(100%-1.25rem)] shrink-0 snap-start items-start justify-center overflow-hidden"
+                        className="flex w-[240px] max-w-[calc(100%-1.25rem)] shrink-0 snap-start items-start justify-center overflow-hidden"
                       >
                         {index === 1 ? (
+                          /* Scale does not shrink layout box; clip to first card height so no gap before gallery. */
                           <div
-                            className="w-full origin-top"
+                            className="w-full overflow-hidden"
                             style={{
-                              transform:
-                                secondCouponScaleDown < 1
-                                  ? `scale(${secondCouponScaleDown})`
+                              height:
+                                firstCouponHeightPx > 0
+                                  ? firstCouponHeightPx
                                   : undefined,
-                              transformOrigin: "top center",
+                              maxHeight:
+                                firstCouponHeightPx > 0
+                                  ? firstCouponHeightPx
+                                  : undefined,
                             }}
                           >
                             <div
-                              ref={secondCouponMeasureRef}
-                              className="w-full"
+                              className="w-full origin-top"
+                              style={{
+                                transform:
+                                  secondCouponScaleDown < 1
+                                    ? `scale(${secondCouponScaleDown})`
+                                    : undefined,
+                                transformOrigin: "top center",
+                              }}
                             >
-                              <CouponCardPreview
-                                offer={offer}
-                                compact
-                                className="max-h-full min-h-0 w-full overflow-hidden rounded-lg shadow-sm ring-1 ring-black/5"
-                                dealershipDisplayName={profile.dealershipName}
-                              />
+                              <div
+                                ref={secondCouponMeasureRef}
+                                className="w-full"
+                              >
+                                <CouponCardPreview
+                                  offer={offer}
+                                  compact
+                                  className="max-h-full min-h-0 w-full overflow-hidden rounded-lg shadow-sm ring-1 ring-black/5"
+                                  dealershipDisplayName={profile.dealershipName}
+                                />
+                              </div>
                             </div>
                           </div>
                         ) : (
@@ -367,29 +393,51 @@ export function ConnectAppPhonePreview({
 
               {/* Your service community — gallery carousel (independent of hero image) */}
               {config.galleryEnabled && galleryUrls.length > 0 ? (
-                <div className="mt-4">
+                <div className="mt-8">
                   <p className="mb-2 text-[13px] font-semibold text-foreground">
                     Your service community
                   </p>
                   <div className="relative overflow-hidden rounded-xl border border-border/50 bg-muted/15">
-                    <div className="relative aspect-[16/10] w-full">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={galleryUrls[gallerySlideIndex]}
-                          initial={CONTENT_TRANSITION.initial}
-                          animate={CONTENT_TRANSITION.animate}
-                          exit={CONTENT_TRANSITION.exit}
-                          transition={{ duration: 0.2 }}
-                          className="absolute inset-0"
+                    <div
+                      ref={galleryScrollRef}
+                      role="region"
+                      aria-label="Your service community gallery"
+                      className={cn(
+                        "flex w-full overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch]",
+                        "snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                        galleryUrls.length > 1 ? "touch-pan-x" : "",
+                      )}
+                      onScroll={(e) => {
+                        const scroller = e.currentTarget;
+                        if (galleryUrls.length <= 1) return;
+                        const w = scroller.clientWidth;
+                        if (w <= 0) return;
+                        const idx = Math.round(scroller.scrollLeft / w);
+                        const clamped = Math.min(
+                          Math.max(0, idx),
+                          galleryUrls.length - 1,
+                        );
+                        setGallerySlideIndex((prev) =>
+                          prev === clamped ? prev : clamped,
+                        );
+                      }}
+                    >
+                      {galleryUrls.map((url, i) => (
+                        <div
+                          key={`${i}-${url.slice(0, 48)}`}
+                          className="w-full shrink-0 snap-start snap-always"
+                          style={{ flex: "0 0 100%" }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={galleryUrls[gallerySlideIndex]}
-                            alt=""
-                            className="size-full object-cover"
-                          />
-                        </motion.div>
-                      </AnimatePresence>
+                          <div className="relative aspect-[16/10] w-full">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt=""
+                              className="size-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     {galleryUrls.length > 1 ? (
                       <div className="flex justify-center gap-1.5 py-2">
@@ -404,7 +452,16 @@ export function ConnectAppPhonePreview({
                                 ? "bg-foreground"
                                 : "bg-foreground/20",
                             )}
-                            onClick={() => setGallerySlideIndex(i)}
+                            onClick={() => {
+                              const el = galleryScrollRef.current;
+                              if (!el) return;
+                              const w = el.clientWidth;
+                              el.scrollTo({
+                                left: i * w,
+                                behavior: "smooth",
+                              });
+                              setGallerySlideIndex(i);
+                            }}
                           />
                         ))}
                       </div>

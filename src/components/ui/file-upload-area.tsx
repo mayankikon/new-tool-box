@@ -10,6 +10,8 @@ interface FileUploadAreaProps extends Omit<React.ComponentProps<"div">, "onDrop"
   hint?: string
   /** Accepted MIME types for the hidden input (e.g. "image/*,video/*") */
   accept?: string
+  /** Allow multi-file selection and drops (default true) */
+  multiple?: boolean
   disabled?: boolean
   /** Called with the selected/dropped files */
   onFilesSelected?: (files: File[]) => void
@@ -19,6 +21,7 @@ function FileUploadArea({
   className,
   hint = "Up to 10 files, 100MB total limit",
   accept,
+  multiple = true,
   disabled = false,
   onFilesSelected,
   ...props
@@ -152,7 +155,7 @@ function FileUploadArea({
       <input
         ref={inputRef}
         type="file"
-        multiple
+        multiple={multiple}
         accept={accept}
         className="hidden"
         onChange={handleInputChange}

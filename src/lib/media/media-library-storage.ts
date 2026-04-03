@@ -2,6 +2,9 @@ import type { MediaAsset, MediaCategory, MediaKind } from "./media-library-types
 
 const STORAGE_KEY = "sm-media-library-v1";
 
+/** Serializes read-modify-write so concurrent `addMediaAsset` calls cannot overwrite each other. */
+let persistQueue: Promise<void> = Promise.resolve();
+
 function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
 }
@@ -166,9 +169,11 @@ export async function addMediaAsset(
     uploadedAt: nowIso(),
   };
 
-  const items = loadRaw();
-  items.unshift(asset);
-  saveRaw(items);
+  await (persistQueue = persistQueue.then(() => {
+    const items = loadRaw();
+    items.unshift(asset);
+    saveRaw(items);
+  }));
   return asset;
 }
 

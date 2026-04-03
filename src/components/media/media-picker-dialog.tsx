@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,25 +8,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUploadArea } from "@/components/ui/file-upload-area";
 import {
   addMediaAsset,
   getMediaAssetById,
   listMediaAssets,
   MEDIA_LIBRARY_CHANGED_EVENT,
 } from "@/lib/media/media-library-storage";
-import { MEDIA_CATEGORY_LABELS } from "@/lib/media/media-library-types";
 import type { MediaAsset, MediaCategory, MediaKind } from "@/lib/media/media-library-types";
 import { cn } from "@/lib/utils";
-
-const ALL_CATEGORIES: (MediaCategory | "all")[] = [
-  "all",
-  "brand-assets",
-  "vehicle-media",
-  "campaign-media",
-  "connect-assets",
-  "general",
-];
 
 export function MediaPickerDialog({
   open,
@@ -50,10 +39,7 @@ export function MediaPickerDialog({
   allowUpload?: boolean;
   uploadCategory?: MediaCategory;
 }) {
-  const uploadInputId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingAssetByIdRef = useRef<Map<string, MediaAsset>>(new Map());
-  const [tab, setTab] = useState<(typeof ALL_CATEGORIES)[number]>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [libraryEpoch, setLibraryEpoch] = useState(0);
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -74,14 +60,13 @@ export function MediaPickerDialog({
 
   const assets = useMemo(() => {
     const list = listMediaAssets({
-      category: tab === "all" ? undefined : tab,
       kind: kindFilter,
     });
     if (categoryFilter) {
       return list.filter((a) => a.category === categoryFilter);
     }
     return list;
-  }, [tab, kindFilter, categoryFilter, open, libraryEpoch]);
+  }, [kindFilter, categoryFilter, open, libraryEpoch]);
 
   const firstSelectedAsset = useMemo(() => {
     const id = Array.from(selected)[0];
@@ -97,13 +82,20 @@ export function MediaPickerDialog({
     return "image/*,video/*";
   }, [kindFilter]);
 
+  const uploadHint = useMemo(() => {
+    if (kindFilter === "video") return "Video files only";
+    if (kindFilter === "image") return "PNG, JPG, WebP, or other images";
+    return "Images or videos";
+  }, [kindFilter]);
+
   const handleUploadFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files?.length) return;
+    async (files: File[]) => {
+      if (!files.length) return;
+      const queue = multiple ? files : files.slice(0, 1);
       setUploadBusy(true);
       try {
         const newIds: string[] = [];
-        for (const file of Array.from(files)) {
+        for (const file of queue) {
           const asset = await addMediaAsset(file, uploadCategory);
           pendingAssetByIdRef.current.set(asset.id, asset);
           const isVideo =
@@ -120,7 +112,6 @@ export function MediaPickerDialog({
           newIds.push(asset.id);
         }
         if (newIds.length === 0) return;
-        setTab(uploadCategory);
         setLibraryEpoch((n) => n + 1);
         setSelected((prev) => {
           const next = new Set(prev);
@@ -135,9 +126,6 @@ export function MediaPickerDialog({
         });
       } finally {
         setUploadBusy(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
       }
     },
     [kindFilter, multiple, uploadCategory],
@@ -187,43 +175,27 @@ export function MediaPickerDialog({
         )}
       >
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-            <DialogTitle className="text-left text-base font-medium">
-              {title}
-            </DialogTitle>
-            {allowUpload ? (
-              <div className="flex shrink-0 flex-col gap-1.5 sm:items-end">
-                <label htmlFor={uploadInputId} className="sr-only">
-                  Upload files from your computer
-                </label>
-                <input
-                  id={uploadInputId}
-                  ref={fileInputRef}
-                  type="file"
-                  className="sr-only"
-                  accept={uploadAccept}
-                  multiple={multiple}
-                  disabled={uploadBusy}
-                  onChange={(e) => void handleUploadFiles(e.target.files)}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="w-full sm:w-auto"
-                  disabled={uploadBusy}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="size-3.5" aria-hidden />
-                  Upload From Computer
-                </Button>
-                <p className="max-w-[260px] text-right text-[11px] leading-snug text-muted-foreground sm:max-w-none">
-                  Files are saved to your library and appear in the grid below.
-                </p>
-              </div>
-            ) : null}
-          </div>
+          <DialogTitle className="text-left text-base font-medium">
+            {title}
+          </DialogTitle>
+          <p className="mt-1 text-left text-xs leading-relaxed text-muted-foreground">
+            Upload new files or pick from your library. Everything is stored
+            locally in this preview.
+          </p>
         </DialogHeader>
+
+        {allowUpload ? (
+          <div className="shrink-0 border-b border-border px-6 py-4">
+            <FileUploadArea
+              hint={uploadHint}
+              accept={uploadAccept}
+              multiple={multiple}
+              disabled={uploadBusy}
+              className="py-6"
+              onFilesSelected={(fileList) => void handleUploadFiles(fileList)}
+            />
+          </div>
+        ) : null}
 
         {firstSelectedAsset && !multiple ? (
           <div className="shrink-0 border-b border-border bg-muted/30 px-6 py-4">
@@ -254,23 +226,10 @@ export function MediaPickerDialog({
           </div>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-hidden px-6 pb-4 pt-3">
-          <Tabs
-            value={tab}
-            onValueChange={(v) => setTab(v as (typeof ALL_CATEGORIES)[number])}
-          >
-            <TabsList className="mb-3 flex h-auto w-full flex-wrap justify-start gap-1">
-              {ALL_CATEGORIES.map((c) => (
-                <TabsTrigger
-                  key={c}
-                  value={c}
-                  className="text-xs capitalize"
-                >
-                  {c === "all" ? "All" : MEDIA_CATEGORY_LABELS[c]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        <div className="min-h-0 flex-1 overflow-hidden px-6 pb-4 pt-4">
+          <p className="mb-3 text-xs font-medium text-muted-foreground">
+            Library
+          </p>
           <div className="grid max-h-[min(42vh,360px)] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
             {assets.map((a) => (
               <button
@@ -310,7 +269,7 @@ export function MediaPickerDialog({
           {assets.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               {allowUpload
-                ? "No matching assets in this tab. Upload above or pick another category."
+                ? "No media in your library yet. Upload above to add files."
                 : "No matching assets yet. Add files in Media Library."}
             </p>
           ) : null}

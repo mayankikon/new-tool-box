@@ -27,6 +27,7 @@ import type {
   ConnectQuickActionKind,
 } from "@/lib/connect-app/connect-app-types";
 import { createDefaultConnectAppConfig } from "@/lib/connect-app/connect-app-types";
+import { MEDIA_LIBRARY_CHANGED_EVENT } from "@/lib/media/media-library-storage";
 import { getMediaAssetById } from "@/lib/media/media-library-storage";
 import { Button } from "@/components/ui/button";
 import {
@@ -238,6 +239,7 @@ export function ConnectAppEditor({
   const [picker, setPicker] = useState<
     "hero" | "gallery" | "these-vehicles" | null
   >(null);
+  const [mediaLibraryEpoch, setMediaLibraryEpoch] = useState(0);
 
   const sync = useCallback(() => {
     setConfig(loadConnectAppConfig());
@@ -247,6 +249,12 @@ export function ConnectAppEditor({
     window.addEventListener(CONNECT_APP_CHANGED_EVENT, sync);
     return () => window.removeEventListener(CONNECT_APP_CHANGED_EVENT, sync);
   }, [sync]);
+
+  useEffect(() => {
+    const bump = () => setMediaLibraryEpoch((n) => n + 1);
+    window.addEventListener(MEDIA_LIBRARY_CHANGED_EVENT, bump);
+    return () => window.removeEventListener(MEDIA_LIBRARY_CHANGED_EVENT, bump);
+  }, []);
 
   const setPartial = useCallback((patch: Partial<ConnectAppConfig>) => {
     setConfig(updateConnectAppConfig(patch));
@@ -276,7 +284,7 @@ export function ConnectAppEditor({
     return config.galleryMediaIds
       .map((id) => getMediaAssetById(id)?.url)
       .filter((u): u is string => Boolean(u));
-  }, [config.galleryMediaIds]);
+  }, [config.galleryMediaIds, mediaLibraryEpoch]);
 
   return (
     <div
