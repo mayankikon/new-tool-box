@@ -14,6 +14,7 @@ import {
 import { videoToGifBlob } from "@/lib/campaigns/video-to-gif";
 import { MEDIA_CATALOG } from "@/lib/campaigns/media-catalog";
 import type { ImageAttachment } from "@/lib/campaigns/types";
+import { MediaPickerDialog } from "@/components/media/media-picker-dialog";
 
 interface ImageUploadProps {
   images: ImageAttachment[];
@@ -34,6 +35,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [mediaLibraryOpen, setMediaLibraryOpen] = useState(false);
   const [webcamOpen, setWebcamOpen] = useState(false);
   const [webcamMode, setWebcamMode] = useState<"photo" | "video">("photo");
   const [webcamError, setWebcamError] = useState<string | null>(null);
@@ -347,6 +349,48 @@ export function ImageUpload({
     }
   }, []);
 
+  const handleSelectFromMediaLibrary = useCallback(
+    (assets: import("@/lib/media/media-library-types").MediaAsset[]) => {
+      const remaining = maxImages - images.length;
+      if (remaining <= 0) return;
+      const slice = assets.slice(0, remaining);
+      const newImages: ImageAttachment[] = slice.map((a) => ({
+        id: crypto.randomUUID(),
+        name: a.name,
+        url: a.url,
+        size: a.sizeBytes,
+        type: a.mimeType,
+        kind: a.kind === "video" ? "video" : "image",
+      }));
+      const next = [...images, ...newImages];
+      onImagesChange(next);
+      setMediaLibraryOpen(false);
+      newImages.forEach((att, i) => {
+        if (att.kind === "video") {
+          setGeneratingGifIds((prev) => new Set(prev).add(att.id));
+          videoToGifBlob(slice[i].url)
+            .then((gifBlob) => {
+              const gifUrl = URL.createObjectURL(gifBlob);
+              const current = imagesRef.current;
+              const updated = current.map((img) =>
+                img.id === att.id ? { ...img, gifPreviewUrl: gifUrl } : img,
+              );
+              onImagesChange(updated);
+            })
+            .catch(() => {})
+            .finally(() => {
+              setGeneratingGifIds((prev) => {
+                const n = new Set(prev);
+                n.delete(att.id);
+                return n;
+              });
+            });
+        }
+      });
+    },
+    [images, maxImages, onImagesChange],
+  );
+
   const handleSelectFromCatalog = useCallback(
     (entry: (typeof MEDIA_CATALOG)[number]) => {
       if (images.length >= maxImages) return;
@@ -457,8 +501,28 @@ export function ImageUpload({
             <Library className="size-3.5" />
             Select from catalog
           </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isMaxReached}
+            onClick={() => setMediaLibraryOpen(true)}
+            aria-label="Browse media library"
+          >
+            <Library className="size-3.5" />
+            Media library
+          </Button>
         </div>
       </div>
+
+      <MediaPickerDialog
+        open={mediaLibraryOpen}
+        onOpenChange={setMediaLibraryOpen}
+        title="Choose From Media Library"
+        multiple
+        uploadCategory="campaign-media"
+        onSelect={handleSelectFromMediaLibrary}
+      />
 
       {/* Catalog modal */}
       <Dialog open={catalogOpen} onOpenChange={setCatalogOpen}>

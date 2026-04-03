@@ -12,6 +12,7 @@ import {
 const sample: InventoryVehicleRecord = {
   title: "2024 Chevrolet Silverado 1500 LT Trail Boss",
   vin: "ANCHORVIN00000001",
+  stockNumber: "000001",
   make: "Chevrolet",
   model: "Silverado 1500",
   trim: "LT Trail Boss",

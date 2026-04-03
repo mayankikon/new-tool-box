@@ -57,3 +57,31 @@ Aligned with **Monitor** mock types in `src/lib/marketing/service-defection-mock
 - **Suggested path**: `POST /dealerships/{dealershipId}/marketing/service-defection/visit-signals`
 - **Request** (example): `{ customerId?, vin?, competitorVenueId, observedAt, source: "telematics" | "dms" | "manual" }`
 - **Idempotency**: `Idempotency-Key` or server-generated `signalId`.
+
+## Dealer brand profile (future)
+
+Aligned with **`DealerBrandProfile`** / **`ResolvedBrandPalette`** in `src/lib/branding/brand-profile-types.ts` and client storage `src/lib/branding/brand-profile-storage.ts`.
+
+### Get or update brand profile
+
+- **Suggested path**: `GET /dealerships/{dealershipId}/brand-profile` / `PUT /dealerships/{dealershipId}/brand-profile`
+- **Response / request**: `DealerBrandProfile` (dealership name, logo URLs, theme preset or custom hex, font preset, tone profile, vehicle fields used by coupons).
+
+## Media library (future)
+
+Aligned with **`MediaAsset`** in `src/lib/media/media-library-types.ts`.
+
+### List / upload / delete media
+
+- **Suggested path**: `GET /dealerships/{dealershipId}/media-library` (query: `category`, `kind`, `search`)
+- **Suggested path**: `POST /dealerships/{dealershipId}/media-library` (multipart upload or presigned URL flow)
+- **Suggested path**: `DELETE /dealerships/{dealershipId}/media-library/{assetId}`
+
+## Storefront customization config (future)
+
+Aligned with **`ConnectAppConfig`** in `src/lib/connect-app/connect-app-types.ts`. In the product UI this is **Smart Marketing → Customization**.
+
+### Get or update storefront customization (`ConnectAppConfig`)
+
+- **Suggested path**: `GET /dealerships/{dealershipId}/connect-app/config` / `PUT /dealerships/{dealershipId}/connect-app/config`
+- **Body**: `ConnectAppConfig` (single hero **image or video** URL, welcome copy, optional **these vehicles** strip image URL, quick actions, promotions, **gallery** image asset IDs—one image is static in preview, multiple rotate as a carousel—theme override flags).

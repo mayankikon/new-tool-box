@@ -1,11 +1,12 @@
 export interface InventoryVehicleRecord {
   title: string;
   vin: string;
+  stockNumber: string;
   make: string;
   model: string;
   trim: string;
   lotAge: string;
-  stockType: "New" | "Pre-Owned" | "Certified";
+  stockType: "New" | "Pre-Owned" | "Certified" | "Service";
   geofence: string;
   imageSrc: string;
   imageAlt: string;
@@ -17,6 +18,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2024 Chevrolet Silverado 1500 LT Trail Boss",
     vin: "3GCUDFED3RG445264",
+    stockNumber: "445264",
     make: "Chevrolet",
     model: "Silverado 1500",
     trim: "LT Trail Boss",
@@ -33,6 +35,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2023 Chevrolet Colorado 4WD ZR2",
     vin: "1GCPTFEK3P1165578",
+    stockNumber: "165578",
     make: "Chevrolet",
     model: "Colorado",
     trim: "4WD ZR2",
@@ -48,6 +51,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Trax Activ",
     vin: "KL77LKEP1TC083011",
+    stockNumber: "083011",
     make: "Chevrolet",
     model: "Trax",
     trim: "Activ",
@@ -63,6 +67,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Equinox LT",
     vin: "3GNAXHEG4TL401103",
+    stockNumber: "401103",
     make: "Chevrolet",
     model: "Equinox",
     trim: "LT",
@@ -78,6 +83,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Tahoe LT",
     vin: "1GNS6NKD8TR275692",
+    stockNumber: "275692",
     make: "Chevrolet",
     model: "Tahoe",
     trim: "LT",
@@ -93,6 +99,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Suburban RST",
     vin: "1GNS6EKD0TR264041",
+    stockNumber: "264041",
     make: "Chevrolet",
     model: "Suburban",
     trim: "RST",
@@ -108,6 +115,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2020 Chevrolet Corvette 2LT",
     vin: "1G1Y72D46L5110459",
+    stockNumber: "110459",
     make: "Chevrolet",
     model: "Corvette",
     trim: "2LT",
@@ -123,6 +131,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Equinox EV 2LT",
     vin: "3GN7DNRR7TS128211",
+    stockNumber: "128211",
     make: "Chevrolet",
     model: "Equinox EV",
     trim: "2LT",
@@ -138,6 +147,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2025 Chevrolet Silverado 1500 High Country",
     vin: "1GCUKJED0SZ197005",
+    stockNumber: "197005",
     make: "Chevrolet",
     model: "Silverado 1500",
     trim: "High Country",
@@ -154,6 +164,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Tahoe RST",
     vin: "1GNS6RKD4TR281061",
+    stockNumber: "281061",
     make: "Chevrolet",
     model: "Tahoe",
     trim: "RST",
@@ -169,6 +180,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2021 Chevrolet Colorado Work Truck",
     vin: "1GCGSBEN5M1215219",
+    stockNumber: "215219",
     make: "Chevrolet",
     model: "Colorado",
     trim: "Work Truck",
@@ -184,6 +196,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2024 Chevrolet Trax LT",
     vin: "KL77LHE22RC236656",
+    stockNumber: "236656",
     make: "Chevrolet",
     model: "Trax",
     trim: "LT",
@@ -199,6 +212,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2025 Chevrolet Equinox AWD LT",
     vin: "3GNAXPEG7SL324977",
+    stockNumber: "324977",
     make: "Chevrolet",
     model: "Equinox",
     trim: "AWD LT",
@@ -214,6 +228,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Corvette 1LT",
     vin: "1G1YA3D41T5106441",
+    stockNumber: "106441",
     make: "Chevrolet",
     model: "Corvette",
     trim: "1LT",
@@ -230,6 +245,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Silverado 2500HD ZR2",
     vin: "2GC4KYEY1T1152127",
+    stockNumber: "152127",
     make: "Chevrolet",
     model: "Silverado 2500HD",
     trim: "ZR2",
@@ -245,6 +261,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2023 Chevrolet Suburban Z71",
     vin: "1GNSKDKD9PR354848",
+    stockNumber: "354848",
     make: "Chevrolet",
     model: "Suburban",
     trim: "Z71",
@@ -260,6 +277,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Trax RS",
     vin: "KL77LJEPXTC056139",
+    stockNumber: "056139",
     make: "Chevrolet",
     model: "Trax",
     trim: "RS",
@@ -275,6 +293,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Silverado 1500 RST",
     vin: "2GCPADEDXT1156523",
+    stockNumber: "156523",
     make: "Chevrolet",
     model: "Silverado 1500",
     trim: "RST",
@@ -290,6 +309,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2024 Chevrolet Silverado 2500HD Custom",
     vin: "1GC2YME70RF175244",
+    stockNumber: "175244",
     make: "Chevrolet",
     model: "Silverado 2500HD",
     trim: "Custom",
@@ -306,6 +326,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2025 Chevrolet Trax LT",
     vin: "KL77LHEP0SC223583",
+    stockNumber: "223583",
     make: "Chevrolet",
     model: "Trax",
     trim: "LT",
@@ -321,6 +342,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2024 Chevrolet Equinox LT",
     vin: "3GNAXUEG4RS230733",
+    stockNumber: "230733",
     make: "Chevrolet",
     model: "Equinox",
     trim: "LT",
@@ -336,6 +358,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Corvette 3LT",
     vin: "1G1YC3D44T5108565",
+    stockNumber: "108565",
     make: "Chevrolet",
     model: "Corvette",
     trim: "3LT",
@@ -351,6 +374,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2021 Chevrolet Tahoe High Country",
     vin: "1GNSKTKLXMR319572",
+    stockNumber: "319572",
     make: "Chevrolet",
     model: "Tahoe",
     trim: "High Country",
@@ -366,6 +390,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2021 Chevrolet Suburban Z71",
     vin: "1GNSKGKL4MR207406",
+    stockNumber: "207406",
     make: "Chevrolet",
     model: "Suburban",
     trim: "Z71",
@@ -381,6 +406,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2022 Chevrolet Trax LT",
     vin: "KL7CJPSM0NB562993",
+    stockNumber: "562993",
     make: "Chevrolet",
     model: "Trax",
     trim: "LT",
@@ -396,6 +422,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2024 Chevrolet Equinox LT",
     vin: "3GNAXUEG7RL244779",
+    stockNumber: "244779",
     make: "Chevrolet",
     model: "Equinox",
     trim: "LT",
@@ -411,6 +438,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2026 Chevrolet Equinox EV 1LT",
     vin: "3GN7DMRR4TS114437",
+    stockNumber: "114437",
     make: "Chevrolet",
     model: "Equinox EV",
     trim: "1LT",
@@ -426,6 +454,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2019 Chevrolet Tahoe LT",
     vin: "1GNSKAKC7KR127849",
+    stockNumber: "127849",
     make: "Chevrolet",
     model: "Tahoe",
     trim: "LT",
@@ -441,6 +470,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2023 Chevrolet Suburban Premier",
     vin: "1GNSCFKD0PR463109",
+    stockNumber: "463109",
     make: "Chevrolet",
     model: "Suburban",
     trim: "Premier",
@@ -456,6 +486,7 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
   {
     title: "2018 Chevrolet Colorado ZR2",
     vin: "1GCGTEEN7J1117173",
+    stockNumber: "117173",
     make: "Chevrolet",
     model: "Colorado",
     trim: "ZR2",
@@ -469,3 +500,10 @@ export const INVENTORY_PANEL_VEHICLES: InventoryVehicleRecord[] = [
     price: "$24,745",
   },
 ];
+
+/** Same CloudFront URLs as inventory list / map photo chips — default Connect storefront hero vehicle. */
+export const DEFAULT_CONNECT_PREVIEW_VEHICLE_IMAGE_SRC =
+  INVENTORY_PANEL_VEHICLES[0]?.imageSrc ?? "";
+
+export const DEFAULT_CONNECT_PREVIEW_VEHICLE_IMAGE_ALT =
+  INVENTORY_PANEL_VEHICLES[0]?.imageAlt ?? "";

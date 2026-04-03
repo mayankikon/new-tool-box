@@ -25,13 +25,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { couponTemplateTitle, offerTypeTitle } from "@/lib/campaigns/coupon-builder-copy";
-import {
-  BRANDING_CHANGED_EVENT,
-  loadDealershipBranding,
-  resetDealershipLogoToDefault,
-  saveDealershipBranding,
-  type DealershipBranding,
-} from "@/lib/campaigns/dealership-branding-storage";
+import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
+import { DEFAULT_DEALERSHIP_LOGO_SRC } from "@/lib/branding/brand-profile-types";
+import type { DealershipBranding } from "@/lib/campaigns/dealership-branding-storage";
 import { pickRandomVehicleFromCatalog } from "@/lib/campaigns/vehicle-catalog-sample";
 import {
   COUPON_CONDITION_OPTIONS,
@@ -146,17 +142,15 @@ export function CouponBuilderForm({
   const [builderStep, setBuilderStep] = useState(0);
   const [reviewSubTab, setReviewSubTab] = useState<0 | 1 | 2>(0);
   const [couponLogoFromAccount, setCouponLogoFromAccount] = useState(true);
-  const [workspaceBranding, setWorkspaceBranding] = useState<DealershipBranding>(
-    () => loadDealershipBranding(),
-  );
+  const { profile, updateProfile } = useBrandProfile();
+  const workspaceBranding: DealershipBranding = {
+    dealershipLogoUrl: profile.logoUrl,
+    vehicleMake: profile.vehicleMake,
+    vehicleModel: profile.vehicleModel,
+    vehicleImageUrl: profile.vehicleImageUrl,
+  };
   /** Avoid re-initializing draft/step on every parent re-render while the surface stays open. */
   const editorSessionOpenRef = useRef(false);
-
-  useEffect(() => {
-    const sync = () => setWorkspaceBranding(loadDealershipBranding());
-    window.addEventListener(BRANDING_CHANGED_EVENT, sync);
-    return () => window.removeEventListener(BRANDING_CHANGED_EVENT, sync);
-  }, []);
 
   useEffect(() => {
     if (!isActive) {
@@ -315,20 +309,14 @@ export function CouponBuilderForm({
     reader.onload = () => {
       const dataUrl = typeof reader.result === "string" ? reader.result : "";
       if (!dataUrl) return;
-      const current = loadDealershipBranding();
-      saveDealershipBranding({
-        ...current,
-        dealershipLogoUrl: dataUrl,
-      });
-      setWorkspaceBranding(loadDealershipBranding());
+      updateProfile({ logoUrl: dataUrl });
     };
     reader.readAsDataURL(file);
     event.target.value = "";
   };
 
   const handleResetAccountLogo = () => {
-    resetDealershipLogoToDefault();
-    setWorkspaceBranding(loadDealershipBranding());
+    updateProfile({ logoUrl: DEFAULT_DEALERSHIP_LOGO_SRC });
   };
 
   const handlePickRandomVehicleForCoupon = () => {

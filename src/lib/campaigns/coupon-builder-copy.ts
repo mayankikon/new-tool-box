@@ -35,6 +35,8 @@ const ACCENT_LABELS: Record<CouponAccentPreset, string> = {
   rose: "Rose",
   slate: "Slate",
   violet: "Violet",
+  "brand-primary": "Brand primary",
+  "brand-secondary": "Brand secondary",
 };
 
 export function accentPresetTitle(preset: CouponAccentPreset): string {

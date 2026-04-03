@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Agentation } from "agentation";
-import { DialRoot } from "dialkit";
-import { Saira, Inter, JetBrains_Mono } from "next/font/google";
+import { Saira, Inter, JetBrains_Mono, Onest } from "next/font/google";
 import { GroovedPanelPreferenceProvider } from "@/components/chrome/grooved-panel-preference";
+import { BrandProfileProvider } from "@/lib/branding/brand-profile-provider";
 import { AppThemeProvider } from "@/components/theme/app-theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
-import "dialkit/styles.css";
 
 const saira = Saira({
   variable: "--font-saira",
@@ -24,6 +23,11 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const onest = Onest({
+  variable: "--font-onest",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "SM 2.0",
   description: "Design system and component showcase",
@@ -37,13 +41,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${saira.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${saira.variable} ${inter.variable} ${jetbrainsMono.variable} ${onest.variable} antialiased`}
       >
         <AppThemeProvider>
-          <GroovedPanelPreferenceProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </GroovedPanelPreferenceProvider>
-          <DialRoot position="bottom-right" defaultOpen={false} />
+          <BrandProfileProvider>
+            <GroovedPanelPreferenceProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </GroovedPanelPreferenceProvider>
+          </BrandProfileProvider>
           {process.env.NODE_ENV === "development" && <Agentation />}
         </AppThemeProvider>
       </body>

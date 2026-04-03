@@ -110,6 +110,7 @@ import { VehicleListItem } from "@/components/ui/vehicle-list-item";
 import { VehicleListPanel } from "@/components/ui/vehicle-list-panel";
 import { VehicleMapClusterMarker } from "@/components/ui/vehicle-map-cluster-marker";
 import { VehicleMapMarkerChip } from "@/components/ui/vehicle-map-marker-chip";
+import { KeysMapMarkerPin } from "@/components/ui/keys-map-marker-pin";
 import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
 import {
   CUSTOMER_DECK_TAB_LABELS,
@@ -147,16 +148,20 @@ const SAMPLE_STEPS = [
 const SAMPLE_VEHICLES = [
   {
     title: "2023 BMW X5 xDrive40i",
+    stockNumber: "R12345",
     vin: "5UXCR6C02P9R12345",
     price: "$58,900",
     mileage: "12,412 mi",
+    stockType: "New" as const,
     statusIcons: { location: "active" as const, keyPaired: "active" as const, battery: "inactive" as const },
   },
   {
     title: "2022 BMW 330i Sedan",
+    stockNumber: "H56789",
     vin: "WBA5R1C0XNFH56789",
     price: "$41,200",
     mileage: "18,903 mi",
+    stockType: "Certified" as const,
     statusIcons: { location: "inactive" as const, keyPaired: "active" as const, battery: "active" as const },
   },
 ];
@@ -890,8 +895,9 @@ function renderComponentShowcase(slug: string, label: string) {
         label,
         "Pin, chip, and cluster markers for inventory map overlays.",
         <ShowcaseCard>
-          <div className="flex flex-wrap items-end gap-8">
+          <div className="flex flex-wrap items-center gap-8">
             <VehicleMapMarkerPin tone="teal" hoverable />
+            <KeysMapMarkerPin hoverable />
             <VehicleMapMarkerChip variantIndex={0} hoverOverlayColor="#1A9375" />
             <VehicleMapClusterMarker countLabel="142" hoverable />
             <VehicleMapClusterMarker variant="group-active" countLabel="32" hoverable />

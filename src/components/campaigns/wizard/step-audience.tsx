@@ -227,6 +227,10 @@ export function StepAudience({ formData, onUpdate }: StepAudienceProps) {
                   {/* Operator */}
                   <Select
                     value={segment.operator}
+                    items={(fieldDef?.operators ?? ["equals"]).map((op) => ({
+                      value: op,
+                      label: op,
+                    }))}
                     onValueChange={(val) => {
                       if (!val) return;
                       updateRule(segment.id, { operator: val });

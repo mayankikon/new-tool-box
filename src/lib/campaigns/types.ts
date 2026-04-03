@@ -59,7 +59,9 @@ export type CouponAccentPreset =
   | "amber"
   | "rose"
   | "slate"
-  | "violet";
+  | "violet"
+  | "brand-primary"
+  | "brand-secondary";
 
 export interface CouponVisualSpec {
   templateId: CouponTemplateId;

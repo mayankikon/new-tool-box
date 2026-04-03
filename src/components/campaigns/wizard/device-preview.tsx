@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { useBrandProfileOptional } from "@/lib/branding/brand-profile-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
@@ -158,17 +159,19 @@ function SmsContent({
   images,
   attachedOffer,
   dealershipDisplayName,
+  dealerName,
 }: {
   body: string;
   images: ImageAttachment[];
   attachedOffer?: CampaignOffer | null;
   dealershipDisplayName?: string;
+  dealerName: string;
 }) {
   return (
     <div className="flex h-full flex-col" style={{ fontFamily: SF_PRO_FONT_STACK }}>
       <div className="border-b border-border/50 px-3 py-2 text-center">
         <p className="text-[11px] font-semibold text-foreground">Messages</p>
-        <p className="text-[9px] text-muted-foreground">AutoNation Toyota</p>
+        <p className="text-[9px] text-muted-foreground">{dealerName}</p>
       </div>
 
       <div className="flex flex-1 flex-col justify-end gap-2 p-3">
@@ -224,12 +227,16 @@ function PushContent({
   images,
   attachedOffer,
   dealershipDisplayName,
+  dealerName,
+  dealerIconUrl,
 }: {
   subject: string;
   body: string;
   images: ImageAttachment[];
   attachedOffer?: CampaignOffer | null;
   dealershipDisplayName?: string;
+  dealerName: string;
+  dealerIconUrl: string;
 }) {
   return (
     <div className="flex h-full flex-col" style={{ fontFamily: SF_PRO_FONT_STACK }}>
@@ -245,11 +252,16 @@ function PushContent({
           {body ? (
             <div className="rounded-md border border-border/50 bg-card/80 p-3 shadow-md backdrop-blur-sm">
               <div className="mb-1.5 flex items-center gap-2">
-                <div className="flex size-5 items-center justify-center rounded-xs bg-primary">
-                  <Bell className="size-3 text-primary-foreground" />
+                <div className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-xs bg-primary">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={dealerIconUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
                 </div>
                 <span className="text-[10px] font-semibold text-foreground">
-                  AutoNation Toyota
+                  {dealerName}
                 </span>
                 <span className="ml-auto text-[9px] text-muted-foreground">
                   now
@@ -316,15 +328,17 @@ function PushContent({
 function InAppContent({
   attachedOffer,
   dealershipDisplayName,
+  dealerName,
 }: {
   attachedOffer?: CampaignOffer | null;
   dealershipDisplayName?: string;
+  dealerName: string;
 }) {
   return (
     <div className="flex h-full flex-col bg-muted/30" style={{ fontFamily: SF_PRO_FONT_STACK }}>
       <div className="border-b border-border/60 bg-card px-3 py-2">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-foreground">Service</span>
+          <span className="text-[11px] font-semibold text-foreground">{dealerName}</span>
           <Smartphone className="size-3.5 text-muted-foreground" />
         </div>
         <p className="text-[9px] text-muted-foreground">Offers for you</p>
@@ -351,12 +365,14 @@ function EmailFrame({
   images,
   attachedOffer,
   dealershipDisplayName,
+  dealerName,
 }: {
   subject: string;
   body: string;
   images: ImageAttachment[];
   attachedOffer?: CampaignOffer | null;
   dealershipDisplayName?: string;
+  dealerName: string;
 }) {
   return (
     <div className="mx-auto w-full max-w-[360px]">
@@ -375,7 +391,7 @@ function EmailFrame({
               From:
             </span>
             <span className="truncate text-[11px] text-foreground">
-              AutoNation Toyota &lt;no-reply@autonation.com&gt;
+              {dealerName} &lt;no-reply@dealership.com&gt;
             </span>
           </div>
           <div className="flex items-baseline gap-2">
@@ -426,7 +442,7 @@ function EmailFrame({
 
         <div className="border-t border-border/40 px-4 py-2.5">
           <p className="text-center text-[8px] text-muted-foreground">
-            AutoNation Toyota · 123 Auto Drive · Anytown, US 12345
+            {dealerName} · 123 Auto Drive · Anytown, US 12345
           </p>
           <p className="mt-0.5 text-center text-[8px] text-muted-foreground underline">
             Unsubscribe
@@ -454,6 +470,14 @@ export function DevicePreview({
   allowedChannels = DEFAULT_DEVICE_PREVIEW_CHANNELS,
   showChannelTabs = true,
 }: DevicePreviewProps) {
+  const brand = useBrandProfileOptional();
+  const dealerName = brand?.profile.dealershipName ?? "Your dealership";
+  const dealerIconUrl =
+    brand?.profile.logomarkUrl?.trim() ||
+    brand?.profile.appIconUrl?.trim() ||
+    brand?.profile.logoUrl ||
+    "/account-logo-placeholder.png";
+
   const channelTabs = useMemo(() => {
     const allowed = new Set(allowedChannels);
     return CHANNEL_TABS.filter((tab) => allowed.has(tab.value));
@@ -482,12 +506,14 @@ export function DevicePreview({
               images={images}
               attachedOffer={attachedOffer}
               dealershipDisplayName={dealershipDisplayName}
+              dealerName={dealerName}
             />
           ) : previewChannel === "in-app" ? (
             <PhoneFrame>
               <InAppContent
                 attachedOffer={attachedOffer}
                 dealershipDisplayName={dealershipDisplayName}
+                dealerName={dealerName}
               />
             </PhoneFrame>
           ) : (
@@ -498,6 +524,7 @@ export function DevicePreview({
                   images={images}
                   attachedOffer={attachedOffer}
                   dealershipDisplayName={dealershipDisplayName}
+                  dealerName={dealerName}
                 />
               ) : (
                 <PushContent
@@ -506,6 +533,8 @@ export function DevicePreview({
                   images={images}
                   attachedOffer={attachedOffer}
                   dealershipDisplayName={dealershipDisplayName}
+                  dealerName={dealerName}
+                  dealerIconUrl={dealerIconUrl}
                 />
               )}
             </PhoneFrame>

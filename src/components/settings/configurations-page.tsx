@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useDialKit } from "dialkit";
 import {
   Blocks,
   CircleGauge,
@@ -11,10 +10,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-import {
-  APP_LINE_FIELD_DIAL_LABEL,
-  appLineFieldDialPreset,
-} from "@/components/chrome/app-line-field-dial-preset";
+import { appLineFieldPattern } from "@/components/chrome/app-line-field-dial-preset";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +21,7 @@ export function ConfigurationsPage({
   className?: string;
   topBar: ReactNode;
 }) {
-  const pattern = useDialKit(APP_LINE_FIELD_DIAL_LABEL, appLineFieldDialPreset);
+  const pattern = appLineFieldPattern;
 
   return (
     <div
@@ -109,8 +105,8 @@ export function ConfigurationsPage({
               </CardHeader>
               <CardContent className="space-y-4 text-sm text-muted-foreground">
                 <div className="rounded-md border border-border/60 bg-background/70 p-4">
-                  Open the Dialkit panel → <strong>App Line Field</strong> to adjust
-                  spacing, stroke, tint, density, and lift for the whole main column.
+                  The main column line-field uses fixed values for spacing, stroke,
+                  tint, density, and lift defined in the app preset.
                 </div>
                 <div className="rounded-md border border-border/60 bg-background/70 p-4">
                   Keeping stroke at <span className="font-mono text-foreground">1px</span> and

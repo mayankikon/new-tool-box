@@ -8,6 +8,7 @@ import {
   PenLine,
   Wrench,
 } from "lucide-react";
+import { useBrandProfileOptional } from "@/lib/branding/brand-profile-provider";
 import { accentPresetTitle, cornerStyleTitle } from "@/lib/campaigns/coupon-builder-copy";
 import {
   COUPON_ACCENT_CLASSES,
@@ -39,6 +40,8 @@ const BADGE_ICONS: Record<CouponBadgeKind, typeof Droplets> = {
 };
 
 const ACCENT_PRESETS: CouponAccentPreset[] = [
+  "brand-primary",
+  "brand-secondary",
   "blue",
   "emerald",
   "amber",
@@ -136,16 +139,23 @@ export function CouponAccentPresetPicker({
   onChange: (next: CouponAccentPreset) => void;
   className?: string;
 }) {
+  const brand = useBrandProfileOptional();
   return (
     <div
       role="group"
       aria-label="Accent color"
-      className={cn("grid grid-cols-3 gap-2 sm:grid-cols-6", className)}
+      className={cn("grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-8", className)}
     >
       {ACCENT_PRESETS.map((preset) => {
         const selected = value === preset;
         const accent = COUPON_ACCENT_CLASSES[preset];
         const title = accentPresetTitle(preset);
+        const brandSwatch =
+          preset === "brand-primary"
+            ? brand?.palette.primary
+            : preset === "brand-secondary"
+              ? brand?.palette.secondary
+              : undefined;
         return (
           <button
             key={preset}
@@ -164,8 +174,13 @@ export function CouponAccentPresetPicker({
             <span
               className={cn(
                 "size-9 shrink-0 rounded-full border border-border/80 shadow-sm",
-                accent.bg,
+                brandSwatch == null && accent.bg,
               )}
+              style={
+                brandSwatch
+                  ? { backgroundColor: brandSwatch }
+                  : undefined
+              }
               aria-hidden
             />
             <span className="text-[11px] font-medium leading-tight text-foreground">

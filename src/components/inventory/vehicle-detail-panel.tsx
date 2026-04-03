@@ -100,6 +100,8 @@ function getStockTypeTextClassName(
       return "text-[var(--theme-text-warning)]";
     case "Pre-Owned":
       return "text-[var(--theme-text-destructive)]";
+    default:
+      return "text-muted-foreground";
   }
 }
 
@@ -437,126 +439,126 @@ export function InventoryVehicleDetailPanel({
                 <ActionButton label="More" icon={CircleEllipsis} />
               </div>
             </div>
-
-            <VehicleDetailDeckTabs
-              value={detailDeckTab}
-              onValueChange={setDetailDeckTab}
-              surface={previewSurface}
-            >
-              <div className="px-2 pb-2 pt-[4px]">
-                {detailDeckTab === "info" ? (
-                  <div className="space-y-6">
-                    <section className="space-y-3">
-                      <h5 className="text-sm font-semibold uppercase text-foreground">
-                        Location
-                      </h5>
-                      <div className="space-y-3">
-                        {locationRows.map((location) => (
-                          <div
-                            key={location.label}
-                            className="flex items-center justify-between gap-3 rounded-sm border border-border bg-muted/20 px-4 py-3"
-                          >
-                            <div className="flex min-w-0 items-center gap-3">
-                              <div className="flex size-6 shrink-0 items-center justify-center">
-                                {location.icon === "key" ? (
-                                  <KeyPairedIcon
-                                    variant="active"
-                                    className="size-6 text-primary"
-                                  />
-                                ) : (
-                                  <MapPin
-                                    className="size-6 text-primary"
-                                    aria-hidden
-                                  />
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-foreground text-pretty">
-                                  {location.label}
-                                </p>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                  {location.caption}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="size-6 shrink-0" aria-hidden />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-
-                    <section className="space-y-3">
-                      <h5 className="text-sm font-semibold uppercase text-foreground">
-                        Basics
-                      </h5>
-                      <div className="grid grid-cols-2 gap-1">
-                        {basics.map((item) => (
-                          <VehicleDetailTile
-                            key={item.label}
-                            label={item.label}
-                            value={item.value}
-                            icon={item.icon}
-                          />
-                        ))}
-                      </div>
-                    </section>
-
-                    <section className="space-y-3">
-                      <div className="rounded-sm bg-[#00476d] px-4 py-7 text-white">
-                        <div className="flex items-center justify-between gap-3">
-                          <Image
-                            src={CARFAX_LOGO_IMAGE}
-                            alt="CARFAX"
-                            width={125}
-                            height={23}
-                            unoptimized
-                            className="h-auto w-[7.8125rem]"
-                          />
-                          <span className="text-sm font-medium underline underline-offset-2">
-                            See full report
-                          </span>
-                        </div>
-                      </div>
-                    </section>
-
-                    <section className="space-y-3">
-                      <h5 className="text-sm font-semibold uppercase text-foreground">
-                        Safety Ratings
-                      </h5>
-                      <div className="space-y-3">
-                        {safetyRatings.map((item) => (
-                          <div
-                            key={item.label}
-                            className="flex items-center justify-between gap-3"
-                          >
-                            <span className="text-sm text-muted-foreground">
-                              {item.label}
-                            </span>
-                            <StarRating value={item.value} />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-sm border border-border bg-muted/20 p-4">
-                      <p className="text-sm font-medium text-foreground text-pretty">
-                        Trips can layer route history, stop summaries, and dwell
-                        events into the same detail shell without changing the
-                        hero or action rail.
-                      </p>
-                      <p className="mt-2 text-sm text-muted-foreground text-pretty">
-                        Keep the image carousel, section header, and action bar
-                        persistent so users can switch contexts without losing the
-                        selected vehicle.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </VehicleDetailDeckTabs>
           </div>
+
+          <VehicleDetailDeckTabs
+            value={detailDeckTab}
+            onValueChange={setDetailDeckTab}
+            surface={previewSurface}
+          >
+            <div className="px-4 pb-4 pt-[4px]">
+              {detailDeckTab === "info" ? (
+                <div className="space-y-6">
+                  <section className="space-y-3">
+                    <h5 className="text-sm font-semibold uppercase text-foreground">
+                      Location
+                    </h5>
+                    <div className="space-y-3">
+                      {locationRows.map((location) => (
+                        <div
+                          key={location.label}
+                          className="flex items-center justify-between gap-3 rounded-sm border border-border bg-muted/20 px-4 py-3"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex size-6 shrink-0 items-center justify-center">
+                              {location.icon === "key" ? (
+                                <KeyPairedIcon
+                                  variant="active"
+                                  className="size-6 text-primary"
+                                />
+                              ) : (
+                                <MapPin
+                                  className="size-6 text-primary"
+                                  aria-hidden
+                                />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-foreground text-pretty">
+                                {location.label}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                {location.caption}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="size-6 shrink-0" aria-hidden />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h5 className="text-sm font-semibold uppercase text-foreground">
+                      Basics
+                    </h5>
+                    <div className="grid grid-cols-2 gap-1">
+                      {basics.map((item) => (
+                        <VehicleDetailTile
+                          key={item.label}
+                          label={item.label}
+                          value={item.value}
+                          icon={item.icon}
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <div className="rounded-sm bg-[#00476d] px-4 py-7 text-white">
+                      <div className="flex items-center justify-between gap-3">
+                        <Image
+                          src={CARFAX_LOGO_IMAGE}
+                          alt="CARFAX"
+                          width={125}
+                          height={23}
+                          unoptimized
+                          className="h-auto w-[7.8125rem]"
+                        />
+                        <span className="text-sm font-medium underline underline-offset-2">
+                          See full report
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h5 className="text-sm font-semibold uppercase text-foreground">
+                      Safety Ratings
+                    </h5>
+                    <div className="space-y-3">
+                      {safetyRatings.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between gap-3"
+                        >
+                          <span className="text-sm text-muted-foreground">
+                            {item.label}
+                          </span>
+                          <StarRating value={item.value} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-sm border border-border bg-muted/20 p-4">
+                    <p className="text-sm font-medium text-foreground text-pretty">
+                      Trips can layer route history, stop summaries, and dwell
+                      events into the same detail shell without changing the
+                      hero or action rail.
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground text-pretty">
+                      Keep the image carousel, section header, and action bar
+                      persistent so users can switch contexts without losing the
+                      selected vehicle.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </VehicleDetailDeckTabs>
         </div>
       </div>
       <SendVehicleBrochureDialog
