@@ -38,12 +38,12 @@ export function VehicleMapMarkerPin({
   const image = (
     <img
       src={src}
-      width={58}
-      height={58}
+      width={48}
+      height={50}
       alt=""
       aria-label={title}
       role="img"
-      className={cn("size-[58px] shrink-0 object-contain", className)}
+      className={cn("h-[50px] w-[48px] shrink-0 object-contain", className)}
       decoding="async"
       draggable={false}
     />
@@ -57,10 +57,11 @@ export function VehicleMapMarkerPin({
     <MapMarkerHoverFrame
       className="pointer-events-auto"
       backdropColor={VEHICLE_MAP_PIN_ACCENT_HEX[tone]}
-      backdropClassName="h-[52px] w-[68px]"
-      backdropOffsetY={-1}
+      backdropClassName="h-[46px] w-[48px]"
+      backdropOffsetY={-2}
       backdropStyle={{
-        clipPath: "polygon(14% 12%, 86% 12%, 86% 60%, 50% 88%, 14% 60%)",
+        clipPath:
+          "path('M4 10C4 6.69 6.69 4 10 4H38C41.31 4 44 6.69 44 10V27C44 29 43 31 41 32.5L26 42.5C25 43.2 23 43.2 22 42.5L7 32.5C5 31 4 29 4 27V10Z')",
       }}
     >
       {image}

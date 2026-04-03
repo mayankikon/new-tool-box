@@ -6,6 +6,14 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
+/**
+ * Root for the design-system select. Forwards to Base UI `Select.Root`.
+ *
+ * **Showing the selected label in the trigger:** pass `items` with either
+ * `ReadonlyArray<{ value, label }>` or `Record<string, React.ReactNode>` (value → label).
+ * Otherwise `SelectValue` falls back to the raw `value` string (e.g. lowercase ids).
+ * @see https://base-ui.com/react/components/select
+ */
 const Select = SelectPrimitive.Root
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {

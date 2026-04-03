@@ -373,6 +373,10 @@ export function StepAudienceTriggers({
 
                   <Select
                     value={segment.operator}
+                    items={(fieldDef?.operators ?? ["equals"]).map((op) => ({
+                      value: op,
+                      label: op,
+                    }))}
                     onValueChange={(val) => {
                       if (!val) return;
                       updateRule(segment.id, { operator: val });
@@ -670,6 +674,11 @@ export function StepAudienceTriggers({
                   />
                   <Select
                     value={String(trigger.config.unit ?? "days")}
+                    items={{
+                      days: "Days",
+                      weeks: "Weeks",
+                      months: "Months",
+                    }}
                     onValueChange={(val) => val && updateConfig("unit", val)}
                   >
                     <SelectTrigger className="w-28 shrink-0">
@@ -730,6 +739,11 @@ export function StepAudienceTriggers({
                   value={String(
                     trigger.config.metric ?? "battery_percentage",
                   )}
+                  items={{
+                    battery_percentage: "Battery Health %",
+                    tire_tread: "Tire Tread Depth",
+                    brake_pad: "Brake Pad Life %",
+                  }}
                   onValueChange={(val) => val && updateConfig("metric", val)}
                 >
                   <SelectTrigger className="w-full">
@@ -791,6 +805,12 @@ export function StepAudienceTriggers({
                 <Label>Season</Label>
                 <Select
                   value={String(trigger.config.season ?? "winter")}
+                  items={{
+                    winter: "Winter",
+                    spring: "Spring",
+                    summer: "Summer",
+                    fall: "Fall",
+                  }}
                   onValueChange={(val) => val && updateConfig("season", val)}
                 >
                   <SelectTrigger className="w-full">
@@ -808,6 +828,7 @@ export function StepAudienceTriggers({
                 <Label>Start Month</Label>
                 <Select
                   value={String(trigger.config.startMonth ?? 10)}
+                  items={MONTHS}
                   onValueChange={(val) =>
                     val && updateConfig("startMonth", Number(val))
                   }

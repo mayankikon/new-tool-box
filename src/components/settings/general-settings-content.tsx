@@ -28,7 +28,9 @@ function AppearanceThemeControl() {
     <ToggleSwitch
       aria-label="Color theme"
       value={displayTheme}
-      onValueChange={(value) => setTheme(value)}
+      onValueChange={(value) =>
+        setTheme(value === "dark" ? "dark" : "light")
+      }
       options={[
         { value: "light", label: "Light" },
         { value: "dark", label: "Dark" },

@@ -45,6 +45,10 @@ export const extractedMapMarkerAssets: MapMarkerAssetItem[] = [
     figmaLabel: "Style=Key, State=Active",
   },
   {
+    publicPath: "/media/map-markers/map-marker-keys.svg",
+    figmaLabel: "Style=Keys (shield), State=Active",
+  },
+  {
     publicPath: "/media/map-markers/map-marker-vehicle-teal.svg",
     figmaLabel: "Style=Car - 2 (teal shield)",
   },

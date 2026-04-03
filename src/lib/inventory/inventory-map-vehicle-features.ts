@@ -99,7 +99,7 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function randomPointInPolygonRing(
+export function randomPointInPolygonRing(
   ring: Position[],
   seed: number,
   maxAttempts = 80

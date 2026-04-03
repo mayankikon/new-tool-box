@@ -12,10 +12,7 @@ import {
   EmptyStateIllustration,
   EmptyStateTitle,
 } from "@/components/ui/empty-state";
-import {
-  BRANDING_CHANGED_EVENT,
-  loadDealershipBranding,
-} from "@/lib/campaigns/dealership-branding-storage";
+import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
 import { couponTemplateTitle } from "@/lib/campaigns/coupon-builder-copy";
 import {
   loadCouponLibrary,
@@ -46,31 +43,20 @@ function offerWithFallbackLogo(
 }
 
 export function CouponLibraryPage() {
+  const { profile } = useBrandProfile();
+  const accountLogoUrl = profile.logoUrl;
   const [coupons, setCoupons] = useState<CampaignOffer[]>([]);
   const [view, setView] = useState<"list" | "editor">("list");
   const [editorMode, setEditorMode] = useState<"create" | "edit">("create");
   const [editingOffer, setEditingOffer] = useState<CampaignOffer | null>(null);
-  const [accountLogoUrl, setAccountLogoUrl] = useState(
-    () => loadDealershipBranding().dealershipLogoUrl,
-  );
 
   const refresh = useCallback(() => {
     setCoupons(loadCouponLibrary());
   }, []);
 
-  const syncBranding = useCallback(() => {
-    setAccountLogoUrl(loadDealershipBranding().dealershipLogoUrl);
-  }, []);
-
   useEffect(() => {
     refresh();
   }, [refresh]);
-
-  useEffect(() => {
-    syncBranding();
-    window.addEventListener(BRANDING_CHANGED_EVENT, syncBranding);
-    return () => window.removeEventListener(BRANDING_CHANGED_EVENT, syncBranding);
-  }, [syncBranding]);
 
   const handleNew = useCallback(() => {
     setEditorMode("create");
@@ -201,24 +187,25 @@ export function CouponLibraryPage() {
             </EmptyState>
           </div>
         ) : (
-          <div className="grid w-full min-w-0 gap-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-8">
+          <div className="grid w-full min-w-0 auto-rows-[minmax(0,1fr)] gap-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-8">
             {coupons.map((offer) => (
               <article
                 key={offer.id}
                 className={cn(
-                  "flex flex-col overflow-hidden rounded-lg border border-border/80 bg-card shadow-sm",
+                  "flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border/80 bg-card shadow-sm",
                 )}
               >
-                <div className="border-b border-border/60 bg-muted/20 p-4">
+                <div className="flex h-64 shrink-0 items-start justify-center overflow-hidden border-b border-border/60 bg-muted/20 p-4">
                   <CouponCardPreview
                     offer={offerWithFallbackLogo(offer, accountLogoUrl)}
                     compact
+                    className="max-h-full w-full max-w-[320px] overflow-hidden"
                     dealershipDisplayName={MOCK_DEALERSHIP}
                   />
                 </div>
-                <div className="flex flex-1 flex-col gap-3 p-4">
+                <div className="flex min-h-0 flex-1 flex-col gap-3 p-4">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-medium leading-snug tracking-tight text-foreground">
+                    <h3 className="line-clamp-2 text-lg font-medium leading-snug tracking-tight text-foreground">
                       {offer.title}
                     </h3>
                     <p className="text-xs leading-relaxed text-muted-foreground">

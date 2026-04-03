@@ -48,6 +48,8 @@ export interface FileCabinetTableChromeProps {
   tabBackgroundClassName?: string;
   /** Optional override for the outer SVG chrome stroke. */
   strokeClassName?: string;
+  /** When true, renders only the tab row + a bottom divider — no card outline, borders, or SVG stroke around the content. */
+  hideCardChrome?: boolean;
   children: React.ReactNode;
 }
 
@@ -414,6 +416,7 @@ export function FileCabinetTableChrome({
   centerTabList = false,
   tabBackgroundClassName,
   strokeClassName,
+  hideCardChrome = false,
   children,
 }: FileCabinetTableChromeProps) {
   const light = surface === "light";
@@ -606,19 +609,25 @@ export function FileCabinetTableChrome({
       <div
         ref={tableCardRef}
         className={cn(
-          "relative flex min-h-0 min-w-0 flex-1 flex-col border-x border-b border-border border-t-0 motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
-          light ? "bg-white" : "bg-sidebar",
+          "relative flex min-h-0 min-w-0 flex-1 flex-col",
+          hideCardChrome
+            ? "border-t border-border"
+            : "border-x border-b border-border border-t-0 motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
+          !hideCardChrome && (light ? "bg-white" : "bg-sidebar"),
         )}
-        style={cardRadiusStyle}
+        style={hideCardChrome ? undefined : cardRadiusStyle}
       >
         <div
-          className="motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-          style={cardRadiusStyle}
+          className={cn(
+            "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+            !hideCardChrome && "motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
+          )}
+          style={hideCardChrome ? undefined : cardRadiusStyle}
         >
           {children}
         </div>
       </div>
-      {showStroke ? (
+      {showStroke && !hideCardChrome ? (
         <svg
           className="pointer-events-none absolute left-0 top-0 z-[2] block overflow-visible"
           width={layout.rootW + CHROME_SVG_VIEWPORT_BLEED_PX}

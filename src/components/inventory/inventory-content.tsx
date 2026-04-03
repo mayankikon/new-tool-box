@@ -66,6 +66,7 @@ import {
   type VehicleMapClusterMarkerVariant,
 } from "@/components/ui/vehicle-map-cluster-marker";
 import { MapMarkerHoverFrame } from "@/components/ui/map-marker-hover-frame";
+import { KeysMapMarkerPin } from "@/components/ui/keys-map-marker-pin";
 import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
 import { cn } from "@/lib/utils";
 import {
@@ -84,9 +85,11 @@ import {
 } from "@/lib/inventory/similar-vehicles";
 import {
   buildInventoryVehicleFeatureCollection,
+  hashStringToSeed,
   INVENTORY_LOT_AGE_TIER_HEX,
   INVENTORY_MAP_DEALERSHIP_LABEL_MAX_ZOOM,
   INVENTORY_MAP_VEHICLE_IMAGE_ZOOM,
+  randomPointInPolygonRing,
   type InventoryVehicleMapFeatureProperties,
 } from "@/lib/inventory/inventory-map-vehicle-features";
 import type { InventoryMapBasemapAppearance } from "@/lib/inventory/inventory-map-highlight";
@@ -246,6 +249,69 @@ let inventoryVehicleClusterIndex: Supercluster<
   Supercluster.AnyProps
 > | null = null;
 
+/** Key markers shown on the map when a vehicle is selected (2 per vehicle). */
+type InventoryKeyMarkerEntry = {
+  marker: mapboxgl.Marker;
+  root: Root;
+};
+const inventoryKeyMarkerEntries: InventoryKeyMarkerEntry[] = [];
+const INVENTORY_KEY_MARKERS_PER_VEHICLE = 2;
+
+function mountInventoryKeyMarker(
+  lngLat: [number, number],
+  map: mapboxgl.Map
+): InventoryKeyMarkerEntry {
+  const wrap = document.createElement("div");
+  wrap.className = "pointer-events-none inline-flex items-center justify-center";
+  wrap.style.zIndex = "45";
+  const root = createRoot(wrap);
+  root.render(<KeysMapMarkerPin hoverable title="Key fob" />);
+  const marker = new mapboxgl.Marker({ element: wrap, anchor: "center" })
+    .setLngLat(lngLat)
+    .addTo(map);
+  return { marker, root };
+}
+
+function removeAllInventoryKeyMarkers() {
+  for (const entry of inventoryKeyMarkerEntries) {
+    entry.root.unmount();
+    entry.marker.remove();
+  }
+  inventoryKeyMarkerEntries.length = 0;
+}
+
+/**
+ * Places or removes key fob markers on the map based on vehicle selection.
+ * When a VIN is selected, 2 key markers are placed at deterministic positions
+ * inside the main lot geofence. When deselected, they are removed.
+ */
+function reconcileInventoryKeyMarkers(map: mapboxgl.Map) {
+  const selectedVin = inventoryMapMarkerHighlightRef.selectedVin;
+  if (!selectedVin) {
+    removeAllInventoryKeyMarkers();
+    return;
+  }
+
+  const currentVinOnMap =
+    inventoryKeyMarkerEntries.length > 0
+      ? (inventoryKeyMarkerEntries as Array<InventoryKeyMarkerEntry & { _vin?: string }>)[0]?._vin
+      : null;
+  if (currentVinOnMap === selectedVin) return;
+
+  removeAllInventoryKeyMarkers();
+
+  const ring = mainLotGeoJSON.features[0]?.geometry.coordinates[0];
+  if (!ring) return;
+
+  for (let i = 0; i < INVENTORY_KEY_MARKERS_PER_VEHICLE; i++) {
+    const seed = hashStringToSeed(`${selectedVin}-key-${i}`);
+    const coords = randomPointInPolygonRing(ring, seed);
+    const entry = mountInventoryKeyMarker(coords, map) as InventoryKeyMarkerEntry & { _vin?: string };
+    entry._vin = selectedVin;
+    inventoryKeyMarkerEntries.push(entry);
+  }
+}
+
 let iconHeadquartersInteractionCleanup: (() => void) | null = null;
 let iconHeadquartersMarker: mapboxgl.Marker | null = null;
 let iconHeadquartersMarkerRoot: Root | null = null;
@@ -379,6 +445,7 @@ function removeInventoryVehicleMapOverlays(map: mapboxgl.Map) {
     marker.remove();
   }
   inventoryVehicleMarkerEntries.clear();
+  removeAllInventoryKeyMarkers();
   lastInventoryVehicleFeatureCollection = null;
   inventoryVehicleClusterIndex = null;
 
@@ -834,6 +901,7 @@ function addInventoryVehicleMapOverlays(
     const reconcile = () => {
       reconcileInventoryVehicleClusterMarkers(map);
       reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
+      reconcileInventoryKeyMarkers(map);
     };
     inventoryVehicleMarkersReconcile = reconcile;
     map.on("zoom", reconcile);
@@ -969,6 +1037,7 @@ function addInventoryVehicleMapOverlays(
   const reconcile = () => {
     reconcileInventoryVehicleClusterMarkers(map);
     reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
+    reconcileInventoryKeyMarkers(map);
   };
   inventoryVehicleMarkersReconcile = reconcile;
   map.on("zoom", reconcile);
@@ -2420,9 +2489,11 @@ export function InventoryContent({
 
   const vehicles: VehicleListPanelRow[] = searchFilteredVehicles.map((vehicle, index) => ({
     title: vehicle.title,
+    stockNumber: vehicle.stockNumber,
     vin: vehicle.vin,
     price: vehicle.price,
     mileage: vehicle.mileage,
+    stockType: vehicle.stockType,
     imageSrc: vehicle.imageSrc,
     imageAlt: vehicle.imageAlt,
     statusIcons: getVehicleStatusIcons(vehicle.vin, index),
@@ -2448,9 +2519,11 @@ export function InventoryContent({
     () =>
       similarFilteredVehicles.map((vehicle) => ({
         title: vehicle.title,
+        stockNumber: vehicle.stockNumber,
         vin: vehicle.vin,
         price: vehicle.price,
         mileage: vehicle.mileage,
+        stockType: vehicle.stockType,
         imageSrc: vehicle.imageSrc,
         imageAlt: vehicle.imageAlt,
         statusIcons: getVehicleStatusIcons(
@@ -2636,7 +2709,7 @@ export function InventoryContent({
   }, []);
 
   const mapGeofenceButton = (
-    <Button variant="secondary" size="lg" className="min-w-0 shrink-0">
+    <Button variant="secondary" size="lg" className="w-full min-w-0">
       <MapPin className="size-4 shrink-0 text-primary" />
       <span className="whitespace-nowrap">All Geofences</span>
       <ChevronDown className="size-4 shrink-0" />
@@ -2646,7 +2719,8 @@ export function InventoryContent({
   const filtersButton = (
     <Button
       variant="secondary"
-      size="md"
+      size="lg"
+      className="w-full"
       leadingIcon={<Filter />}
       aria-pressed={isFiltersOpen}
       onClick={() => setIsFiltersOpen((current) => !current)}
@@ -2901,9 +2975,9 @@ export function InventoryContent({
                 >
                   <div className="shrink-0 space-y-2.5 border-b border-border p-3">
                     {mapPanelSearchInput}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {mapGeofenceButton}
-                      {filtersButton}
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">{mapGeofenceButton}</div>
+                      <div className="flex-1">{filtersButton}</div>
                     </div>
                   </div>
                   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

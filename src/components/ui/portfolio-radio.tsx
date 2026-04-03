@@ -87,20 +87,22 @@ function PortfolioRadioButton({
         isVisuallyDisabled && "opacity-65",
         className
       )}
-      style={{
-        "--portfolio-radio-border": PORTFOLIO_FORM_CONTROL_BORDER_HEX,
-        "--portfolio-radio-accent": visualSpec.accentColor,
-        "--portfolio-radio-disabled": visualSpec.disabledFillColor,
-        "--portfolio-radio-surface": visualSpec.surfaceColor,
-        "--portfolio-radio-dot-size": `${visualSpec.dotSizePx}px`,
-        "--portfolio-radio-glow-size": `${visualSpec.glowSizePx}px`,
-        "--portfolio-radio-glow-blur": `${visualSpec.glowBlurPx}px`,
-        "--portfolio-radio-glow-color": hexToRgbaString(
-          visualSpec.accentColor,
-          visualSpec.glowOpacity
-        ),
-        ...style,
-      }}
+      style={
+        {
+          "--portfolio-radio-border": PORTFOLIO_FORM_CONTROL_BORDER_HEX,
+          "--portfolio-radio-accent": visualSpec.accentColor,
+          "--portfolio-radio-disabled": visualSpec.disabledFillColor,
+          "--portfolio-radio-surface": visualSpec.surfaceColor,
+          "--portfolio-radio-dot-size": `${visualSpec.dotSizePx}px`,
+          "--portfolio-radio-glow-size": `${visualSpec.glowSizePx}px`,
+          "--portfolio-radio-glow-blur": `${visualSpec.glowBlurPx}px`,
+          "--portfolio-radio-glow-color": hexToRgbaString(
+            visualSpec.accentColor,
+            visualSpec.glowOpacity
+          ),
+          ...style,
+        } as unknown as React.CSSProperties
+      }
       {...props}
     >
       <span className="relative size-4 shrink-0 overflow-hidden rounded-full">

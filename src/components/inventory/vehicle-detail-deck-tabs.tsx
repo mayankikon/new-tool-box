@@ -50,6 +50,7 @@ export function VehicleDetailDeckTabs({
       noLeftLampBelowStyle="preset-led"
       tabMotionVariant="sink-rise"
       centerTabList
+      hideCardChrome
     >
       {children}
     </FileCabinetTableChrome>

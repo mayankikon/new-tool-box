@@ -1,8 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useBrandProfileOptional } from "@/lib/branding/brand-profile-provider";
+import type { CouponAccentDisplay } from "@/lib/campaigns/coupon-accent-display";
+import { resolveCouponAccentDisplay } from "@/lib/campaigns/coupon-accent-display";
 import {
-  COUPON_ACCENT_CLASSES,
   COUPON_BADGE_LABELS,
   formatCouponExpirationSummary,
 } from "@/lib/campaigns/coupon-templates";
@@ -15,6 +17,51 @@ export interface CouponCardPreviewProps {
   className?: string;
   /** Shown when no logoUrl on visual */
   dealershipDisplayName?: string;
+}
+
+type TemplateProps = CouponCardPreviewProps & {
+  radius: string;
+  accentDisplay: CouponAccentDisplay;
+};
+
+function accentBgProps(display: CouponAccentDisplay): {
+  className?: string;
+  style?: React.CSSProperties;
+} {
+  if (display.kind === "tailwind") {
+    return { className: display.tw.bg };
+  }
+  return { style: { backgroundColor: display.primary } };
+}
+
+function accentSoftProps(display: CouponAccentDisplay): {
+  className?: string;
+  style?: React.CSSProperties;
+} {
+  if (display.kind === "tailwind") {
+    return { className: display.tw.soft };
+  }
+  return { style: { backgroundColor: display.soft } };
+}
+
+function accentTextProps(display: CouponAccentDisplay): {
+  className?: string;
+  style?: React.CSSProperties;
+} {
+  if (display.kind === "tailwind") {
+    return { className: display.tw.text };
+  }
+  return { style: { color: display.primary } };
+}
+
+function accentBorderProps(display: CouponAccentDisplay): {
+  className?: string;
+  style?: React.CSSProperties;
+} {
+  if (display.kind === "tailwind") {
+    return { className: display.tw.border };
+  }
+  return { style: { borderColor: display.primary } };
 }
 
 function shouldShowCouponLogo(visual: CampaignOffer["visual"]): boolean {
@@ -164,17 +211,20 @@ function BadgeChip({
   offer,
   compact,
   onDarkBand,
+  accentDisplay,
 }: {
   offer: CampaignOffer;
   compact?: boolean;
   /** Light badge on saturated header bands */
   onDarkBand?: boolean;
+  accentDisplay: CouponAccentDisplay;
 }) {
   const { visual } = offer;
   const label =
     visual.badge === "custom" && visual.customBadgeLabel?.trim()
       ? visual.customBadgeLabel
       : COUPON_BADGE_LABELS[visual.badge];
+  const bg = accentBgProps(accentDisplay);
   return (
     <span
       className={cn(
@@ -182,8 +232,10 @@ function BadgeChip({
         compact ? "rounded-sm px-1.5 py-0.5 text-[7px]" : "rounded-md px-2 py-0.5 text-[8px]",
         onDarkBand
           ? "bg-white/20 text-white"
-          : cn("text-primary-foreground", COUPON_ACCENT_CLASSES[visual.accentPreset].bg),
+          : "text-primary-foreground",
+        !onDarkBand && bg.className,
       )}
+      style={!onDarkBand ? bg.style : undefined}
     >
       {label}
     </span>
@@ -300,9 +352,11 @@ function TemplateHeroBanner({
   compact,
   dealershipDisplayName,
   radius,
-}: CouponCardPreviewProps & { radius: string }) {
+  accentDisplay,
+}: TemplateProps) {
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const band = accentBgProps(accentDisplay);
+  const cta = accentBgProps(accentDisplay);
   return (
     <div
       className={cn(
@@ -311,13 +365,16 @@ function TemplateHeroBanner({
       )}
     >
       <div
-        className={cn(
-          "px-3 py-2 text-primary-foreground",
-          accent.bg,
-        )}
+        className={cn("px-3 py-2 text-primary-foreground", band.className)}
+        style={band.style}
       >
         <div className="flex items-start justify-between gap-2">
-          <BadgeChip offer={offer} compact={compact} onDarkBand />
+          <BadgeChip
+            offer={offer}
+            compact={compact}
+            onDarkBand
+            accentDisplay={accentDisplay}
+          />
           <DealershipLogoMark
             offer={offer}
             compact={compact}
@@ -360,9 +417,10 @@ function TemplateHeroBanner({
         <div
           className={cn(
             "mt-1 inline-flex font-medium text-primary-foreground",
-            accent.bg,
             compact ? "rounded-sm px-2 py-1 text-[8px]" : "rounded-md px-2.5 py-1.5 text-[10px]",
+            cta.className,
           )}
+          style={cta.style}
         >
           {visual.ctaLabel}
         </div>
@@ -371,10 +429,12 @@ function TemplateHeroBanner({
   );
 }
 
-function TemplateTicketStub(props: CouponCardPreviewProps & { radius: string }) {
-  const { offer, compact, radius, dealershipDisplayName } = props;
+function TemplateTicketStub(props: TemplateProps) {
+  const { offer, compact, radius, dealershipDisplayName, accentDisplay } = props;
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const soft = accentSoftProps(accentDisplay);
+  const txt = accentTextProps(accentDisplay);
+  const brd = accentBorderProps(accentDisplay);
   return (
     <div
       className={cn(
@@ -384,10 +444,13 @@ function TemplateTicketStub(props: CouponCardPreviewProps & { radius: string }) 
     >
       <div className="absolute left-0 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-border" />
       <div className="absolute right-0 top-1/2 size-2 translate-x-1/2 -translate-y-1/2 rounded-full bg-background ring-2 ring-border" />
-      <div className={cn("border-b border-dashed border-border/80 px-3 py-2", accent.soft)}>
+      <div
+        className={cn("border-b border-dashed border-border/80 px-3 py-2", soft.className)}
+        style={soft.style}
+      >
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
-            <BadgeChip offer={offer} compact={compact} />
+            <BadgeChip offer={offer} compact={compact} accentDisplay={accentDisplay} />
             <ValueBlock offer={offer} compact={compact} />
           </div>
           <div className="flex justify-end">
@@ -420,10 +483,11 @@ function TemplateTicketStub(props: CouponCardPreviewProps & { radius: string }) 
         <span
           className={cn(
             "mt-1 inline-block border-2 border-dashed font-medium",
-            accent.text,
-            accent.border,
+            txt.className,
+            brd.className,
             compact ? "px-2 py-0.5 text-[8px]" : "px-2.5 py-1 text-[10px]",
           )}
+          style={{ ...txt.style, ...brd.style }}
         >
           {visual.ctaLabel}
         </span>
@@ -432,10 +496,10 @@ function TemplateTicketStub(props: CouponCardPreviewProps & { radius: string }) 
   );
 }
 
-function TemplateMinimalCard(props: CouponCardPreviewProps & { radius: string }) {
-  const { offer, compact, radius, dealershipDisplayName } = props;
+function TemplateMinimalCard(props: TemplateProps) {
+  const { offer, compact, radius, dealershipDisplayName, accentDisplay } = props;
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const cta = accentBgProps(accentDisplay);
   return (
     <div
       className={cn(
@@ -444,7 +508,7 @@ function TemplateMinimalCard(props: CouponCardPreviewProps & { radius: string })
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <BadgeChip offer={offer} compact={compact} />
+        <BadgeChip offer={offer} compact={compact} accentDisplay={accentDisplay} />
         <DealershipLogoMark
           offer={offer}
           compact={compact}
@@ -473,9 +537,10 @@ function TemplateMinimalCard(props: CouponCardPreviewProps & { radius: string })
       <div
         className={cn(
           "text-center font-medium text-primary-foreground",
-          accent.bg,
           compact ? "rounded-sm py-1 text-[8px]" : "rounded-md py-1.5 text-[10px]",
+          cta.className,
         )}
+        style={cta.style}
       >
         {visual.ctaLabel}
       </div>
@@ -483,22 +548,24 @@ function TemplateMinimalCard(props: CouponCardPreviewProps & { radius: string })
   );
 }
 
-function TemplateSplitBand(props: CouponCardPreviewProps & { radius: string }) {
-  const { offer, compact, radius, dealershipDisplayName } = props;
+function TemplateSplitBand(props: TemplateProps) {
+  const { offer, compact, radius, dealershipDisplayName, accentDisplay } = props;
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const band = accentBgProps(accentDisplay);
+  const txt = accentTextProps(accentDisplay);
   return (
     <div className={cn("flex overflow-hidden border border-border/60", radius)}>
       <div
         className={cn(
           "flex w-[38%] flex-col justify-center gap-1 px-2 py-2 text-primary-foreground",
-          accent.bg,
+          band.className,
         )}
+        style={band.style}
       >
         <div className="text-primary-foreground">
           <ValueBlock offer={offer} compact={compact} />
         </div>
-        <BadgeChip offer={offer} compact={compact} onDarkBand />
+        <BadgeChip offer={offer} compact={compact} onDarkBand accentDisplay={accentDisplay} />
         <div className="flex min-h-0 justify-center pt-0.5">
           <DealershipLogoMark
             offer={offer}
@@ -526,7 +593,10 @@ function TemplateSplitBand(props: CouponCardPreviewProps & { radius: string }) {
         <p className={cn("text-muted-foreground", compact ? "text-[7px]" : "text-[8px]")}>
           {formatCouponExpirationSummary(offer)}
         </p>
-        <span className={cn("font-medium", accent.text, compact ? "text-[8px]" : "text-[10px]")}>
+        <span
+          className={cn("font-medium", txt.className, compact ? "text-[8px]" : "text-[10px]")}
+          style={txt.style}
+        >
           {visual.ctaLabel} →
         </span>
       </div>
@@ -534,23 +604,25 @@ function TemplateSplitBand(props: CouponCardPreviewProps & { radius: string }) {
   );
 }
 
-function TemplateBadgeRibbon(props: CouponCardPreviewProps & { radius: string }) {
-  const { offer, compact, radius, dealershipDisplayName } = props;
+function TemplateBadgeRibbon(props: TemplateProps) {
+  const { offer, compact, radius, dealershipDisplayName, accentDisplay } = props;
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const ribbon = accentBgProps(accentDisplay);
+  const cta = accentBgProps(accentDisplay);
   return (
     <div className={cn("relative overflow-hidden border border-border/60 bg-card", radius)}>
       <div
         className={cn(
           "absolute -right-8 top-3 rotate-45 px-10 py-0.5 text-center text-[7px] font-bold uppercase text-primary-foreground",
-          accent.bg,
+          ribbon.className,
         )}
+        style={ribbon.style}
       >
         Special
       </div>
       <div className="space-y-1 p-3 pr-14">
         <div className="flex items-start justify-between gap-2">
-          <BadgeChip offer={offer} compact={compact} />
+          <BadgeChip offer={offer} compact={compact} accentDisplay={accentDisplay} />
           <DealershipLogoMark
             offer={offer}
             compact={compact}
@@ -578,9 +650,10 @@ function TemplateBadgeRibbon(props: CouponCardPreviewProps & { radius: string })
         <div
           className={cn(
             "inline-flex font-medium text-primary-foreground",
-            accent.bg,
             compact ? "rounded-sm px-2 py-0.5 text-[8px]" : "rounded-md px-2.5 py-1 text-[10px]",
+            cta.className,
           )}
+          style={cta.style}
         >
           {visual.ctaLabel}
         </div>
@@ -589,10 +662,11 @@ function TemplateBadgeRibbon(props: CouponCardPreviewProps & { radius: string })
   );
 }
 
-function TemplateDarkAccent(props: CouponCardPreviewProps & { radius: string }) {
-  const { offer, compact, radius, dealershipDisplayName } = props;
+function TemplateDarkAccent(props: TemplateProps) {
+  const { offer, compact, radius, dealershipDisplayName, accentDisplay } = props;
   const { visual } = offer;
-  const accent = COUPON_ACCENT_CLASSES[visual.accentPreset];
+  const stripe = accentBgProps(accentDisplay);
+  const cta = accentBgProps(accentDisplay);
   return (
     <div
       className={cn(
@@ -600,7 +674,7 @@ function TemplateDarkAccent(props: CouponCardPreviewProps & { radius: string }) 
         radius,
       )}
     >
-      <div className={cn("h-1 w-full", accent.bg)} />
+      <div className={cn("h-1 w-full", stripe.className)} style={stripe.style} />
       <div className="space-y-1.5 p-3">
         <div className="flex items-center justify-between gap-2">
           <DealershipLogoMark
@@ -610,7 +684,7 @@ function TemplateDarkAccent(props: CouponCardPreviewProps & { radius: string }) 
             tone="muted"
             logoMarkSize="prominent"
           />
-          <BadgeChip offer={offer} compact={compact} />
+          <BadgeChip offer={offer} compact={compact} accentDisplay={accentDisplay} />
         </div>
         <div className="text-foreground">
           <ValueBlock offer={offer} compact={compact} />
@@ -635,8 +709,9 @@ function TemplateDarkAccent(props: CouponCardPreviewProps & { radius: string }) 
           className={cn(
             "text-center font-medium text-primary-foreground",
             compact ? "rounded-sm py-1 text-[8px]" : "rounded-md py-1.5 text-[10px]",
-            accent.bg,
+            cta.className,
           )}
+          style={cta.style}
         >
           {visual.ctaLabel}
         </div>
@@ -651,13 +726,19 @@ export function CouponCardPreview({
   className,
   dealershipDisplayName,
 }: CouponCardPreviewProps) {
+  const brand = useBrandProfileOptional();
+  const accentDisplay = resolveCouponAccentDisplay(
+    offer.visual.accentPreset,
+    brand?.palette,
+  );
   const radius = cornerClass(offer.visual.cornerStyle);
-  const common = {
+  const common: TemplateProps = {
     offer,
     compact,
     dealershipDisplayName,
     radius,
-  } satisfies CouponCardPreviewProps & { radius: string };
+    accentDisplay,
+  };
 
   const inner = (() => {
     switch (offer.visual.templateId) {

@@ -60,7 +60,7 @@ function VehicleListPanelHeader(props: VehicleListPanelHeaderProps) {
 /** Row data for the panel (avoid Omit<div> — `title` would be stripped as an HTML attribute). */
 export type VehicleListPanelRow = Pick<
   VehicleListItemProps,
-  "title" | "vin" | "price" | "mileage" | "statusIcons" | "imageSrc" | "imageAlt"
+  "title" | "stockNumber" | "vin" | "price" | "mileage" | "stockType" | "statusIcons" | "imageSrc" | "imageAlt"
 >;
 
 interface VehicleListPanelProps extends React.ComponentProps<"div"> {

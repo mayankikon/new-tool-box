@@ -328,6 +328,18 @@ export const COUPON_ACCENT_CLASSES: Record<
     border: "border-violet-500/40",
     soft: "bg-violet-500/10",
   },
+  "brand-primary": {
+    bg: "bg-blue-600",
+    text: "text-blue-600",
+    border: "border-blue-500/40",
+    soft: "bg-blue-500/10",
+  },
+  "brand-secondary": {
+    bg: "bg-slate-600",
+    text: "text-slate-600",
+    border: "border-slate-500/40",
+    soft: "bg-slate-500/10",
+  },
 };
 
 export function conditionRuleLabel(rule: CouponConditionRule): string {

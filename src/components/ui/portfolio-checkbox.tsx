@@ -54,13 +54,15 @@ function PortfolioCheckboxControl({
         isVisuallyDisabled && "opacity-65",
         className
       )}
-      style={{
-        "--portfolio-checkbox-border": PORTFOLIO_FORM_CONTROL_BORDER_HEX,
-        "--portfolio-checkbox-green": visualSpec.accentColor,
-        "--portfolio-checkbox-disabled": visualSpec.disabledFillColor,
-        "--portfolio-checkbox-surface": visualSpec.surfaceColor,
-        ...style,
-      }}
+      style={
+        {
+          "--portfolio-checkbox-border": PORTFOLIO_FORM_CONTROL_BORDER_HEX,
+          "--portfolio-checkbox-green": visualSpec.accentColor,
+          "--portfolio-checkbox-disabled": visualSpec.disabledFillColor,
+          "--portfolio-checkbox-surface": visualSpec.surfaceColor,
+          ...style,
+        } as unknown as React.CSSProperties
+      }
       {...props}
     >
       <span className="relative size-4 shrink-0 overflow-hidden rounded-[4px]">

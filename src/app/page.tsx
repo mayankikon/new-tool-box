@@ -53,8 +53,14 @@ import {
   Activity,
   Wand2,
   TicketPercent,
+  Palette,
+  ImageIcon,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
+import { BrandProfileSettings } from "@/components/settings/brand-profile-settings";
+import { MediaLibraryPage } from "@/components/media/media-library-page";
+import { ConnectAppEditor } from "@/components/connect-app/connect-app-editor";
 import { CouponLibraryPage } from "@/components/campaigns/coupon-builder";
 import { CampaignWizard } from "@/components/campaigns/campaign-wizard";
 import { MarketingMonitorPage } from "@/components/marketing/marketing-monitor-page";
@@ -67,6 +73,7 @@ import {
 import { InventoryViewModeToggle } from "@/components/inventory/inventory-view-mode-toggle";
 import type { WizardFormData } from "@/components/campaigns/campaign-wizard";
 import type { CampaignOffer } from "@/lib/campaigns/types";
+import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
 
 const products: SidebarProductConfig[] = [
   { id: "inventory", label: "Inventory Management", icon: Package },
@@ -90,6 +97,7 @@ const inventoryMainItems: NavItemDef[] = [
 
 const inventorySettingsItems: NavItemDef[] = [
   { label: "General", icon: Settings },
+  { label: "Brand Profile", icon: Palette },
   { label: "Alerts", icon: Bell },
   { label: "Geofences", iconSrc: "/boundary.svg" },
   { label: "Configurations", icon: Settings2 },
@@ -103,11 +111,14 @@ const marketingMainItems: NavItemDef[] = [
   { label: "Audiences", icon: Users },
   { label: "Campaigns", icon: Target },
   { label: "Templates", icon: FileText },
+  { label: "Media Library", icon: ImageIcon },
   { label: "Coupons", icon: TicketPercent },
+  { label: "Customization", icon: Smartphone },
 ];
 
 const marketingSettingsItems: NavItemDef[] = [
   { label: "General", icon: Settings },
+  { label: "Brand Profile", icon: Palette },
   { label: "Analytics", icon: BarChart3 },
   { label: "Channels", icon: Radio },
   { label: "Automations", icon: Zap },
@@ -188,6 +199,7 @@ function InventoryPlaceholderPage({
 
 export default function ProductPage() {
   const router = useRouter();
+  const { profile: brandProfile } = useBrandProfile();
   const [activeProduct, setActiveProduct] = useState("marketing");
   const [activeItem, setActiveItem] = useState("Campaigns");
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
@@ -438,6 +450,11 @@ export default function ProductPage() {
         mainSections={mainSections}
         settingsSections={settingsSections}
         onNavItemClick={handleNavItemClick}
+        user={{
+          primaryText: brandProfile.dealershipName,
+          secondaryText: "Automobile Group",
+          logoSrc: brandProfile.logoUrl,
+        }}
       />
       <AppGroovedMainColumn>
         <AvatarBar>
@@ -523,6 +540,46 @@ export default function ProductPage() {
                 className="overflow-auto pt-6"
               />
             </div>
+          ) : activeItem === "Brand Profile" ? (
+            <BrandProfileSettings
+              topBar={
+                <TopBar
+                  title="Brand Profile"
+                  right={
+                    <Button size="header" leadingIcon={<Save />}>
+                      Save Changes
+                    </Button>
+                  }
+                />
+              }
+            />
+          ) : activeProduct === "marketing" && activeItem === "Media Library" ? (
+            <MediaLibraryPage
+              topBar={
+                <TopBar
+                  title="Media Library"
+                  right={
+                    <Button size="header" leadingIcon={<Save />}>
+                      Save
+                    </Button>
+                  }
+                />
+              }
+            />
+          ) : activeProduct === "marketing" &&
+            activeItem === "Customization" ? (
+            <ConnectAppEditor
+              topBar={
+                <TopBar
+                  title="Customization"
+                  right={
+                    <Button size="header" leadingIcon={<Save />}>
+                      Save
+                    </Button>
+                  }
+                />
+              }
+            />
           ) : activeInventoryPage != null &&
             activeItem === "Alerts" ? (
             <InventoryPlaceholderPage {...activeInventoryPage}>

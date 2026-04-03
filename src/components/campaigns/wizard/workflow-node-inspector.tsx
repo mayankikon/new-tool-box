@@ -113,6 +113,10 @@ export function WorkflowNodeInspector({
           <Label>What counts as success?</Label>
           <Select
             value={formData.sequenceLogic.goal}
+            items={GOAL_EVENT_OPTIONS.map((event) => ({
+              value: event,
+              label: formatGoalEvent(event),
+            }))}
             onValueChange={(value) => updateCampaignGoal(value as CampaignGoalEvent)}
           >
             <SelectTrigger>
@@ -201,6 +205,10 @@ export function WorkflowNodeInspector({
             <Label>If customer</Label>
             <Select
               value={r.event}
+              items={RESPONSE_EVENT_OPTIONS.map((event) => ({
+                value: event,
+                label: event.replace(/-/g, " "),
+              }))}
               onValueChange={(value) =>
                 updateResponseRule(r.id, { event: value as ResponseRuleEvent })
               }
@@ -426,7 +434,20 @@ function InspectorMessageSelect({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Select value={String(value)} onValueChange={(next) => onValueChange(Number(next))}>
+      <Select
+        value={String(value)}
+        items={messages.map((message, index) => ({
+          value: String(index),
+          label:
+            `Message ${index + 1}` +
+            (message.delayDays != null
+              ? ` • Day ${message.delayDays}`
+              : index === 0
+                ? " • Day 0"
+                : ""),
+        }))}
+        onValueChange={(next) => onValueChange(Number(next))}
+      >
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
@@ -459,7 +480,14 @@ function ActionSelect({
   return (
     <div className="space-y-2">
       <Label>Then</Label>
-      <Select value={value} onValueChange={(next) => onValueChange(next as SequenceRuleAction)}>
+      <Select
+        value={value}
+        items={options.map((option) => ({
+          value: option,
+          label: ACTION_LABELS[option],
+        }))}
+        onValueChange={(next) => onValueChange(next as SequenceRuleAction)}
+      >
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
@@ -489,6 +517,9 @@ function OfferSelect({
       <Label>Offer</Label>
       <Select
         value={value ?? ""}
+        items={Object.fromEntries(
+          offers.map((offer) => [offer.id, offer.title]),
+        )}
         onValueChange={(next) => {
           if (next) onValueChange(next);
         }}

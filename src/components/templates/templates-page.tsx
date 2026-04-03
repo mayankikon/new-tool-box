@@ -393,6 +393,10 @@ function TemplateDetailPage({
                       <Label htmlFor={`trigger-type-${template.id}`}>Trigger type</Label>
                       <Select
                         value={triggerValue.type}
+                        items={TRIGGER_TYPES.map((t) => ({
+                          value: t,
+                          label: TRIGGER_TYPE_LABELS[t],
+                        }))}
                         onValueChange={(value) => {
                           const nextType = value as CampaignTrigger["type"];
                           onTriggerChange({

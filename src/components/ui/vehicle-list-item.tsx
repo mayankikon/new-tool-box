@@ -1,6 +1,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import {
   LocationIconSvg,
   KeyIconSvg,
@@ -51,13 +52,27 @@ interface VehicleStatusIcons {
   battery?: StatusIconVariant;
 }
 
+type VehicleStockType = "New" | "Pre-Owned" | "Certified" | "Service";
+
+const stockTypeBadgeConfig: Record<VehicleStockType, { label: string; className: string }> = {
+  New: { label: "New", className: "bg-[#3D25DC] text-white" },
+  "Pre-Owned": { label: "Pre-Owned", className: "bg-[#B45309] text-white" },
+  Certified: { label: "Certified", className: "bg-[#047857] text-white" },
+  Service: { label: "Service", className: "bg-[#BE123C] text-white" },
+};
+
 interface VehicleListItemProps extends React.ComponentProps<"div"> {
   imageSrc?: string;
   imageAlt?: string;
   title: string;
+  /** Displayed as the secondary identifier. Falls back to `vin` when absent. */
+  stockNumber?: string;
   vin?: string;
   price?: string;
   mileage?: string;
+  /** @deprecated Use `stockType` instead. */
+  isNew?: boolean;
+  stockType?: VehicleStockType;
   statusIcons?: VehicleStatusIcons;
 }
 
@@ -65,14 +80,23 @@ function VehicleListItem({
   imageSrc,
   imageAlt,
   title,
+  stockNumber,
   vin,
   price,
   mileage,
+  isNew,
+  stockType,
   statusIcons = {},
   className,
   ...props
 }: VehicleListItemProps) {
-  const priceAndMileage = [price, mileage].filter(Boolean).join(" • ");
+  const identifier = stockNumber ?? vin;
+  const identifierAndMileage = [identifier, mileage]
+    .filter(Boolean)
+    .join(" \u2022 ");
+
+  const resolvedStockType = stockType ?? (isNew ? "New" : undefined);
+  const badgeConfig = resolvedStockType ? stockTypeBadgeConfig[resolvedStockType] : undefined;
 
   return (
     <div
@@ -85,7 +109,7 @@ function VehicleListItem({
       {...props}
     >
       {/* Thumbnail */}
-      <div className="shrink-0 overflow-hidden rounded-xs bg-transparent">
+      <div className="relative shrink-0 overflow-hidden rounded-xs bg-transparent">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -97,6 +121,15 @@ function VehicleListItem({
         ) : (
           <div className="h-[72px] w-[95px] bg-background/40" />
         )}
+        {badgeConfig && (
+          <Badge
+            shape="pill"
+            size="sm"
+            className={cn("absolute left-1 top-1 min-h-0 border-transparent px-1.5 py-0", badgeConfig.className)}
+          >
+            {badgeConfig.label}
+          </Badge>
+        )}
       </div>
 
       {/* Description */}
@@ -104,14 +137,14 @@ function VehicleListItem({
         <span className="truncate text-base font-medium leading-6 text-foreground">
           {title}
         </span>
-        {vin && (
+        {identifierAndMileage && (
           <span className="truncate text-sm leading-5 text-muted-foreground">
-            {vin}
+            {identifierAndMileage}
           </span>
         )}
-        {priceAndMileage && (
-          <span className="truncate text-sm leading-5 text-muted-foreground">
-            {priceAndMileage}
+        {price && (
+          <span className="truncate text-base font-medium leading-6 text-foreground">
+            {price}
           </span>
         )}
       </div>
@@ -153,4 +186,4 @@ export {
   KeyPairedIcon,
   BatteryIcon,
 };
-export type { VehicleListItemProps, VehicleListProps, VehicleStatusIcons, StatusIconVariant };
+export type { VehicleListItemProps, VehicleListProps, VehicleStatusIcons, VehicleStockType, StatusIconVariant };

@@ -6,6 +6,7 @@ import type { InventoryVehicleRecord } from "@/lib/inventory/vehicle-list-data";
 const demoVehicle: InventoryVehicleRecord = {
   title: "2022 Lexus ES 350",
   vin: "WBA53AK02R7N11601",
+  stockNumber: "N11601",
   make: "Lexus",
   model: "ES",
   trim: "350",

@@ -39,7 +39,7 @@ function hexToRgb(hex: string) {
 }
 
 /**
- * Dark theme: DialKit opacities assume a light shell. Re-map to black-based washes and
+ * Dark theme: preset opacities assume a light shell. Re-map to black-based washes and
  * very faint pinstripes so we do not paint a second “white from the top” on top of the
  * grooved column (which would disagree with Settings → General live preview).
  */
@@ -135,7 +135,7 @@ export function LineFieldPatternLayers({
         <div className="absolute inset-0">{darkShellLayers}</div>
       ) : (
         <>
-          {/* Light shell: bright top wash + cool-tint pinstripes (DialKit defaults). */}
+          {/* Light shell: bright top wash + cool-tint pinstripes. */}
           <div className="absolute inset-0 dark:hidden">
             <div
               className="absolute inset-0"
