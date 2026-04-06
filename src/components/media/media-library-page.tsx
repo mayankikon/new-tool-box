@@ -124,7 +124,7 @@ export function MediaLibraryPage({
               onFilesSelected={(files) => void handleFilesSelected(files)}
             />
 
-            <InputContainer className="w-full max-w-sm" size="default">
+            <InputContainer className="w-full max-w-sm" size="sm">
               <InputIcon position="lead">
                 <Search className="size-4" aria-hidden />
               </InputIcon>
