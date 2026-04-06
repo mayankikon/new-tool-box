@@ -10,6 +10,7 @@ import {
   BUTTON_HOVER_LOOK,
   BUTTON_ACTIVE_LOOK,
 } from "../../design-system-constants";
+import { SectionTitle } from "../atoms/SectionTitle";
 import { ShowcaseCard } from "../atoms/ShowcaseCard";
 import { CodeInline } from "../atoms/CodeInline";
 
@@ -18,9 +19,6 @@ function ButtonComponentShowcase() {
 
   return (
     <ShowcaseCard padding="lg" className="w-full max-w-full overflow-x-auto">
-      <h3 className="ds-doc-font text-lg font-medium text-foreground mb-1">
-        Button Component
-      </h3>
       <p className="ds-doc-font text-sm text-muted-foreground mb-6">
         Design system button with 7 variants, 5 sizes, and 6 states. All colors bound to design tokens. Optional <CodeInline>leadingIcon</CodeInline>, <CodeInline>trailingIcon</CodeInline>, <CodeInline>badge</CodeInline>.{" "}
         <a href="https://www.figma.com/design/SWdPHuoLpCP03Ottx8g5GT/Sort-UI-%E2%80%94-1.3-Playground?node-id=13769-26313" className="text-primary underline-offset-2 hover:underline" target="_blank" rel="noreferrer">Figma (node 13769-26313)</a>.
@@ -109,9 +107,20 @@ function ButtonComponentShowcase() {
   );
 }
 
-export function ButtonShowcaseSection() {
+export interface ButtonShowcaseSectionProps {
+  overline?: string;
+  title?: string;
+  description?: React.ReactNode;
+}
+
+export function ButtonShowcaseSection({
+  overline,
+  title = "Buttons",
+  description,
+}: ButtonShowcaseSectionProps) {
   return (
     <section id="button" className="scroll-mt-28 space-y-8">
+      <SectionTitle overline={overline} title={title} description={description} />
       <ButtonComponentShowcase />
     </section>
   );

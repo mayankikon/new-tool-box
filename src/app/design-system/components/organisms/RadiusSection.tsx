@@ -4,18 +4,14 @@ import { radiusTokens } from "@/lib/design-tokens";
 import { SectionTitle } from "../atoms/SectionTitle";
 import { ShowcaseCard } from "../atoms/ShowcaseCard";
 import { TokenSwatch } from "../atoms/TokenSwatch";
-import { CodeInline } from "../atoms/CodeInline";
 
 export function RadiusSection() {
   return (
     <section id="radius" className="scroll-mt-28 space-y-8">
       <SectionTitle
+        overline="Foundations"
         title="Radius"
-        description={
-          <>
-            From <CodeInline size="sm">design-tokens/radius.json</CodeInline> (layout-primitives.css). Border radius tokens for consistent rounding across components.
-          </>
-        }
+        description="Radius tokens control corner curvature to keep surfaces and controls visually consistent."
       />
       <ShowcaseCard padding="lg" className="flex flex-wrap gap-6">
         {radiusTokens.map((token) => (

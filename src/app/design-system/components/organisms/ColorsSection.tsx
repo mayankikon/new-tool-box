@@ -8,7 +8,7 @@ import { TokenSwatch } from "../atoms/TokenSwatch";
 export function ColorsSection() {
   return (
     <section id="colors" className="scroll-mt-28 space-y-8">
-      <SectionTitle title="Colors" description="Theme colors only." />
+      <SectionTitle overline="Foundations" title="Colors" description="Colors define the visual language and semantic meaning across interfaces and states." />
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {themeTokenGroups.map((group) => (

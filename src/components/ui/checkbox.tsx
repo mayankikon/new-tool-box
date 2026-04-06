@@ -30,10 +30,9 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
       >
         <CheckboxPrimitive.Indicator
           data-slot="checkbox-indicator"
-          className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
+          className="absolute inset-0 flex items-center justify-center leading-none text-current transition-none"
         >
-          <CheckIcon
-          />
+          <CheckIcon className="block size-3.5" aria-hidden />
         </CheckboxPrimitive.Indicator>
       </span>
     </CheckboxPrimitive.Root>

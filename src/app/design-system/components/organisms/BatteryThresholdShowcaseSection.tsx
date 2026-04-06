@@ -15,12 +15,21 @@ import { BatteryThresholdDialog } from "@/components/ui/battery-threshold-dialog
 import { BatteryThresholdSliderField } from "@/components/ui/battery-threshold-slider-field";
 import {
   BATTERY_THRESHOLD_RECOMMENDED_V,
-  BATTERY_THRESHOLD_STEP,
   BATTERY_THRESHOLD_V_MIN,
 } from "@/components/ui/battery-threshold-icon";
-import { CodeInline } from "../atoms/CodeInline";
+import { SectionTitle } from "../atoms/SectionTitle";
 
-export function BatteryThresholdShowcaseSection() {
+export interface BatteryThresholdShowcaseSectionProps {
+  overline?: string;
+  title?: string;
+  description?: React.ReactNode;
+}
+
+export function BatteryThresholdShowcaseSection({
+  overline,
+  title = "Battery threshold",
+  description,
+}: BatteryThresholdShowcaseSectionProps) {
   const [inlineVolts, setInlineVolts] = useState(BATTERY_THRESHOLD_RECOMMENDED_V);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalVolts, setModalVolts] = useState(BATTERY_THRESHOLD_V_MIN);
@@ -39,27 +48,15 @@ export function BatteryThresholdShowcaseSection() {
   return (
     <section
       id="battery-threshold"
-      className="scroll-mt-28 rounded-sm border border-border bg-card p-6 shadow-sm"
+      className="scroll-mt-28 space-y-6"
     >
-      <h3 className="ds-doc-font mb-2 text-lg font-medium text-foreground">Battery threshold</h3>
-      <p className="ds-doc-font mb-4 text-sm text-muted-foreground">
-        Low-battery alert threshold in volts (10–12.5 V, {BATTERY_THRESHOLD_STEP} V steps). Uses the dealership
-        battery glyph (<CodeInline>public/media/icons/lead-icon-battery-full.svg</CodeInline>) with a
-        dynamic fill; marked slider matches{" "}
-        <a href="#slider" className="text-primary underline-offset-2 hover:underline">
-          Slider
-        </a>
-        . Recommended {BATTERY_THRESHOLD_RECOMMENDED_V} V is marked on the track. Components:{" "}
-        <CodeInline>battery-threshold-icon.tsx</CodeInline>,{" "}
-        <CodeInline>battery-threshold-slider-field.tsx</CodeInline>,{" "}
-        <CodeInline>battery-threshold-dialog.tsx</CodeInline>.
-      </p>
+      <SectionTitle overline={overline} title={title} description={description} />
 
-      <div className="space-y-8">
+      <div className="space-y-8 rounded-sm border border-border bg-card p-6 shadow-sm">
         <div>
           <h4 className="ds-doc-font mb-2 text-sm font-medium text-foreground">Inline field</h4>
           <p className="ds-doc-font mb-3 text-xs text-muted-foreground">
-            Icon + horizontal scale; use in settings panels or forms.
+            Icon + horizontal scale; use in settings panels or forms. Recommended {BATTERY_THRESHOLD_RECOMMENDED_V} V is marked on the track.
           </p>
           <div className="max-w-md rounded-lg border border-border bg-background/50 p-4">
             <BatteryThresholdSliderField value={inlineVolts} onValueChange={setInlineVolts} layout="inline" />
