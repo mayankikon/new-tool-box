@@ -74,6 +74,8 @@ import { InventoryViewModeToggle } from "@/components/inventory/inventory-view-m
 import type { WizardFormData } from "@/components/campaigns/campaign-wizard";
 import type { CampaignOffer } from "@/lib/campaigns/types";
 import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
+import { useNavVisibility } from "@/lib/nav-visibility/nav-visibility-provider";
+import type { NavVisibilitySectionData } from "@/lib/nav-visibility/nav-visibility-storage";
 
 const products: SidebarProductConfig[] = [
   { id: "inventory", label: "Inventory Management", icon: Package },
@@ -129,6 +131,21 @@ const defaultActiveByProduct: Record<string, string> = {
   inventory: "Inventory",
   marketing: "Ask Atlas",
 };
+
+const navVisibilitySections: NavVisibilitySectionData[] = [
+  {
+    productId: "inventory",
+    productLabel: "Inventory Management",
+    mainLabels: inventoryMainItems.map((i) => i.label),
+    settingsLabels: inventorySettingsItems.map((i) => i.label),
+  },
+  {
+    productId: "marketing",
+    productLabel: "Smart Marketing",
+    mainLabels: marketingMainItems.map((i) => i.label),
+    settingsLabels: marketingSettingsItems.map((i) => i.label),
+  },
+];
 
 function buildSections(
   items: NavItemDef[],
@@ -200,6 +217,7 @@ function InventoryPlaceholderPage({
 export default function ProductPage() {
   const router = useRouter();
   const { profile: brandProfile } = useBrandProfile();
+  const { isItemHidden } = useNavVisibility();
   const [activeProduct, setActiveProduct] = useState("marketing");
   const [activeItem, setActiveItem] = useState("Campaigns");
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
@@ -305,10 +323,17 @@ export default function ProductPage() {
     ? inventorySettingsItems
     : marketingSettingsItems;
 
-  const mainSections = buildSections(mainItems, activeItem);
+  const visibleMainItems = mainItems.filter(
+    (item) => !isItemHidden(activeProduct, item.label),
+  );
+  const visibleSettingsItems = settingsItems.filter(
+    (item) => !isItemHidden(activeProduct, item.label),
+  );
+
+  const mainSections = buildSections(visibleMainItems, activeItem);
 
   const settingsSections = buildSections(
-    settingsItems,
+    visibleSettingsItems,
     activeItem,
     "Settings"
   );
@@ -538,6 +563,7 @@ export default function ProductPage() {
                 activeProductId={activeProduct}
                 onProductChange={handleProductChange}
                 className="overflow-auto pt-6"
+                navSections={navVisibilitySections}
               />
             </div>
           ) : activeItem === "Brand Profile" ? (

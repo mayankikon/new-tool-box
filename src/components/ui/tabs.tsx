@@ -41,6 +41,9 @@ const tabsListVariants = cva(
         line: "gap-1 rounded-none bg-transparent",
         /** Shift 2.0 Sort UI: pill/segment tabs, 8px gap, no list background */
         pill: "gap-2 rounded-none bg-transparent p-0",
+        /** Bordered flat filter tabs — wrapping, content-sized, no list background. Derived from templates-page lifecycle filters. */
+        filter:
+          "gap-2 rounded-none bg-transparent p-0 flex-wrap group-data-horizontal/tabs:h-auto",
       },
     },
     defaultVariants: {
@@ -90,6 +93,8 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         "group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:text-foreground dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:text-foreground",
         "group-data-[variant=line]/tabs-list:after:absolute group-data-[variant=line]/tabs-list:after:bg-foreground group-data-[variant=line]/tabs-list:after:opacity-0 group-data-[variant=line]/tabs-list:after:transition-opacity group-data-[variant=line]/tabs-list:data-active:after:opacity-100 group-data-horizontal/tabs:group-data-[variant=line]/tabs-list:after:inset-x-0 group-data-horizontal/tabs:group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-horizontal/tabs:group-data-[variant=line]/tabs-list:after:h-0.5 group-data-vertical/tabs:group-data-[variant=line]/tabs-list:after:inset-y-0 group-data-vertical/tabs:group-data-[variant=line]/tabs-list:after:-right-1 group-data-vertical/tabs:group-data-[variant=line]/tabs-list:after:w-0.5",
         "group-data-[variant=pill]/tabs-list:relative group-data-[variant=pill]/tabs-list:z-10 group-data-[variant=pill]/tabs-list:rounded-[var(--radius-md)] group-data-[variant=pill]/tabs-list:px-2.5 group-data-[variant=pill]/tabs-list:py-1.5 group-data-[variant=pill]/tabs-list:text-muted-foreground group-data-[variant=pill]/tabs-list:hover:text-foreground group-data-[variant=pill]/tabs-list:data-active:text-foreground",
+        "group-data-[variant=filter]/tabs-list:h-8 group-data-[variant=filter]/tabs-list:flex-initial group-data-[variant=filter]/tabs-list:rounded-sm group-data-[variant=filter]/tabs-list:border group-data-[variant=filter]/tabs-list:px-3 group-data-[variant=filter]/tabs-list:text-xs group-data-[variant=filter]/tabs-list:border-border group-data-[variant=filter]/tabs-list:bg-background group-data-[variant=filter]/tabs-list:text-muted-foreground group-data-[variant=filter]/tabs-list:hover:border-foreground/15 group-data-[variant=filter]/tabs-list:hover:bg-muted/40 group-data-[variant=filter]/tabs-list:hover:text-foreground group-data-[variant=filter]/tabs-list:focus-visible:ring-3 group-data-[variant=filter]/tabs-list:focus-visible:ring-ring/50",
+        "group-data-[variant=filter]/tabs-list:data-active:border-foreground/15 group-data-[variant=filter]/tabs-list:data-active:bg-foreground/6 group-data-[variant=filter]/tabs-list:data-active:text-foreground",
         className
       )}
       {...props}

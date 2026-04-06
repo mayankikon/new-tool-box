@@ -5,6 +5,7 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-m
 
 import { DashboardLedCapsuleWebgl } from "@/components/ui/dashboard-led-capsule-webgl";
 import type { TelemetryDeckLedTone } from "@/components/ui/telemetry-led-tones";
+import { DATA_TABLE_HEADER_BACKGROUND_CLASS } from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
 import { mediaUrl } from "@/lib/media-paths";
 
@@ -73,7 +74,11 @@ export interface FileCabinetTabRowProps {
   tabValues?: readonly string[];
   /** When true, tab buttons are grouped in the horizontal center (e.g. vehicle detail deck). */
   centerTabList?: boolean;
-  /** Optional shared fill applied to the tab strip and the active folder surface. */
+  /**
+   * Optional override for the tab row wrapper and active folder fill. When omitted, the active tab
+   * uses the same neutral fill as sortable table header rows (`DATA_TABLE_HEADER_BACKGROUND_CLASS`);
+   * inactive tabs stay transparent.
+   */
   backgroundClassName?: string;
 }
 
@@ -218,7 +223,7 @@ export function FileCabinetTabRow({
     accent === "amber" ? "amber" : "vfd";
 
   const folderBgClass =
-    backgroundClassName ?? (light ? "bg-white" : "bg-sidebar");
+    backgroundClassName ?? DATA_TABLE_HEADER_BACKGROUND_CLASS;
 
   /** Full sink-rise choreography (folder + label + lamp crossfade); false when reduced-motion or keyboard activation. */
   const sinkRisePointerMotion =

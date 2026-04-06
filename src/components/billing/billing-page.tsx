@@ -29,7 +29,9 @@ import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import {
   DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS,
   DATA_TABLE_ROW_GROUP_CLASS,
+  DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
 } from "@/lib/data-table-row-hover";
 import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
 import { cn } from "@/lib/utils";
@@ -568,7 +570,8 @@ function BillingDataTableRow({
       size="default"
       className={cn(
         DATA_TABLE_ROW_GROUP_CLASS,
-        "!border-0 !bg-transparent hover:!bg-transparent",
+        "!border-0 !bg-transparent",
+        DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
       )}
       style={{ minHeight: bodyCellHeightPx }}
     >
@@ -880,11 +883,11 @@ export function BillingPage({
           tabMotionVariant="sink-rise"
           tabValues={BILLING_SERVICE_TAB_VALUES}
         >
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2">
             <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
               <Table className="border-separate border-spacing-0 bg-transparent text-sm">
                 <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
-                  <TableRow size="compact" className="!border-0 hover:bg-transparent">
+                    <TableRow size="compact" className={cn("!border-0", DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS)}>
                     {BILLING_HEADERS.map((header) => (
                       <TableHead
                         key={header.key}

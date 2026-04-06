@@ -33,6 +33,12 @@ import {
 } from "@/components/ui/table";
 import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { TableSlotCell } from "@/components/ui/table-slot-cell";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+  DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
+} from "@/lib/data-table-row-hover";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import { cn } from "@/lib/utils";
 
@@ -349,7 +355,7 @@ export function StaffPage() {
         >
           <Table className="border-separate border-spacing-0 bg-transparent text-sm">
             <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
-              <TableRow size="compact" className="!border-0 hover:bg-transparent">
+              <TableRow size="compact" className={cn("!border-0", DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS)}>
                 {STAFF_HEADERS.map((header) => (
                   <TableHead
                     key={header.key}
@@ -430,11 +436,18 @@ export function StaffPage() {
                   <TableRow
                     key={record.id}
                     size="default"
-                    className="!border-0 !bg-transparent hover:!bg-transparent"
+                    className={cn(
+                      DATA_TABLE_ROW_GROUP_CLASS,
+                      "!border-0 !bg-transparent",
+                      DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
+                    )}
                     style={{ minHeight: bodyCellHeightPx }}
                   >
                     <TableCell className={cellFrame}>
-                      <div className="flex items-center" style={innerStyle}>
+                      <div
+                        className={cn("flex items-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+                        style={innerStyle}
+                      >
                         <span className="truncate font-medium leading-5 text-foreground">
                           {record.name}
                         </span>
@@ -444,7 +457,7 @@ export function StaffPage() {
                     <TableCell className={cellFrame}>
                       <TableSlotCell
                         label={record.email}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       />
                     </TableCell>
@@ -452,7 +465,7 @@ export function StaffPage() {
                     <TableCell className={cellFrame}>
                       <TableSlotCell
                         label={record.phoneNumber}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       />
                     </TableCell>
@@ -460,7 +473,7 @@ export function StaffPage() {
                     <TableCell className={cellFrame}>
                       <TableSlotCell
                         label={record.department}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       />
                     </TableCell>
@@ -468,7 +481,7 @@ export function StaffPage() {
                     <TableCell className={cellFrame}>
                       <TableSlotCell
                         label={record.jobTitle}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       />
                     </TableCell>
@@ -476,14 +489,14 @@ export function StaffPage() {
                     <TableCell className={cellFrame}>
                       <TableSlotCell
                         label={record.permissionLevel}
-                        className={slotClass}
+                        className={cn(slotClass, DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       />
                     </TableCell>
 
                     <TableCell className={cellFrame}>
                       <div
-                        className="flex items-center justify-center"
+                        className={cn("flex items-center justify-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         style={innerStyle}
                       >
                         <DropdownMenu>

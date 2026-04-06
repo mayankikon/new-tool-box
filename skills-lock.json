@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "7ff26e59b5707ea3d57e42a74fb020034d56bd372d2142da248bf231afb11be4"
     },
+    "background-removal": {
+      "source": "inferen-sh/skills",
+      "sourceType": "github",
+      "computedHash": "daa7b7216f48cd32abeea0ecc8595d9d6d2fe608db8efdf8590c7528c3f2752c"
+    },
     "baseline-ui": {
       "source": "ibelick/ui-skills",
       "sourceType": "github",

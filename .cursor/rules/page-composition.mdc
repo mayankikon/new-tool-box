@@ -1,0 +1,147 @@
+---
+description: Page composition rules — design system usage, page skeleton, content hierarchy, and surface layout. Apply whenever creating a new page, modifying page layout, or adding UI elements to any page-level component.
+globs:
+  - src/app/**/*.tsx
+  - src/components/**/*.tsx
+---
+
+# Page Composition Standards
+
+Every page in this app follows a consistent composition pattern. These rules are non-negotiable when building or modifying any page.
+
+## Rule 1: Design System First
+
+Never build custom UI when a component exists in `src/components/ui/`. Before writing any inline `<button>`, `<input>`, `<select>`, drag-and-drop zone, card, dialog, or similar element, check the design system.
+
+Key components to reach for:
+
+| Need | Component | Import path |
+| ---- | --------- | ----------- |
+| Actions | `Button`, `LinkButton`, `DropdownButton` | `@/components/ui/button`, etc. |
+| Text input | `Input`, `InputContainer`, `InputIcon` | `@/components/ui/input` |
+| Search field | `InputContainer` + `InputIcon` (Search icon) + `Input` | `@/components/ui/input` |
+| Long text | `Textarea`, `AiTextarea` | `@/components/ui/textarea`, etc. |
+| Selection (single) | `Select`, `RadioGroup`, `RadioCard`, `RadioSegmented` | `@/components/ui/select`, etc. |
+| Selection (multi) | `Checkbox`, `CheckboxGroup`, `CheckboxCard` | `@/components/ui/checkbox`, etc. |
+| Tabs / filters | `Tabs`, `TabsList` (variants: `default`, `line`, `pill`, `filter`), `TabsTrigger` | `@/components/ui/tabs` |
+| File upload | `FileUploadArea` (drag-and-drop), `FileUploadCard` (uploaded file row) | `@/components/ui/file-upload-area`, etc. |
+| Avatar upload | `AvatarUpload` | `@/components/ui/avatar-upload` |
+| Cards / surfaces | `Card`, `CardHeader`, `CardTitle`, `CardContent` | `@/components/ui/card` |
+| Tables | `Table` + header/slot cells | `@/components/ui/table` |
+| Pagination | `Paginator` | `@/components/ui/paginator` |
+| Empty states | `EmptyState` | `@/components/ui/empty-state` |
+| Dialogs / modals | `Dialog`, `AlertDialog`, `Sheet` | `@/components/ui/dialog`, etc. |
+| Labels / hints | `Label`, `InputCaption`, `InlineTip` | `@/components/ui/label`, etc. |
+| Date picking | `DatePicker`, `DateRangePicker`, `Calendar` | `@/components/ui/date-picker`, etc. |
+| Badges / tags | `Badge` | `@/components/ui/badge` |
+| Menus | `DropdownMenu` | `@/components/ui/dropdown-menu` |
+| Tooltips | `Tooltip` | `@/components/ui/tooltip` |
+| Progress | `Progress`, `Skeleton` | `@/components/ui/progress`, etc. |
+| Stepper / wizard | `StepperHorizontal`, `StepperVertical` | `@/components/ui/stepper-*` |
+| Toggle | `Switch`, `ToggleSwitch` | `@/components/ui/switch`, etc. |
+
+If the exact component doesn't exist, check for a close match before building from scratch. When no suitable primitive exists, build the new component *inside* `src/components/ui/` so it becomes part of the design system for reuse.
+
+## Rule 2: Standard Page Skeleton
+
+Every page follows a three-layer structure. Do not deviate.
+
+```tsx
+{/* Layer 1: Outer wrapper — flex column, overflow-hidden, pt-6 gap below avatar bar */}
+<div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
+
+  {/* Layer 2: TopBar — already carries px-8 internally */}
+  <TopBar title="Page Title" right={<Button size="header">Action</Button>} />
+
+  {/* Layer 3: Scrollable body — px-8 for 32px left padding, pt-6 gap below TopBar */}
+  <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6">
+    {/* Page content goes here */}
+  </div>
+</div>
+```
+
+### Layer-by-layer rules
+
+1. **Outer wrapper** — `flex min-h-0 flex-1 flex-col overflow-hidden pt-6`
+   - `pt-6` (24 px) is the gap between the avatar bar and the TopBar. Never change this.
+   - `overflow-hidden` prevents the page from scrolling at this level.
+
+2. **TopBar** — Use `<TopBar />` from `@/components/app/top-bar`. It already has `px-8`.
+   - Pass `title` (required), optional `subtitle`, optional `breadcrumbs`, and optional `right` (action buttons).
+   - Action buttons in `right` use `size="header"`.
+
+3. **Scrollable body** — `flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6`
+   - `px-8` (32 px) horizontal padding — left-aligned content.
+   - `pt-6` (24 px) spacing below the TopBar.
+   - `pb-8` or `pb-10` bottom padding for scroll breathing room.
+   - `gap-6` (24 px) vertical rhythm between top-level content sections.
+   - Use `overflow-y-auto overflow-x-hidden` if horizontal overflow needs to be suppressed.
+
+## Rule 3: Content Hierarchy and Surfaces
+
+Page content uses two surface levels: **background** and **card**.
+
+### Background level (directly in the scrollable body)
+These elements sit on the page background without a card wrapper:
+- **Tabs / filter bars** — `<Tabs>` with `<TabsList variant="filter">` or other variants
+- **Search inputs** (when standalone, not inside a card)
+- **Section headings**
+
+### Card level (white container)
+Rich interactive content goes inside a card surface:
+- **File upload areas** (`FileUploadArea`)
+- **Asset grids / data grids**
+- **Forms and form sections**
+- **Detail panels / sidebars** (use `Card` component)
+
+Card surface classes: `rounded-md border border-border bg-card p-6 shadow-sm`
+
+Corner radius must match the `Card` component (`rounded-md`). Do not use `rounded-xl` or `rounded-lg` for card-level containers.
+
+Sidebar detail panels use the `Card` component directly (it already provides the white surface).
+
+### Layout pattern with card surface
+
+```tsx
+{/* Tabs on background */}
+<Tabs value={tab} onValueChange={setTab}>
+  <TabsList variant="filter">
+    <TabsTrigger value="all">All</TabsTrigger>
+    <TabsTrigger value="photos">Photos</TabsTrigger>
+  </TabsList>
+</Tabs>
+
+{/* Content in white card container */}
+<div className="flex flex-col gap-6 lg:flex-row">
+  <div className="min-w-0 flex-1 space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
+    {/* FileUploadArea, grids, forms, etc. */}
+  </div>
+  <div className="w-full shrink-0 lg:w-80">
+    <Card className="sticky top-6">
+      {/* Sidebar details */}
+    </Card>
+  </div>
+</div>
+```
+
+## Rule 4: Left-Aligned, No Centering
+
+Content fills the available width and is left-aligned by default. Do **not** add `mx-auto` or `max-w-*` to center-constrain content unless the page explicitly requires a narrow centered layout (rare).
+
+## Rule 5: Reference Pages
+
+When unsure, match these canonical implementations:
+
+- **List page with table:** `src/components/customers/customers-page.tsx`
+- **Library page with filters + grid:** `src/components/templates/templates-page.tsx`
+- **Upload + grid + sidebar:** `src/components/media/media-library-page.tsx`
+
+## Quick Checklist
+
+- [ ] Every UI element uses a design system component from `src/components/ui/` (no custom buttons, inputs, selects, file pickers, etc.)
+- [ ] Page uses the three-layer skeleton: outer wrapper (`pt-6`) → `TopBar` → scrollable body (`px-8 pt-6 pb-8 gap-6`)
+- [ ] Horizontal padding is exactly 32 px (`px-8`) on the scrollable body
+- [ ] Content is left-aligned (no `mx-auto` / `max-w-*` unless intentional)
+- [ ] Tabs / filters sit on the page background, not inside a card
+- [ ] Rich content (uploads, grids, forms) is inside a white card surface (`rounded-md` + `bg-card` + border)
+- [ ] TopBar action buttons use `size="header"`

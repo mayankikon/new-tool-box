@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ImagePlus, Trash2 } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FileUploadArea } from "@/components/ui/file-upload-area";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Input, InputContainer, InputIcon } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -79,12 +79,11 @@ export function MediaLibraryPage({
     [assets, selectedId],
   );
 
-  const handleUpload = useCallback(
-    async (files: FileList | null) => {
-      if (!files?.length) return;
-      const category: MediaCategory =
-        tab === "all" ? "general" : tab;
-      for (const file of Array.from(files)) {
+  const handleFilesSelected = useCallback(
+    async (files: File[]) => {
+      if (!files.length) return;
+      const category: MediaCategory = tab === "all" ? "general" : tab;
+      for (const file of files) {
         await addMediaAsset(file, category);
       }
       refresh();
@@ -95,114 +94,101 @@ export function MediaLibraryPage({
   return (
     <div
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+        "flex min-h-0 flex-1 flex-col overflow-hidden pt-6",
         className,
       )}
     >
-      <div className="shrink-0 pt-6">{topBar}</div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-8 pb-8 pt-6">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row">
-          <div className="min-w-0 flex-1 space-y-4">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <Tabs
-                value={tab}
-                onValueChange={(v) =>
-                  setTab(v as (typeof FILTER_TABS)[number])
-                }
-              >
-                <TabsList className="h-auto flex-wrap justify-start">
-                  {FILTER_TABS.map((f) => (
-                    <TabsTrigger key={f} value={f} className="text-xs capitalize">
-                      {f === "all" ? "All" : MEDIA_CATEGORY_LABELS[f]}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  placeholder="Search name or tags…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-48"
-                />
-                <Label className="sr-only" htmlFor="media-upload">
-                  Upload files
-                </Label>
-                <Input
-                  id="media-upload"
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  className="max-w-[200px] cursor-pointer text-xs"
-                  onChange={(e) => void handleUpload(e.target.files)}
-                />
-              </div>
-            </div>
+      {topBar}
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {assets.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setSelectedId(a.id)}
-                  className={cn(
-                    "overflow-hidden rounded-xl border text-left transition-colors",
-                    selectedId === a.id
-                      ? "border-primary ring-2 ring-primary/25"
-                      : "border-border bg-card hover:bg-muted/40",
-                  )}
-                >
-                  <div className="aspect-square bg-muted/40">
-                    {a.kind === "video" ? (
-                      <video
-                        src={a.url}
-                        className="size-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={a.url}
-                        alt=""
-                        className="size-full object-cover"
-                      />
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden px-8 pb-8 pt-6">
+        <Tabs
+          value={tab}
+          onValueChange={(v) =>
+            setTab(v as (typeof FILTER_TABS)[number])
+          }
+        >
+          <TabsList variant="filter">
+            {FILTER_TABS.map((f) => (
+              <TabsTrigger key={f} value={f}>
+                {f === "all" ? "All" : MEDIA_CATEGORY_LABELS[f]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="min-w-0 flex-1 space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
+            <FileUploadArea
+              accept="image/*,video/*"
+              hint="Drop images or videos here, up to 10 files at a time"
+              onFilesSelected={(files) => void handleFilesSelected(files)}
+            />
+
+            <InputContainer className="w-full max-w-sm" size="default">
+              <InputIcon position="lead">
+                <Search className="size-4" aria-hidden />
+              </InputIcon>
+              <Input
+                standalone={false}
+                aria-label="Search name or tags"
+                placeholder="Search name or tags…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputContainer>
+
+            {assets.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {assets.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setSelectedId(a.id)}
+                    className={cn(
+                      "overflow-hidden rounded-md border text-left transition-colors",
+                      selectedId === a.id
+                        ? "border-primary ring-2 ring-primary/25"
+                        : "border-border bg-background hover:bg-muted/20",
                     )}
-                  </div>
-                  <div className="space-y-0.5 p-2">
-                    <p className="truncate text-xs font-medium">{a.name}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {(a.sizeBytes / 1024).toFixed(0)} KB ·{" "}
-                      {MEDIA_CATEGORY_LABELS[a.category]}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-            {assets.length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">No media yet</CardTitle>
-                  <CardDescription>
-                    Upload images or videos to use in campaigns, coupons, and
-                    Customization.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
-                    <ImagePlus className="size-4" />
-                    Choose files
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      className="hidden"
-                      onChange={(e) => void handleUpload(e.target.files)}
-                    />
-                  </label>
-                </CardContent>
-              </Card>
-            ) : null}
+                  >
+                    <div className="aspect-square bg-background">
+                      {a.kind === "video" ? (
+                        <video
+                          src={a.url}
+                          className="size-full object-cover"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={a.url}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="space-y-0.5 p-2">
+                      <p className="truncate text-xs font-medium">{a.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {(a.sizeBytes / 1024).toFixed(0)} KB ·{" "}
+                        {MEDIA_CATEGORY_LABELS[a.category]}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-sm font-medium text-foreground">
+                  No media yet
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload images or videos to use in campaigns, coupons, and
+                  Customization.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="w-full shrink-0 lg:w-80">
@@ -213,7 +199,7 @@ export function MediaLibraryPage({
               <CardContent className="space-y-3">
                 {selected ? (
                   <>
-                    <div className="overflow-hidden rounded-lg border bg-muted/30">
+                    <div className="overflow-hidden rounded-lg border bg-background">
                       {selected.kind === "video" ? (
                         <video
                           src={selected.url}
