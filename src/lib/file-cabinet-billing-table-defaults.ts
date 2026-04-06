@@ -14,7 +14,7 @@ export const FILE_CABINET_BILLING_TABLE_DEFAULTS = {
   tabTopRadiusPx: 6,
   /** Theme primary — emerald left lamp + underline (not amber). */
   tabAccent: "primary" as const,
-  headerCellHeightPx: 44,
+  headerCellHeightPx: 48,
   bodyCellHeightPx: 40,
   /** Horizontal inset per column (px); keep in sync with `px-3` on {@link TableHeaderCell} / {@link TableSlotCell}. */
   cellPaddingXPx: 12,

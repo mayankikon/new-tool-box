@@ -25,6 +25,7 @@ const FILE_CABINET_TAB_LAMP_SRC = {
 const PRESET_LED_INTENSITY_RATIO = 0.7;
 /** Active Preset + LED pill (file-cabinet tab row, under label). */
 const PRESET_LED_ACCENT_RGB = { r: 12, g: 219, b: 168 } as const; // #0CDBA8
+const PRESET_LED_ACCENT_RGB_CSS = `${PRESET_LED_ACCENT_RGB.r}, ${PRESET_LED_ACCENT_RGB.g}, ${PRESET_LED_ACCENT_RGB.b}`;
 
 /** Inactive tab labels sit this many px below the active tab label (not bottom-aligned to the seam). */
 const INACTIVE_TAB_LABEL_OFFSET_PX = 2;
@@ -45,6 +46,63 @@ const SINK_RISE_FOLDER_ENTER_DELAY_S = 0.04;
 /** Shorter exit than enter: less overlap with the incoming sheet. */
 const SINK_RISE_FOLDER_EXIT_MS = 0.1;
 const SINK_RISE_LAMP_CROSSFADE_MS = 0.15;
+
+function PresetLedPhotorealPill() {
+  const glowStrength = PRESET_LED_INTENSITY_RATIO;
+
+  return (
+    <span
+      aria-hidden
+      className="relative z-[1] mx-auto mt-1.5 block h-[5px] w-[24px] shrink-0 overflow-visible"
+    >
+      <span
+        className="pointer-events-none absolute -left-1 top-1/2 h-[7px] w-[8px] -translate-y-1/2 rounded-full blur-[2px]"
+        style={{
+          background: `radial-gradient(closest-side, rgba(${PRESET_LED_ACCENT_RGB_CSS}, ${0.44 + glowStrength * 0.24}), rgba(${PRESET_LED_ACCENT_RGB_CSS}, 0))`,
+        }}
+      />
+      <span
+        className="pointer-events-none absolute -right-1 top-1/2 h-[7px] w-[8px] -translate-y-1/2 rounded-full blur-[2px]"
+        style={{
+          background: `radial-gradient(closest-side, rgba(${PRESET_LED_ACCENT_RGB_CSS}, ${0.4 + glowStrength * 0.24}), rgba(${PRESET_LED_ACCENT_RGB_CSS}, 0))`,
+        }}
+      />
+
+      <span
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full border border-black/40"
+        style={{
+          transform: "skewX(-14deg)",
+          transformOrigin: "50% 50%",
+          background: `linear-gradient(90deg,
+            rgba(${PRESET_LED_ACCENT_RGB_CSS}, 0.28) 0%,
+            rgba(${PRESET_LED_ACCENT_RGB_CSS}, ${0.6 + glowStrength * 0.2}) 24%,
+            rgba(207,255,236,0.92) 50%,
+            rgba(${PRESET_LED_ACCENT_RGB_CSS}, ${0.68 + glowStrength * 0.18}) 76%,
+            rgba(${PRESET_LED_ACCENT_RGB_CSS}, 0.3) 100%)`,
+          boxShadow: `0 0 ${9 + glowStrength * 8}px rgba(${PRESET_LED_ACCENT_RGB_CSS}, ${0.35 + glowStrength * 0.25}),
+            inset 0 0 2px rgba(230,255,245,0.75),
+            inset 0 -1px 1.5px rgba(0,0,0,0.35)`,
+        }}
+      >
+        <span
+          className="pointer-events-none absolute left-[14%] top-[14%] h-[35%] w-[72%] rounded-full"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(243,255,250,0.85), rgba(243,255,250,0.12))",
+            mixBlendMode: "screen",
+          }}
+        />
+        <span
+          className="pointer-events-none absolute left-[43%] top-1/2 h-[58%] w-[22%] -translate-y-1/2 rounded-full blur-[0.6px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(255,255,255,0.98) 0%, rgba(230,255,245,0.78) 52%, rgba(230,255,245,0) 100%)",
+          }}
+        />
+      </span>
+    </span>
+  );
+}
 
 export interface FileCabinetTabRowProps {
   value: string;
@@ -211,8 +269,6 @@ export function FileCabinetTabRow({
     : noLeftLampBelowStyle === "preset-led"
       ? "preset-led"
       : "telemetry";
-
-  const presetLedGlow = PRESET_LED_INTENSITY_RATIO;
 
   const underlineClass =
     accent === "amber" ? "bg-amber-500" : "bg-white";
@@ -509,14 +565,7 @@ export function FileCabinetTabRow({
                   {active ? (
                     <motion.span
                       key="preset-led-pill"
-                      aria-hidden
-                      className={cn(
-                        "relative z-[1] mx-auto mt-1.5 block h-[4px] w-[22px] shrink-0 rounded-full border border-zinc-600 motion-reduce:transition-none",
-                      )}
-                      style={{
-                        backgroundColor: `rgba(${PRESET_LED_ACCENT_RGB.r}, ${PRESET_LED_ACCENT_RGB.g}, ${PRESET_LED_ACCENT_RGB.b}, ${0.5 + presetLedGlow * 0.45})`,
-                        boxShadow: `0 0 ${8 + presetLedGlow * 12}px rgba(${PRESET_LED_ACCENT_RGB.r}, ${PRESET_LED_ACCENT_RGB.g}, ${PRESET_LED_ACCENT_RGB.b}, ${0.4 + presetLedGlow * 0.4})`,
-                      }}
+                      className="block"
                       initial={
                         reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 0 }
                       }
@@ -530,25 +579,20 @@ export function FileCabinetTabRow({
                         y: 0,
                         transition: presencePillExitTransition,
                       }}
-                    />
+                    >
+                      <PresetLedPhotorealPill />
+                    </motion.span>
                   ) : null}
                 </AnimatePresence>
               ) : (
                 <span
-                  aria-hidden
                   className={cn(
-                    "relative z-[1] mx-auto mt-1.5 h-[4px] w-[22px] shrink-0 rounded-full border border-zinc-600 transition-opacity duration-150 ease-out motion-reduce:transition-none",
+                    "block transition-opacity duration-150 ease-out motion-reduce:transition-none",
                     active ? "opacity-100" : "opacity-0",
                   )}
-                  style={
-                    active
-                      ? {
-                          backgroundColor: `rgba(${PRESET_LED_ACCENT_RGB.r}, ${PRESET_LED_ACCENT_RGB.g}, ${PRESET_LED_ACCENT_RGB.b}, ${0.5 + presetLedGlow * 0.45})`,
-                          boxShadow: `0 0 ${8 + presetLedGlow * 12}px rgba(${PRESET_LED_ACCENT_RGB.r}, ${PRESET_LED_ACCENT_RGB.g}, ${PRESET_LED_ACCENT_RGB.b}, ${0.4 + presetLedGlow * 0.4})`,
-                        }
-                      : undefined
-                  }
-                />
+                >
+                  <PresetLedPhotorealPill />
+                </span>
               )
             ) : usesPresenceMotion ? (
               <AnimatePresence initial={false} mode="sync">
