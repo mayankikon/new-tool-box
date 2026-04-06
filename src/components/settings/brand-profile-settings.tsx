@@ -19,10 +19,10 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FileUploadArea } from "@/components/ui/file-upload-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -306,13 +306,14 @@ export function BrandProfileSettings({
   return (
     <div
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+        "flex min-h-0 flex-1 flex-col overflow-hidden pt-6",
         className,
       )}
     >
-      <div className="shrink-0 pt-6">{topBar}</div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-8 pb-8 pt-6">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+      {topBar}
+
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden px-8 pb-8 pt-6">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
           <div className="min-w-0 flex-1 space-y-8">
             <section className="space-y-4">
               <div>
@@ -324,7 +325,7 @@ export function BrandProfileSettings({
                   In The Preview.
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 rounded-md border border-border bg-card p-6 shadow-sm">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {THEME_PRESET_ORDER.map((preset) => {
                     const pal = BRAND_THEME_PALETTES[preset];
@@ -342,10 +343,10 @@ export function BrandProfileSettings({
                           })
                         }
                         className={cn(
-                          "rounded-xl border p-3 text-left transition-colors",
+                          "rounded-md border p-3 text-left transition-colors",
                           selected
                             ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-border bg-card hover:bg-muted/40",
+                            : "border-border bg-background hover:bg-muted/40",
                         )}
                       >
                         <div className="flex items-center gap-2">
@@ -369,10 +370,10 @@ export function BrandProfileSettings({
                   aria-pressed={profile.themePreset === "custom"}
                   onClick={() => updateProfile({ themePreset: "custom" })}
                   className={cn(
-                    "w-full rounded-xl border p-3 text-left transition-colors",
+                    "w-full rounded-md border p-3 text-left transition-colors",
                     profile.themePreset === "custom"
                       ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border bg-card hover:bg-muted/40",
+                      : "border-border bg-background hover:bg-muted/40",
                   )}
                 >
                   <span className="text-sm font-medium">Custom</span>
@@ -417,110 +418,102 @@ export function BrandProfileSettings({
                   Customization Preview.
                 </p>
               </div>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Dealership Details</CardTitle>
-                  <CardDescription>
+              <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Dealership Details</p>
+                  <p className="text-xs text-muted-foreground">
                     Name Shown In Messages, Email Footers, And The Consumer App.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`${formId}-name`}>Dealership Name</Label>
-                    <Input
-                      id={`${formId}-name`}
-                      value={profile.dealershipName}
-                      onChange={(e) =>
-                        updateProfile({ dealershipName: e.target.value })
-                      }
-                    />
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`${formId}-name`}>Dealership Name</Label>
+                  <Input
+                    id={`${formId}-name`}
+                    value={profile.dealershipName}
+                    onChange={(e) =>
+                      updateProfile({ dealershipName: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-foreground">
+                    Sample Dealerships
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Apply A Matching Logo And App Icon Pair.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {BRAND_IDENTITY_SAMPLES.map((sample) => (
+                      <Button
+                        key={sample.id}
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          updateProfile({
+                            dealershipName: sample.dealershipName,
+                            logoUrl: sample.logoUrl,
+                            appIconUrl: sample.appIconUrl,
+                            logomarkUrl: sample.appIconUrl,
+                          })
+                        }
+                      >
+                        {sample.label}
+                      </Button>
+                    ))}
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-foreground">
-                      Sample Dealerships
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Apply A Matching Logo And App Icon Pair.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {BRAND_IDENTITY_SAMPLES.map((sample) => (
-                        <Button
-                          key={sample.id}
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() =>
-                            updateProfile({
-                              dealershipName: sample.dealershipName,
-                              logoUrl: sample.logoUrl,
-                              appIconUrl: sample.appIconUrl,
-                              logomarkUrl: sample.appIconUrl,
-                            })
-                          }
-                        >
-                          {sample.label}
-                        </Button>
-                      ))}
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <Label>Logo</Label>
+                    <div className="flex items-center justify-center rounded-lg border border-border bg-background p-4">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={profile.logoUrl}
+                        alt=""
+                        className="h-10 max-w-full object-contain"
+                      />
                     </div>
+                    <FileUploadArea
+                      accept="image/*"
+                      multiple={false}
+                      hint="PNG or SVG, 5 MB max"
+                      onFilesSelected={onLogoFiles}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        updateProfile({
+                          logoUrl: DEFAULT_DEALERSHIP_LOGO_SRC,
+                        })
+                      }
+                    >
+                      Reset To Default
+                    </Button>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Logo</Label>
-                      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border bg-muted/20 p-3">
+                  <div className="space-y-3">
+                    <Label>App Icon</Label>
+                    <div className="flex items-center justify-center rounded-lg border border-border bg-background p-4">
+                      <div className="size-16 overflow-hidden rounded-xl border border-border bg-background shadow-sm">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={profile.logoUrl}
+                          src={profile.appIconUrl || profile.logomarkUrl || profile.logoUrl}
                           alt=""
-                          className="mx-auto h-10 max-w-full object-contain"
-                        />
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          className="cursor-pointer text-xs"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) void onLogoFiles([file]);
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            updateProfile({
-                              logoUrl: DEFAULT_DEALERSHIP_LOGO_SRC,
-                            })
-                          }
-                        >
-                          Reset To Default
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>App Icon</Label>
-                      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-muted/20 p-3">
-                        <div className="size-16 overflow-hidden rounded-xl border border-border bg-background shadow-sm">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={profile.appIconUrl || profile.logomarkUrl || profile.logoUrl}
-                            alt=""
-                            className="size-full object-cover"
-                          />
-                        </div>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          className="cursor-pointer text-xs"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) void onIconFiles([file]);
-                          }}
+                          className="size-full object-cover"
                         />
                       </div>
                     </div>
+                    <FileUploadArea
+                      accept="image/*"
+                      multiple={false}
+                      hint="Square image, 512×512 recommended"
+                      onFilesSelected={onIconFiles}
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </section>
 
             <section className="space-y-4">
@@ -532,7 +525,7 @@ export function BrandProfileSettings({
                   Font Pairing For Customization And Customer-Facing Previews.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 rounded-md border border-border bg-card p-6 shadow-sm sm:grid-cols-2">
                 {FONT_PRESETS.map((preset) => {
                   const selected = profile.fontPreset === preset;
                   return (
@@ -542,10 +535,10 @@ export function BrandProfileSettings({
                       aria-pressed={selected}
                       onClick={() => updateProfile({ fontPreset: preset })}
                       className={cn(
-                        "rounded-xl border p-3 text-left transition-colors",
+                        "rounded-md border p-3 text-left transition-colors",
                         selected
                           ? "border-primary bg-primary/5 shadow-sm"
-                          : "border-border bg-card hover:bg-muted/40",
+                          : "border-border bg-background hover:bg-muted/40",
                       )}
                       style={FONT_PREVIEW_STYLE[preset]}
                     >
@@ -561,14 +554,14 @@ export function BrandProfileSettings({
               </div>
             </section>
 
-            <section className="space-y-4 pb-4">
+            <section className="space-y-4">
               <div>
                 <h2 className="text-base font-medium tracking-tight">Tone</h2>
                 <p className="text-xs text-muted-foreground">
                   Guides Default Copy Style For Campaigns And Templates.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-1">
+              <div className="grid gap-3 rounded-md border border-border bg-card p-6 shadow-sm sm:grid-cols-1">
                 {TONE_ORDER.map((tone) => {
                   const selected = profile.toneProfile === tone;
                   return (
@@ -578,10 +571,10 @@ export function BrandProfileSettings({
                       aria-pressed={selected}
                       onClick={() => updateProfile({ toneProfile: tone })}
                       className={cn(
-                        "rounded-xl border p-3 text-left transition-colors",
+                        "rounded-md border p-3 text-left transition-colors",
                         selected
                           ? "border-primary bg-primary/5 shadow-sm"
-                          : "border-border bg-card hover:bg-muted/40",
+                          : "border-border bg-background hover:bg-muted/40",
                       )}
                     >
                       <p className="text-sm font-medium">

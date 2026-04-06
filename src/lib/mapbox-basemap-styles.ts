@@ -1,8 +1,11 @@
 /**
  * Shared Mapbox style URLs for product maps (Inventory, MapboxMap default).
  *
- * Default “dark” basemap: Mapbox `dark-v11` (deep slate / blue-gray). For a
- * light-gray canvas with optional `.sm-map-dark-muted` filter, use
- * `mapbox://styles/mapbox/light-v11` and set `MapboxMap` `mutedMonochromeDark`.
+ * Default `MapboxMap` style: Mapbox `dark-v11` (see `DEFAULT_STYLE` in `mapbox-map.tsx`).
+ *
+ * Inventory vector basemaps (light + dark) both use Mapbox Standard
+ * (`mapbox://styles/mapbox/standard`); runtime `setConfigProperty("basemap", …)`
+ * sets `lightPreset` (`dusk` vs `night`) and 3D/vegetation options — see
+ * `configureInventoryMapStandardStyle` in `inventory-content.tsx`.
  */
 export const MAPBOX_BASEMAP_DARK_URL = "mapbox://styles/mapbox/dark-v11";

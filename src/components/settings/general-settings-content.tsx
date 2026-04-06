@@ -9,9 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CheckboxList, CheckboxListItem } from "@/components/ui/checkbox-list";
 import type { SidebarProductConfig } from "@/components/ui/sidebar";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { useNavVisibility } from "@/lib/nav-visibility/nav-visibility-provider";
+import type { NavVisibilitySectionData } from "@/lib/nav-visibility/nav-visibility-storage";
 import { cn } from "@/lib/utils";
+
+const PROTECTED_LABELS = ["General"];
 
 function AppearanceThemeControl() {
   const { theme, setTheme } = useTheme();
@@ -40,11 +45,85 @@ function AppearanceThemeControl() {
   );
 }
 
+function NavigationVisibilityCard({
+  section,
+}: {
+  section: NavVisibilitySectionData;
+}) {
+  const { getHiddenLabels, setHiddenLabels } = useNavVisibility();
+  const { productId, productLabel, mainLabels, settingsLabels } = section;
+
+  const allLabels = React.useMemo(
+    () => [...mainLabels, ...settingsLabels],
+    [mainLabels, settingsLabels],
+  );
+
+  const hiddenLabels = getHiddenLabels(productId);
+  const visibleLabels = allLabels.filter((l) => !hiddenLabels.includes(l));
+
+  const handleVisibleChange = React.useCallback(
+    (newVisible: string[]) => {
+      const protectedInProduct = PROTECTED_LABELS.filter((l) =>
+        allLabels.includes(l),
+      );
+      const ensuredVisible = [
+        ...new Set([...newVisible, ...protectedInProduct]),
+      ];
+      const newHidden = allLabels.filter((l) => !ensuredVisible.includes(l));
+      setHiddenLabels(productId, newHidden);
+    },
+    [allLabels, productId, setHiddenLabels],
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">{productLabel}</CardTitle>
+        <CardDescription>
+          Toggle pages visible in the sidebar.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <CheckboxList
+          value={visibleLabels}
+          onValueChange={handleVisibleChange}
+        >
+          {mainLabels.map((label) => (
+            <CheckboxListItem
+              key={label}
+              value={label}
+              label={label}
+              disabled={PROTECTED_LABELS.includes(label)}
+            />
+          ))}
+          {settingsLabels.length > 0 && (
+            <>
+              <div className="my-1 border-t border-border" />
+              <p className="px-3 py-1 text-xs font-medium text-muted-foreground">
+                Settings
+              </p>
+              {settingsLabels.map((label) => (
+                <CheckboxListItem
+                  key={label}
+                  value={label}
+                  label={label}
+                  disabled={PROTECTED_LABELS.includes(label)}
+                />
+              ))}
+            </>
+          )}
+        </CheckboxList>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface GeneralSettingsContentProps {
   products: SidebarProductConfig[];
   activeProductId: string;
   onProductChange: (productId: string) => void;
   className?: string;
+  navSections?: NavVisibilitySectionData[];
 }
 
 export function GeneralSettingsContent({
@@ -52,10 +131,11 @@ export function GeneralSettingsContent({
   activeProductId,
   onProductChange,
   className,
+  navSections,
 }: GeneralSettingsContentProps) {
   return (
     <div className={cn("flex flex-1 flex-col gap-8 px-8 pb-8", className)}>
-      {/* General settings sections (above product switcher) */}
+      {/* Account & preferences */}
       <section className="space-y-6">
         <h2 className="text-sm font-medium text-muted-foreground">
           Account &amp; preferences
@@ -100,7 +180,30 @@ export function GeneralSettingsContent({
         </div>
       </section>
 
-      {/* Product switcher: Inventory Management / Smart Marketing (buried at bottom) */}
+      {/* Sidebar navigation visibility */}
+      {navSections && navSections.length > 0 && (
+        <section className="space-y-6 border-t border-border pt-8">
+          <div className="space-y-1">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Sidebar navigation
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Choose which pages appear in the sidebar for each application.
+              Unchecked pages are hidden from the navigation.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {navSections.map((section) => (
+              <NavigationVisibilityCard
+                key={section.productId}
+                section={section}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Product switcher */}
       <section className="space-y-4 border-t border-border pt-8">
         <h2 className="text-sm font-medium text-muted-foreground">
           Application

@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/vehicle-list-panel";
 import { InventoryVehicleDetailPanel } from "@/components/inventory/vehicle-detail-panel";
 import { SendVehicleBrochureDialog } from "@/components/inventory/send-vehicle-brochure-dialog";
-import { MAPBOX_BASEMAP_DARK_URL } from "@/lib/mapbox-basemap-styles";
 import {
   BatteryIcon,
   KeyPairedIcon,
@@ -68,6 +67,12 @@ import {
 import { MapMarkerHoverFrame } from "@/components/ui/map-marker-hover-frame";
 import { KeysMapMarkerPin } from "@/components/ui/keys-map-marker-pin";
 import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
+import {
+  DATA_TABLE_CELL_INNER_HOVER_CLASS,
+  DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS,
+  DATA_TABLE_ROW_GROUP_CLASS,
+  DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
+} from "@/lib/data-table-row-hover";
 import { cn } from "@/lib/utils";
 import {
   DEALERSHIP_CENTER,
@@ -109,10 +114,10 @@ export type InventoryViewMode = "map" | "table";
 
 export type InventoryMapAppearance = InventoryMapBasemapAppearance;
 
-export const INVENTORY_MAP_STYLE_DARK = MAPBOX_BASEMAP_DARK_URL;
-/** Mapbox Studio light basemap — use a token that can load this style (style owner account or public). */
-export const INVENTORY_MAP_STYLE_LIGHT =
-  "mapbox://styles/kingermayank/cmn3lx6iy002j01ruclwo3ri0";
+/** Mapbox Standard: same vector basemap for light + dark; `lightPreset` switches at runtime. */
+const INVENTORY_MAP_STANDARD_STYLE_URL = "mapbox://styles/mapbox/standard";
+export const INVENTORY_MAP_STYLE_LIGHT = INVENTORY_MAP_STANDARD_STYLE_URL;
+export const INVENTORY_MAP_STYLE_DARK = INVENTORY_MAP_STANDARD_STYLE_URL;
 /** Satellite imagery with street / place labels (Mapbox default). */
 export const INVENTORY_MAP_STYLE_SATELLITE =
   "mapbox://styles/mapbox/satellite-streets-v12";
@@ -136,11 +141,60 @@ function getMapAppearanceLabel(appearance: InventoryMapAppearance): string {
   }
 }
 
-/** True when the basemap is light (studio / light-v11) so labels and clusters stay readable. */
+/** True when the basemap is light (Standard / light-v11) so labels and clusters stay readable. */
 function inventoryMapUsesLightBasemapUi(
   appearance: InventoryMapAppearance
 ): boolean {
   return appearance === "light";
+}
+
+/** Standard style has built-in 3D buildings/landmarks — skip custom fill-extrusion layers. */
+function isInventoryMapStandardStyle(
+  appearance: InventoryMapAppearance
+): boolean {
+  return appearance === "light" || appearance === "dark";
+}
+
+/** Apple Maps–like park / woodland tint on Standard (2D landcover, not individual trees). */
+const INVENTORY_MAP_STANDARD_COLOR_GREENSPACE = "#6eb85a";
+
+/**
+ * Configure Mapbox Standard style's basemap properties via `setConfigProperty`.
+ * Safe to call on non-Standard styles (errors silently caught).
+ *
+ * Tree models require `show3dObjects: true` — when it is false, Mapbox hides all
+ * Standard 3D content (buildings, landmarks, and trees). That is independent of
+ * camera pitch; the inventory "3D" toggle only controlled this flag before, so
+ * users in flat (2D) mode never saw trees. We keep the object stack on and use
+ * `show3dLandmarks` follows the inventory 3D toggle. We keep `show3dBuildings`
+ * on whenever Standard is active so tree models are not suppressed in flat
+ * (pitch-0) mode — in practice Mapbox ties building mesh visibility closely to
+ * the same 3D stack as vegetation in many tiles.
+ */
+function configureInventoryMapStandardStyle(
+  map: mapboxgl.Map,
+  is3D: boolean,
+  appearance: InventoryMapAppearance
+) {
+  const setBasemapConfig = (key: string, value: unknown) => {
+    try {
+      map.setConfigProperty("basemap", key, value);
+    } catch {
+      /* non-Standard style or unsupported GL JS version */
+    }
+  };
+
+  const lightPreset =
+    appearance === "light" ? "dusk" : appearance === "dark" ? "night" : "dusk";
+  setBasemapConfig("lightPreset", lightPreset);
+  setBasemapConfig("show3dObjects", true);
+  setBasemapConfig("show3dTrees", true);
+  setBasemapConfig("show3dBuildings", true);
+  setBasemapConfig("show3dLandmarks", is3D);
+  setBasemapConfig(
+    "colorGreenspace",
+    appearance === "dark" ? "#4a8f42" : INVENTORY_MAP_STANDARD_COLOR_GREENSPACE
+  );
 }
 
 const CAR_RELATED_POI_CLASSES = [
@@ -263,7 +317,7 @@ function mountInventoryKeyMarker(
 ): InventoryKeyMarkerEntry {
   const wrap = document.createElement("div");
   wrap.className = "pointer-events-none inline-flex items-center justify-center";
-  wrap.style.zIndex = "45";
+  wrap.style.zIndex = "12";
   const root = createRoot(wrap);
   root.render(<KeysMapMarkerPin hoverable title="Key fob" />);
   const marker = new mapboxgl.Marker({ element: wrap, anchor: "center" })
@@ -796,7 +850,7 @@ function reconcileInventoryVehicleHtmlMarkers(
       const el = existing.marker.getElement();
       el.style.zIndex =
         selectedVin != null && props.vin === selectedVin
-          ? "50"
+          ? "15"
           : selectedVin != null
             ? "1"
             : "";
@@ -813,7 +867,7 @@ function reconcileInventoryVehicleHtmlMarkers(
       const selectedVin = inventoryMapMarkerHighlightRef.selectedVin;
       el.style.zIndex =
         selectedVin != null && props.vin === selectedVin
-          ? "50"
+          ? "15"
           : selectedVin != null
             ? "1"
             : "";
@@ -846,8 +900,11 @@ function addInventoryVehicleMapOverlays(
   onVehicleSelect?: InventoryVehicleSelectHandler
 ) {
   const mainLot = mainLotGeoJSON.features[0];
-  const dealershipName =
-    mainLot?.properties?.name ?? "Dealership";
+  const addressLine = mainLot?.properties?.address?.trim();
+  const dealershipLabelText =
+    addressLine != null && addressLine.length > 0
+      ? `${ICON_HEADQUARTERS_DISPLAY_NAME}\n${addressLine}`
+      : ICON_HEADQUARTERS_DISPLAY_NAME;
 
   map.addSource(INVENTORY_DEALERSHIP_LABEL_SOURCE_ID, {
     type: "geojson",
@@ -856,7 +913,7 @@ function addInventoryVehicleMapOverlays(
       features: [
         {
           type: "Feature",
-          properties: { name: dealershipName },
+          properties: { name: dealershipLabelText },
           geometry: {
             type: "Point",
             coordinates: [...DEALERSHIP_CENTER] as [number, number],
@@ -1167,20 +1224,20 @@ function addGeofenceLayers(
   appearance: InventoryMapAppearance
 ) {
   const fillColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#155dfc"
+    ? "#22c55e"
     : appearance === "satellite"
-      ? "#ffffff"
-      : "#7eb0ff";
+      ? "#39ff14"
+      : "#4ade80";
   const fillOpacity = inventoryMapUsesLightBasemapUi(appearance)
     ? 0.14
     : appearance === "satellite"
       ? 0.22
       : 0.22;
   const lineColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#155dfc"
+    ? "#15803d"
     : appearance === "satellite"
-      ? "#ffffff"
-      : "#c5ddff";
+      ? "#bef264"
+      : "#86efac";
 
   map.addSource("geofences", {
     type: "geojson",
@@ -1248,6 +1305,7 @@ function addRoadHighlighting(
   map: mapboxgl.Map,
   appearance: InventoryMapAppearance
 ) {
+  if (isInventoryMapStandardStyle(appearance)) return;
   const beforeId = resolveRoadHighlightBeforeId(map);
   if (!beforeId) return;
 
@@ -1344,9 +1402,11 @@ function setupInventoryMap(
   onVehicleSelect?: InventoryVehicleSelectHandler
 ) {
   teardownInventoryMapOverlays(map);
+  if (!isInventoryMapStandardStyle(appearance)) {
+    filterPoiLayers(map);
+  }
   addGeofenceLayers(map, geofences, appearance);
   addRoadHighlighting(map, appearance);
-  filterPoiLayers(map);
 
   const mainLotGeometry = geofences.features[0]?.geometry;
   const mainLotRing =
@@ -1384,7 +1444,7 @@ const INVENTORY_VIEW_MAP_IN_DURATION_S = 0.3;
 const INVENTORY_PAGE_SIZE = 14;
 /** Map + outer chrome — matches dark basemap letterboxing and app shell. */
 const MAP_SURFACE_CLASS_DARK = "bg-[#1a1f26]";
-const MAP_SURFACE_CLASS_LIGHT = "bg-[#F2F2F2]";
+const MAP_SURFACE_CLASS_LIGHT = "bg-[#ddd5cc]";
 /** Tighter framing on dealership HQ (1161 W Corporate Dr, Arlington); global map default remains 16. */
 const INVENTORY_MAP_INITIAL_ZOOM = 18;
 
@@ -1542,6 +1602,7 @@ function applyInventoryMapBuildingsExtrusionPaintWithHqFeatureState(
   appearance: InventoryMapAppearance,
   hqIds: (string | number)[]
 ) {
+  if (isInventoryMapStandardStyle(appearance)) return;
   if (!map.getLayer(INVENTORY_3D_BUILDINGS_LAYER_ID)) return;
   const paint = buildInventoryMapBuildingsExtrusionPaintWithHqFeatureState(
     appearance,
@@ -1707,6 +1768,7 @@ function ensureInventoryIconHqFillLayer(
   is3D: boolean,
   appearance: InventoryMapAppearance
 ) {
+  if (isInventoryMapStandardStyle(appearance)) return;
   if (!map.getSource("composite")) return;
   if (map.getLayer(INVENTORY_ICON_HQ_FILL_LAYER_ID)) {
     map.removeLayer(INVENTORY_ICON_HQ_FILL_LAYER_ID);
@@ -2032,6 +2094,7 @@ function addInventoryMap3dBuildingsLayer(
   map: mapboxgl.Map,
   appearance: InventoryMapAppearance
 ) {
+  if (isInventoryMapStandardStyle(appearance)) return;
   if (map.getLayer(INVENTORY_3D_BUILDINGS_LAYER_ID)) return;
   if (!map.getSource("composite")) return;
 
@@ -2065,6 +2128,8 @@ function addInventoryMap3dBuildingsLayer(
 
 /**
  * 3D: terrain, extruded buildings, pitched camera. 2D: flat (no extrusion / terrain).
+ * For Mapbox Standard style, 3D buildings/landmarks are built-in; we configure
+ * them via `setConfigProperty` and only add terrain + pitch.
  * Call after inventory layers are on the map (e.g. microtask after `setupInventoryMap`).
  */
 function applyInventoryMapPerspective(
@@ -2074,6 +2139,16 @@ function applyInventoryMapPerspective(
   appearance: InventoryMapAppearance
 ) {
   if (!map.loaded()) return;
+
+  const useStandard = isInventoryMapStandardStyle(appearance);
+
+  if (useStandard) {
+    configureInventoryMapStandardStyle(map, useThreeDimensions, appearance);
+    const reapplyStandardConfig = () => {
+      configureInventoryMapStandardStyle(map, useThreeDimensions, appearance);
+    };
+    map.once("idle", reapplyStandardConfig);
+  }
 
   if (useThreeDimensions) {
     try {
@@ -2105,9 +2180,11 @@ function applyInventoryMapPerspective(
     });
   }
 
-  queueMicrotask(() => {
-    scheduleIconHeadquartersSetup(map, appearance, useThreeDimensions);
-  });
+  if (!useStandard) {
+    queueMicrotask(() => {
+      scheduleIconHeadquartersSetup(map, appearance, useThreeDimensions);
+    });
+  }
 }
 
 function clearInventoryMapTerrainBeforeStyleChange(map: mapboxgl.Map) {
@@ -2200,7 +2277,7 @@ function InventoryTableView({
         <div className="relative min-h-0 min-w-0">
           <Table className="border-separate border-spacing-0 bg-transparent text-sm">
             <TableHeader className="[&_tr]:border-0 [&_tr]:bg-transparent [&_tr]:hover:bg-transparent">
-              <TableRow size="compact" className="!border-0 hover:bg-transparent">
+              <TableRow size="compact" className={cn("!border-0", DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS)}>
                   <TableHead className="w-[56px] p-0">
                     <TableHeaderCell variant="checkbox" />
                   </TableHead>
@@ -2253,10 +2330,14 @@ function InventoryTableView({
                     <TableRow
                       key={vehicle.vin}
                       size="default"
-                      className="!border-0 !bg-transparent hover:!bg-transparent"
+                      className={cn(
+                        DATA_TABLE_ROW_GROUP_CLASS,
+                        "!border-0 !bg-transparent",
+                        DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
+                      )}
                     >
                       <TableCell className="p-0">
-                        <div className="flex min-h-11 items-center justify-center">
+                        <div className={cn("flex min-h-11 items-center justify-center", DATA_TABLE_CELL_INNER_HOVER_CLASS)}>
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={(checked) =>
@@ -2267,7 +2348,7 @@ function InventoryTableView({
                         </div>
                       </TableCell>
                       <TableCell className="p-0">
-                        <div className="flex min-h-11 items-center px-2.5">
+                        <div className={cn("flex min-h-11 items-center px-2.5", DATA_TABLE_CELL_INNER_HOVER_CLASS)}>
                           <div className="inline-flex max-w-full items-center gap-1">
                             <button
                               type="button"
@@ -2293,7 +2374,7 @@ function InventoryTableView({
                         </div>
                       </TableCell>
                       <TableCell className="p-0">
-                        <div className="flex min-h-11 items-center px-2.5">
+                        <div className={cn("flex min-h-11 items-center px-2.5", DATA_TABLE_CELL_INNER_HOVER_CLASS)}>
                           <div className="inline-flex max-w-full items-center gap-1">
                             <span className="truncate text-sm leading-5 text-foreground">
                               {stockNumber}
@@ -2316,47 +2397,59 @@ function InventoryTableView({
                       <TableCell className="p-0">
                         <TableSlotCell
                           label={year}
-                          className="min-h-11 text-foreground"
+                          className={cn("min-h-11 text-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         />
                       </TableCell>
                       <TableCell className="p-0">
                         <TableSlotCell
                           label={vehicle.make}
-                          className="min-h-11 text-foreground"
+                          className={cn("min-h-11 text-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         />
                       </TableCell>
                       <TableCell className="p-0">
                         <TableSlotCell
                           label={vehicle.model}
-                          className="min-h-11 text-foreground"
+                          className={cn("min-h-11 text-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         />
                       </TableCell>
                       <TableCell className="p-0">
                         <TableSlotCell
                           label={vehicle.trim}
-                          className="min-h-11 text-foreground"
+                          className={cn("min-h-11 text-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         />
                       </TableCell>
                       <TableCell className="p-0">
-                        <TableSlotCell label={vehicle.mileage} className="min-h-11" />
+                        <TableSlotCell
+                          label={vehicle.mileage}
+                          className={cn("min-h-11", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+                        />
                       </TableCell>
                       <TableCell className="p-0">
                         <TableSlotCell
                           label={vehicle.price}
-                          className="min-h-11 text-sm font-medium text-foreground"
+                          className={cn("min-h-11 text-sm font-medium text-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
                         />
                       </TableCell>
                       <TableCell className="p-0">
-                        <TableSlotCell label={vehicle.lotAge} className="min-h-11" />
+                        <TableSlotCell
+                          label={vehicle.lotAge}
+                          className={cn("min-h-11", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+                        />
                       </TableCell>
                       <TableCell className="p-0">
-                        <TableSlotCell label={vehicle.stockType} className="min-h-11" />
+                        <TableSlotCell
+                          label={vehicle.stockType}
+                          className={cn("min-h-11", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+                        />
                       </TableCell>
                       <TableCell className="p-0">
-                        <TableSlotCell label={vehicle.geofence} className="min-h-11" />
+                        <TableSlotCell
+                          label={vehicle.geofence}
+                          className={cn("min-h-11", DATA_TABLE_CELL_INNER_HOVER_CLASS)}
+                        />
                       </TableCell>
                       <TableCell className="p-0">
-                        <div className="flex min-h-11 items-center gap-2 px-2.5 text-muted-foreground">
+                        <div className={cn("flex min-h-11 items-center gap-2 px-2.5 text-muted-foreground", DATA_TABLE_CELL_INNER_HOVER_CLASS)}>
                           <LocationIcon variant={statusIcons.location} />
                           <KeyPairedIcon variant={statusIcons.keyPaired} />
                           <BatteryIcon variant={statusIcons.battery} />
@@ -2888,7 +2981,7 @@ export function InventoryContent({
               className="h-full w-full overflow-hidden"
               surfaceClassName={mapCanvasSurfaceClass}
               canvasBackgroundColor={
-                mapAppearance === "light" ? "#F2F2F2" : "#1a1f26"
+                mapAppearance === "light" ? "#ddd5cc" : "#1a1f26"
               }
               mutedMonochromeDark={false}
               extraControls={

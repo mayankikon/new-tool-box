@@ -165,7 +165,7 @@ export function MarketingAudiencesPage({
             noLeftLampBelowStyle="preset-led"
             tabMotionVariant="sink-rise"
           >
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2 pt-[4px]">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col pb-2">
               <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
                 <MarketingAudiencesFileCabinetTable
                   rows={pagedRows}

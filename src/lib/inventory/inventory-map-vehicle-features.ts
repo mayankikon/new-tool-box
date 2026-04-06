@@ -20,8 +20,8 @@ export const INVENTORY_LOT_AGE_TIER_HEX: Record<InventoryLotAgeTier, string> = {
 /** Zoom at or above this shows HTML image markers (and hides unclustered circles). */
 export const INVENTORY_MAP_VEHICLE_IMAGE_ZOOM = 18.5;
 
-/** Dealership label only at very low zoom. */
-export const INVENTORY_MAP_DEALERSHIP_LABEL_MAX_ZOOM = 11.5;
+/** Dealership name label visible up to this zoom (inventory default zoom ~18). */
+export const INVENTORY_MAP_DEALERSHIP_LABEL_MAX_ZOOM = 22;
 
 const LOT_AGE_DAY_PATTERN = /(\d+)\s*days?/i;
 

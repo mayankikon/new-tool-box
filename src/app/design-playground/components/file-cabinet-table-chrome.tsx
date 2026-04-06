@@ -44,7 +44,10 @@ export interface FileCabinetTableChromeProps {
   tabValues?: readonly string[];
   /** Passed through to {@link FileCabinetTabRow} (e.g. center vehicle detail tabs). */
   centerTabList?: boolean;
-  /** Optional shared fill applied to the tab strip and the active folder surface. */
+  /**
+   * Optional override for the tab row wrapper and active folder fill. When omitted, the active tab
+   * matches the table header row neutral (`DATA_TABLE_HEADER_BACKGROUND_CLASS` in `FileCabinetTabRow`).
+   */
   tabBackgroundClassName?: string;
   /** Optional override for the outer SVG chrome stroke. */
   strokeClassName?: string;
