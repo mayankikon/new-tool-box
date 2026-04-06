@@ -712,14 +712,18 @@ export function AtlasAiPage({ onNavigateToCampaigns }: AtlasAiPageProps) {
         {modules.map((module, index) => {
           const Icon = module.iconKey ? homeModuleIcons[module.iconKey] : Sparkles;
           const accentClasses = [
-            "from-primary/14 via-primary/8 to-transparent dark:from-primary/[0.12] dark:via-muted/50 dark:to-card",
-            "from-sky-500/12 via-primary/8 to-transparent dark:from-sky-500/[0.14] dark:via-muted/50 dark:to-card",
-            "from-amber-500/12 via-primary/8 to-transparent dark:from-amber-500/[0.12] dark:via-muted/50 dark:to-card",
-            "from-emerald-500/12 via-primary/8 to-transparent dark:from-emerald-500/[0.12] dark:via-muted/50 dark:to-card",
-            "from-primary/12 via-teal-500/8 to-transparent dark:from-teal-500/[0.12] dark:via-muted/50 dark:to-card",
-            "from-cyan-500/12 via-primary/8 to-transparent dark:from-cyan-500/[0.12] dark:via-muted/50 dark:to-card",
+            "bg-[linear-gradient(135deg,rgba(226,239,236,0.96)_0%,rgba(233,243,241,0.98)_52%,rgba(223,235,232,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(16,24,24,0.72)_0%,rgba(22,32,31,0.62)_52%,rgba(16,24,24,0.72)_100%)]",
+            "bg-[linear-gradient(135deg,rgba(223,238,237,0.97)_0%,rgba(232,242,241,0.98)_52%,rgba(220,233,231,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(16,24,24,0.72)_0%,rgba(22,32,31,0.62)_52%,rgba(16,24,24,0.72)_100%)]",
+            "bg-[linear-gradient(135deg,rgba(228,240,235,0.96)_0%,rgba(234,243,239,0.98)_52%,rgba(223,236,231,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(20,24,20,0.72)_0%,rgba(30,34,27,0.62)_52%,rgba(20,24,20,0.72)_100%)]",
+            "bg-[linear-gradient(135deg,rgba(223,240,233,0.96)_0%,rgba(232,243,238,0.98)_52%,rgba(219,234,227,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(16,24,20,0.72)_0%,rgba(20,33,28,0.62)_52%,rgba(16,24,20,0.72)_100%)]",
+            "bg-[linear-gradient(135deg,rgba(223,239,236,0.97)_0%,rgba(232,242,240,0.98)_52%,rgba(220,233,230,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(16,24,24,0.72)_0%,rgba(20,32,32,0.62)_52%,rgba(16,24,24,0.72)_100%)]",
+            "bg-[linear-gradient(135deg,rgba(223,239,239,0.97)_0%,rgba(232,242,242,0.98)_52%,rgba(220,233,233,0.98)_100%)] dark:bg-[linear-gradient(135deg,rgba(16,24,24,0.72)_0%,rgba(20,31,34,0.62)_52%,rgba(16,24,24,0.72)_100%)]",
           ];
-          const accentClass = accentClasses[index % accentClasses.length];
+          const recallOpportunityAccentClass = accentClasses[1];
+          const accentClass =
+            module.id === "atlas-home-defection"
+              ? recallOpportunityAccentClass
+              : accentClasses[index % accentClasses.length];
 
           return (
             <motion.button
@@ -730,11 +734,11 @@ export function AtlasAiPage({ onNavigateToCampaigns }: AtlasAiPageProps) {
               whileTap={{ scale: 0.995 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
               onClick={() => setQuery(module.prompt)}
-              className="group overflow-hidden rounded-md border border-border/70 bg-card/70 text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-[border-color,background-color,transform,box-shadow] duration-200 hover:border-primary/25 hover:bg-card hover:shadow-[0_6px_18px_rgba(16,24,40,0.07)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:shadow-[0_1px_2px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.45)]"
+              className="group overflow-hidden rounded-md border border-border/70 bg-card text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-[border-color,background-color,transform,box-shadow] duration-200 hover:border-primary/25 hover:bg-card hover:shadow-[0_6px_18px_rgba(16,24,40,0.07)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:shadow-[0_1px_2px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.45)]"
             >
               <div
                 className={cn(
-                  "relative overflow-hidden border-b border-border/60 bg-gradient-to-br px-3 py-3",
+                  "relative overflow-hidden border-b border-border/60 px-3 py-2",
                   accentClass,
                 )}
               >
@@ -752,7 +756,7 @@ export function AtlasAiPage({ onNavigateToCampaigns }: AtlasAiPageProps) {
                     "dark:bg-[radial-gradient(circle_at_bottom_right,color-mix(in_oklab,var(--primary)_34%,transparent),transparent_52%)]",
                   )}
                 />
-                <div className="relative flex min-h-[74px] items-center justify-center">
+                <div className="relative flex min-h-[56px] items-center justify-center">
                   <motion.div
                     className="relative flex items-center justify-center text-primary"
                     animate={{ scale: [1, 1.02, 1] }}

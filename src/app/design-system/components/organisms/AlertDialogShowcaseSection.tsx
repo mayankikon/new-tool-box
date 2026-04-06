@@ -23,32 +23,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CodeInline } from "../atoms/CodeInline";
+import { SectionTitle } from "../atoms/SectionTitle";
 
-export function AlertDialogShowcaseSection() {
+export interface AlertDialogShowcaseSectionProps {
+  overline?: string;
+  title?: string;
+  description?: React.ReactNode;
+}
+
+export function AlertDialogShowcaseSection({
+  overline,
+  title = "Modal",
+  description,
+}: AlertDialogShowcaseSectionProps) {
   return (
-    <section id="alert-dialog" className="scroll-mt-28 space-y-8">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          Alert Dialog
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground ds-doc-font">
-          Modal confirmation pattern for destructive or irreversible actions. Uses
-          foundation tokens: <CodeInline>bg-popover</CodeInline>,{" "}
-          <CodeInline>text-foreground</CodeInline> /{" "}
-          <CodeInline>text-muted-foreground</CodeInline>,{" "}
-          <CodeInline>rounded-[var(--radius-lg)]</CodeInline> (12px), <CodeInline>p-6</CodeInline>,{" "}
-          <CodeInline>border</CodeInline> (<CodeInline>--stroke-default</CodeInline>, 1px all sides),{" "}
-          <CodeInline>gap-4</CodeInline> (16px) between stacked sections. Motion: 200ms enter / 150ms
-          exit (fade, scale, light blur);{" "}
-          <CodeInline>motion-reduce</CodeInline> disables animation. Title{" "}
-          <CodeInline>font-medium</CodeInline> (500); body <CodeInline>text-sm</CodeInline>{" "}
-          (14px, Saira); actions default to <CodeInline>size=&quot;lg&quot;</CodeInline>. Built on{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">
-            @base-ui/react/alert-dialog
-          </code>
-          .
-        </p>
-      </div>
+    <section id="modal" className="scroll-mt-28 space-y-8">
+      <SectionTitle overline={overline} title={title} description={description} />
 
       <div className="rounded-sm border border-border bg-card p-6 shadow-sm space-y-10">
         <div>

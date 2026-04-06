@@ -5,6 +5,7 @@ import { SectionTitle } from "../atoms/SectionTitle";
 export interface DesignSystemPlaceholderSectionProps {
   id: string;
   title: string;
+  overline?: string;
 }
 
 /**
@@ -13,10 +14,12 @@ export interface DesignSystemPlaceholderSectionProps {
 export function DesignSystemPlaceholderSection({
   id,
   title,
+  overline,
 }: DesignSystemPlaceholderSectionProps) {
   return (
     <section id={id} className="scroll-mt-28 space-y-8">
       <SectionTitle
+        overline={overline}
         title={title}
         description={
           <>

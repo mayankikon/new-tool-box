@@ -24,7 +24,7 @@ export function TypographySection() {
 
   return (
     <section id="typography" className="scroll-mt-28 space-y-8">
-      <SectionTitle title="Typography" description="Saira only: heading and body." />
+      <SectionTitle overline="Foundations" title="Typography" description="Typography establishes hierarchy, readability, and tone across product experiences." />
 
       <div className="space-y-10">
         <div>

@@ -4,18 +4,14 @@ import { strokeTokens } from "@/lib/design-tokens";
 import { SectionTitle } from "../atoms/SectionTitle";
 import { ShowcaseCard } from "../atoms/ShowcaseCard";
 import { TokenSwatch } from "../atoms/TokenSwatch";
-import { CodeInline } from "../atoms/CodeInline";
 
 export function StrokeSection() {
   return (
     <section id="stroke" className="scroll-mt-28 space-y-8">
       <SectionTitle
+        overline="Foundations"
         title="Stroke"
-        description={
-          <>
-            Border width from <CodeInline size="sm">design-tokens/stroke.json</CodeInline>. Use <CodeInline size="sm">border</CodeInline>, <CodeInline size="sm">border-2</CodeInline>, etc.
-          </>
-        }
+        description="Stroke tokens define border weight and separation for components and layout chrome."
       />
       <ShowcaseCard padding="lg" className="space-y-3">
         {strokeTokens.map((token) => (

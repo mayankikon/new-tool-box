@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils";
 import {
   PORTFOLIO_CHECKBOX_DEFAULT_VISUALS,
   PORTFOLIO_FORM_CONTROL_BORDER_HEX,
-  PORTFOLIO_FORM_CONTROL_DISABLED_FILL_HEX,
-  PORTFOLIO_FORM_CONTROL_GREEN_HEX,
   type PortfolioCheckboxVisuals,
   hexToRgbaString,
 } from "@/components/ui/portfolio-form-controls-visuals";
@@ -100,13 +98,19 @@ function PortfolioCheckboxControl({
         <CheckboxPrimitive.Indicator
           data-slot="portfolio-checkbox-indicator"
           keepMounted
-          className="relative z-10 grid place-content-center text-current group-disabled:text-white/70 group-data-[visual-disabled=true]:text-white/70 [&_svg]:size-2.5"
+          className="absolute inset-0 z-10 flex items-center justify-center leading-none text-current group-disabled:text-white/70 group-data-[visual-disabled=true]:text-white/70"
           render={(indicatorProps, state) => (
-            <span {...indicatorProps}>
+            <span
+              {...indicatorProps}
+              className={cn(
+                indicatorProps.className,
+                "flex size-full items-center justify-center"
+              )}
+            >
               {state.indeterminate ? (
-                <MinusIcon className="text-white" strokeWidth={2.25} aria-hidden />
+                <MinusIcon className="block size-2.5 text-white" strokeWidth={2.25} aria-hidden />
               ) : state.checked ? (
-                <CheckIcon className="text-white" strokeWidth={2.25} aria-hidden />
+                <CheckIcon className="block size-2.5 text-white" strokeWidth={2.25} aria-hidden />
               ) : null}
             </span>
           )}

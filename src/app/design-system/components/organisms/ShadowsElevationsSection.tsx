@@ -6,8 +6,9 @@ export function ShadowsElevationsSection() {
   return (
     <section id="shadows-elevations" className="scroll-mt-28 space-y-8">
       <SectionTitle
+        overline="Foundations"
         title="Shadows & Elevations"
-        description="Shadow and elevation tokens for layering and depth hierarchy."
+        description="Shadows and elevations communicate depth, layering, and interactive prominence."
       />
       <div className="rounded-sm border border-dashed border-border bg-muted/20 p-10 text-center">
         <p className="ds-doc-font text-sm text-muted-foreground">
