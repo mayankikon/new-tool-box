@@ -79,7 +79,7 @@ function PortfolioRadioButton({
       data-visual-disabled={visualDisabled ? "true" : undefined}
       disabled={disabled}
       className={cn(
-        "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none transition-colors",
+        "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none transition-colors",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#1A9375]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         "disabled:cursor-not-allowed disabled:opacity-65",
         "data-disabled:[&_[data-slot=portfolio-radio-inner-dot]]:bg-[color:var(--portfolio-radio-disabled)]",

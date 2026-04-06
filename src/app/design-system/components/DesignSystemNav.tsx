@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { LayoutDashboard, Package, Palette, Search, X } from "lucide-react";
 
 import { appLineFieldPattern } from "@/components/chrome/app-line-field-dial-preset";
 import { LineFieldPatternLayers } from "@/components/chrome/line-field-pattern-layers";
@@ -17,6 +17,12 @@ const SECTION_HEADINGS: Record<DesignSystemGroup, string> = {
   foundations: "Foundations",
   components: "Components",
   patterns: "Patterns",
+};
+
+const SECTION_ICONS: Record<DesignSystemGroup, typeof Palette> = {
+  foundations: Palette,
+  components: Package,
+  patterns: LayoutDashboard,
 };
 
 type NavEntry = NavItem & { group: DesignSystemGroup };
@@ -70,7 +76,7 @@ function NavRow({ href, label, isActive }: { href: string; label: string; isActi
         "flex w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-8)] h-9 transition-colors",
         isActive
           ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-          : "bg-transparent text-[color:var(--theme-text-secondary)] hover:bg-[color:var(--sidebar-nav-item-hover-bg)] hover:text-foreground"
+          : "bg-transparent text-[color:var(--theme-text-secondary)] hover:bg-sidebar-accent hover:font-medium hover:text-sidebar-accent-foreground"
       )}
     >
       <span
@@ -171,6 +177,8 @@ export function DesignSystemNav() {
           const items = entriesByGroup[group];
           if (items.length === 0) return null;
 
+          const SectionIcon = SECTION_ICONS[group];
+
           return (
             <div
               key={group}
@@ -183,14 +191,14 @@ export function DesignSystemNav() {
               }}
             >
               <h3
-                className="px-[var(--spacing-8)] py-[var(--spacing-4)] font-medium"
+                className="flex items-center gap-1.5 px-[var(--spacing-8)] py-[var(--spacing-4)] font-medium uppercase text-primary"
                 style={{
                   fontSize: "var(--text-xs)",
                   lineHeight: "var(--leading-5)",
-                  color: "var(--theme-text-secondary)",
                 }}
               >
-                {SECTION_HEADINGS[group]}
+                <SectionIcon className="size-3 shrink-0" strokeWidth={3} aria-hidden />
+                <span>{SECTION_HEADINGS[group]}</span>
               </h3>
 
               <div className="flex flex-col gap-[2px]">
