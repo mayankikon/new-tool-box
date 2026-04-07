@@ -124,10 +124,8 @@ import { AlertDialogShowcaseSection } from "./components/organisms/AlertDialogSh
 import { BatteryThresholdShowcaseSection } from "./components/organisms/BatteryThresholdShowcaseSection";
 import { ButtonShowcaseSection } from "./components/organisms/ButtonShowcaseSection";
 import { ColorsSection } from "./components/organisms/ColorsSection";
-import { RadiusSection } from "./components/organisms/RadiusSection";
 import { ShadowsElevationsSection } from "./components/organisms/ShadowsElevationsSection";
 import { SpacingSection } from "./components/organisms/SpacingSection";
-import { StrokeSection } from "./components/organisms/StrokeSection";
 import { TypographySection } from "./components/organisms/TypographySection";
 import { DesignSystemPlaceholderSection } from "./components/organisms/DesignSystemPlaceholderSection";
 import {
@@ -1341,12 +1339,8 @@ function renderFoundationShowcase(slug: string) {
       return <TypographySection key={slug} />;
     case "spacing":
       return <SpacingSection key={slug} />;
-    case "radius":
-      return <RadiusSection key={slug} />;
     case "shadows-elevations":
       return <ShadowsElevationsSection key={slug} />;
-    case "stroke":
-      return <StrokeSection key={slug} />;
     default:
       return null;
   }
@@ -1363,10 +1357,9 @@ export interface DesignSystemPageEntry {
 const entryDescriptions: Record<string, string> = {
   "foundations:colors": "Colors define the visual language and semantic meaning across interfaces and states.",
   "foundations:typography": "Typography establishes hierarchy, readability, and tone across product experiences.",
-  "foundations:spacing": "Spacing creates rhythm, structure, and clarity between related interface elements.",
-  "foundations:radius": "Radius tokens control corner curvature to keep surfaces and controls visually consistent.",
+  "foundations:spacing":
+    "Spacing and corner radius create rhythm, structure, and consistent surfaces across the product.",
   "foundations:shadows-elevations": "Shadows and elevations communicate depth, layering, and interactive prominence.",
-  "foundations:stroke": "Stroke tokens define border weight and separation for components and layout chrome.",
   "components:button": "Buttons allow the users to take action, make choices, or navigate within a product or website.",
   "components:avatar-bar": "Avatar Bar presents account context and quick user controls at the page edge.",
   "components:top-bar": "Top Bar introduces each page with title, context, and primary actions.",

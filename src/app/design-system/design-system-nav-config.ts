@@ -19,10 +19,8 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
   foundations: [
     { slug: "colors", label: "Colors" },
     { slug: "typography", label: "Typography" },
-    { slug: "spacing", label: "Spacing" },
-    { slug: "radius", label: "Radius" },
+    { slug: "spacing", label: "Spacing and Layout" },
     { slug: "shadows-elevations", label: "Shadows & Elevations" },
-    { slug: "stroke", label: "Stroke" },
   ],
   components: [
     { slug: "button", label: "Button" },

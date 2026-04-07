@@ -1,8 +1,8 @@
 /**
- * Foundation design tokens sourced from globals.css / design-tokens JSON.
- * Used by the design system showcase. Theme colors (`themeTokenGroups`) are the canonical palette;
- * shadcn-style semantic groups are not duplicated here — components still use `--background`, `--primary`,
- * etc. from `globals.css` via Tailwind.
+ * Foundation design tokens for the design system showcase (spacing, radius, stroke).
+ * Semantic theme colors (`--theme-*`, `--background`, `--primary`, etc.) live in `theme-primitives.css`
+ * and `globals.css` — not duplicated here. Typography token arrays below are reference data only
+ * (Typography foundation uses custom samples, not these exports).
  */
 
 export const radiusTokens = [
@@ -75,61 +75,4 @@ export const letterSpacingTokens = [
   { name: "wide", value: "0.40px" },
   { name: "wider", value: "0.80px" },
   { name: "widest", value: "1.60px" },
-] as const;
-
-/** Theme tokens (design-tokens/themes.json) for design system showcase - background swatches use var, text use color */
-export const themeTokenGroups = [
-  {
-    name: "Background",
-    tokens: [
-      { name: "background-page", cssVar: "var(--theme-background-page)", type: "bg" as const },
-      { name: "background-container", cssVar: "var(--theme-background-container)", type: "bg" as const },
-      { name: "background-default", cssVar: "var(--theme-background-default)", type: "bg" as const },
-      { name: "background-sidebar", cssVar: "var(--theme-background-sidebar)", type: "bg" as const },
-      { name: "background-accent", cssVar: "var(--theme-background-accent)", type: "bg" as const },
-      { name: "background-hover", cssVar: "var(--theme-background-hover)", type: "bg" as const },
-      { name: "background-pressed", cssVar: "var(--theme-background-pressed)", type: "bg" as const },
-    ],
-  },
-  {
-    name: "Text",
-    tokens: [
-      { name: "text-primary", cssVar: "var(--theme-text-primary)", type: "text" as const },
-      { name: "text-secondary", cssVar: "var(--theme-text-secondary)", type: "text" as const },
-      { name: "text-tertiary", cssVar: "var(--theme-text-tertiary)", type: "text" as const },
-      { name: "text-inactive", cssVar: "var(--theme-text-inactive)", type: "text" as const },
-      { name: "text-destructive", cssVar: "var(--theme-text-destructive)", type: "text" as const },
-      { name: "text-interactive", cssVar: "var(--theme-text-interactive)", type: "text" as const },
-      { name: "text-success", cssVar: "var(--theme-text-success)", type: "text" as const },
-      { name: "text-warning", cssVar: "var(--theme-text-warning)", type: "text" as const },
-    ],
-  },
-  {
-    name: "Stroke (border color)",
-    tokens: [
-      { name: "stroke-default", cssVar: "var(--theme-stroke-default)", type: "bg" as const },
-      { name: "stroke-subtle", cssVar: "var(--theme-stroke-subtle)", type: "bg" as const },
-      { name: "stroke-accent", cssVar: "var(--theme-stroke-accent)", type: "bg" as const },
-      { name: "stroke-destructive", cssVar: "var(--theme-stroke-destructive)", type: "bg" as const },
-    ],
-  },
-  {
-    name: "Button",
-    tokens: [
-      { name: "button-primary-default", cssVar: "var(--theme-background-button-primary-default)", type: "bg" as const },
-      { name: "button-primary-hover", cssVar: "var(--theme-background-button-primary-hover)", type: "bg" as const },
-      { name: "button-secondary-default", cssVar: "var(--theme-background-button-secondary-default)", type: "bg" as const },
-      { name: "button-secondary-hover", cssVar: "var(--theme-background-button-secondary-hover)", type: "bg" as const },
-      { name: "button-destructive", cssVar: "var(--theme-background-button-destructive)", type: "bg" as const },
-    ],
-  },
-  {
-    name: "Interaction States",
-    tokens: [
-      { name: "stroke-hover", cssVar: "var(--theme-stroke-hover)", type: "bg" as const },
-      { name: "stroke-focus", cssVar: "var(--theme-stroke-focus)", type: "bg" as const },
-      { name: "input-hover", cssVar: "var(--theme-background-input-hover)", type: "bg" as const },
-      { name: "card-hover", cssVar: "var(--theme-background-card-hover)", type: "bg" as const },
-    ],
-  },
 ] as const;

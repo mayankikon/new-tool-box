@@ -24,11 +24,13 @@ export function SectionTitle({
       className={cn(
         "font-[family-name:var(--font-saira)]",
         variant === "default" && "pt-10",
+        /* 40px below the divider; collapses with the next sibling’s space-y-* margin so body starts once. */
+        variant === "default" && description != null && "mb-[40px]",
         className
       )}
     >
       {overline != null && variant === "default" && (
-        <p className="mb-1 text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="mb-1 text-sm font-medium uppercase tracking-wider text-muted-foreground">
           {overline}
         </p>
       )}
@@ -42,8 +44,8 @@ export function SectionTitle({
         {title}
       </h2>
       {description != null && variant === "default" && (
-        <div className="mt-0 pb-2">
-          <p className="pt-2 pb-10 text-[16px] text-muted-foreground">{description}</p>
+        <div className="mt-0">
+          <p className="pt-2 pb-5 text-[16px] text-muted-foreground">{description}</p>
           <div className="border-t border-border" />
         </div>
       )}

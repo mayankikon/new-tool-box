@@ -10,6 +10,50 @@ export const BUTTON_SHOWCASE_SIZES = [
   { id: "lg" as const, label: "lg", px: 40 },
 ] as const;
 
+/** Text button sizes for per-example previews (matches Button `size` prop; excludes icon-only sizes). */
+/** `heightPx` matches Tailwind in `button.tsx` (`h-6` = 24px … `h-12` = 48px at default theme). */
+export const BUTTON_DOC_TEXT_SIZES = [
+  { id: "2xs" as const, label: "2XS", heightPx: 24 },
+  { id: "sm" as const, label: "SM", heightPx: 32 },
+  { id: "md" as const, label: "MD", heightPx: 36 },
+  { id: "lg" as const, label: "LG", heightPx: 40 },
+  { id: "xl" as const, label: "XL", heightPx: 48 },
+] as const;
+
+/** Variant rows for documentation “Examples” panels (shadcn-style one block per type). */
+export const BUTTON_DOC_VARIANT_EXAMPLES = [
+  {
+    id: "default" as const,
+    title: "Default",
+    description: "Primary action; strongest emphasis. Use one per region when possible.",
+  },
+  {
+    id: "secondary" as const,
+    title: "Secondary",
+    description: "Alternate emphasis when default is already used or context is lower priority.",
+  },
+  {
+    id: "soft" as const,
+    title: "Soft",
+    description: "Tinted surface for supportive actions that should stay visible but quieter than primary.",
+  },
+  {
+    id: "ghost" as const,
+    title: "Ghost",
+    description: "Minimal chrome for toolbars, tables, and dense layouts.",
+  },
+  {
+    id: "muted" as const,
+    title: "Muted",
+    description: "Low-emphasis actions that read as tertiary until hovered.",
+  },
+  {
+    id: "destructive" as const,
+    title: "Destructive",
+    description: "Irreversible or risky actions; pair with confirmation when impact is high.",
+  },
+] as const;
+
 /** Button showcase: variants for matrix rows (id = Button variant prop). */
 export const BUTTON_SHOWCASE_VARIANTS = [
   { id: "default" as const, label: "Primary" },

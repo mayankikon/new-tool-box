@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTheme } from "@/components/theme/app-theme-provider";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import {
   BatteryFull,
   BatteryLow,
@@ -117,66 +117,53 @@ const stockTypeBadgeConfig: Record<string, { label: string; className: string }>
   Service: { label: "Service", className: "bg-[#BE123C] text-white" },
 };
 
-function VehicleInfoChip({
+function VehicleDetailTile({
   label,
+  value,
+  icon: Icon,
+  className,
+  labelIconClassName,
   copyValue,
   copiedValue,
   onCopy,
+  valueAccessory,
 }: {
   label: string;
-  copyValue: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  className?: string;
+  labelIconClassName?: string;
+  copyValue?: string;
   copiedValue?: string | null;
-  onCopy: (value: string) => void;
+  onCopy?: (value: string) => void;
+  valueAccessory?: ReactNode;
 }) {
-  const isCopied = copiedValue === copyValue;
-
-  return (
-    <button
-      type="button"
-      onClick={() => onCopy(copyValue)}
-      aria-label={`Copy ${label}`}
-    >
-      <Badge
-        variant="outline"
-        className="h-8 cursor-pointer gap-1 rounded-sm border-sidebar-border bg-sidebar px-2 text-sidebar-foreground transition-colors hover:bg-sidebar-accent"
-      >
-        <span className="tabular-nums">{label}</span>
-        <span className="relative ml-1.5 inline-flex size-4 items-center justify-center">
+  const isCopied = copyValue != null && copiedValue === copyValue;
+  const valueRow = (
+    <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+      <span className="min-w-0 break-all text-pretty">{value}</span>
+      {valueAccessory}
+      {copyValue != null && onCopy ? (
+        <span className="relative inline-flex size-3.5 shrink-0 items-center justify-center">
           <Copy
             className={cn(
               "absolute size-3 transition-all duration-300 ease-in-out",
-              isCopied
-                ? "scale-0 opacity-0"
-                : "scale-100 opacity-100",
+              isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
             )}
             aria-hidden
           />
           <Check
             className={cn(
               "absolute size-3 text-emerald-500 transition-all duration-300 ease-in-out",
-              isCopied
-                ? "scale-100 opacity-100"
-                : "scale-0 opacity-0",
+              isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
             )}
             aria-hidden
           />
         </span>
-      </Badge>
-    </button>
+      ) : null}
+    </span>
   );
-}
 
-function VehicleDetailTile({
-  label,
-  value,
-  icon: Icon,
-  className,
-}: {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  className?: string;
-}) {
   return (
     <div
       className={cn(
@@ -185,12 +172,23 @@ function VehicleDetailTile({
       )}
     >
       <div className="mb-3 flex items-center gap-2 text-xs font-medium text-[color-mix(in_srgb,var(--theme-text-secondary)_91%,rgb(0_0_0)_9%)]">
-        <Icon className="size-3.5" aria-hidden />
+        <Icon className={cn("size-3.5", labelIconClassName)} aria-hidden />
         <span>{label}</span>
       </div>
-      <p className="text-sm font-medium text-[var(--theme-text-secondary)] text-pretty">
-        {value}
-      </p>
+      {copyValue != null && onCopy ? (
+        <button
+          type="button"
+          onClick={() => onCopy(copyValue)}
+          className="w-full text-left text-sm font-medium text-[var(--theme-text-secondary)] transition-colors hover:text-foreground"
+          aria-label={`Copy ${label}`}
+        >
+          {valueRow}
+        </button>
+      ) : (
+        <p className="text-sm font-medium text-[var(--theme-text-secondary)] text-pretty">
+          {valueRow}
+        </p>
+      )}
     </div>
   );
 }
@@ -298,10 +296,16 @@ export function InventoryVehicleDetailPanel({
   }, []);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-lg bg-sidebar">
-      <div className="flex-1 overflow-y-auto cursor-default select-none bg-background">
+    <div
+      className={cn(
+        "flex h-full flex-col overflow-hidden rounded-lg border border-border/45 bg-sidebar/75 shadow-[0_8px_40px_rgba(0,0,0,0.1)] backdrop-blur-xl",
+        "dark:border-border/30 dark:bg-sidebar/65 dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]",
+      )}
+    >
+      <div className="flex-1 cursor-default select-none overflow-y-auto bg-transparent">
         <div className="overflow-hidden">
-          <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          <div className="px-1 pt-1">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-muted">
             <Image
               src={vehicle.imageSrc}
               alt={vehicle.imageAlt ?? vehicle.title}
@@ -368,15 +372,16 @@ export function InventoryVehicleDetailPanel({
               <KeyPairedIcon variant={statusIcons.keyPaired} />
               <BatteryIcon variant={statusIcons.battery} />
             </div>
+            </div>
           </div>
 
           <div className="space-y-4 px-4 py-4">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {vehicle.title.match(/^\d{4}/)?.[0]} {vehicle.make}
                 </p>
-                <h4 className="font-headline text-[22px] font-medium leading-7 text-foreground text-balance">
+                <h4 className="[text-wrap:wrap] whitespace-normal font-headline text-[22px] font-medium leading-7 text-foreground">
                   {vehicle.model} {vehicle.trim}
                 </h4>
               </div>
@@ -406,73 +411,6 @@ export function InventoryVehicleDetailPanel({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-2 tabular-nums">
-                <Gauge className="size-3.5" aria-hidden />
-                {vehicle.mileage}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleCopy(vehicle.vin)}
-                className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
-              >
-                <Fingerprint className="size-3.5" aria-hidden />
-                <span>VIN {vehicle.vin}</span>
-                <span className="relative inline-flex size-3.5 items-center justify-center">
-                  <Copy
-                    className={cn(
-                      "absolute size-3 transition-all duration-300 ease-in-out",
-                      copiedValue === vehicle.vin ? "scale-0 opacity-0" : "scale-100 opacity-100",
-                    )}
-                    aria-hidden
-                  />
-                  <Check
-                    className={cn(
-                      "absolute size-3 text-emerald-500 transition-all duration-300 ease-in-out",
-                      copiedValue === vehicle.vin ? "scale-100 opacity-100" : "scale-0 opacity-0",
-                    )}
-                    aria-hidden
-                  />
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCopy(stockNumber)}
-                className="inline-flex items-center gap-2 tabular-nums transition-colors hover:text-foreground"
-              >
-                <Hash className="size-3.5" aria-hidden />
-                <span>Stock {stockNumber}</span>
-                <span className="relative inline-flex size-3.5 items-center justify-center">
-                  <Copy
-                    className={cn(
-                      "absolute size-3 transition-all duration-300 ease-in-out",
-                      copiedValue === stockNumber ? "scale-0 opacity-0" : "scale-100 opacity-100",
-                    )}
-                    aria-hidden
-                  />
-                  <Check
-                    className={cn(
-                      "absolute size-3 text-emerald-500 transition-all duration-300 ease-in-out",
-                      copiedValue === stockNumber ? "scale-100 opacity-100" : "scale-0 opacity-0",
-                    )}
-                    aria-hidden
-                  />
-                </span>
-              </button>
-              <span className="inline-flex items-center gap-2">
-                <Palette className="size-3.5" aria-hidden />
-                {exteriorColor}
-                <span
-                  className="size-3.5 shrink-0 rounded-full border border-border"
-                  style={{ backgroundColor: exteriorColorHex[exteriorColor] ?? "#888" }}
-                  aria-hidden
-                />
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <batteryIndicator.Icon className={cn("size-3.5", batteryIndicator.className)} aria-hidden />
-                {batteryDisplay}
-              </span>
-            </div>
           </div>
 
           <VehicleDetailDeckTabs
@@ -522,56 +460,58 @@ export function InventoryVehicleDetailPanel({
                     </div>
                   </section>
 
-                  <div className="flex flex-wrap gap-2">
-                    <VehicleInfoChip
-                      label={`VIN ${vehicle.vin}`}
-                      copyValue={vehicle.vin}
-                      copiedValue={copiedValue}
-                      onCopy={handleCopy}
-                    />
-                    <VehicleInfoChip
-                      label={`Stock ${stockNumber}`}
-                      copyValue={stockNumber}
-                      copiedValue={copiedValue}
-                      onCopy={handleCopy}
-                    />
-                  </div>
-
-                  <section>
-                    <div className="overflow-hidden rounded-sm border border-border bg-background">
-                      <div className="grid grid-cols-2 border-b border-border">
-                        <VehicleDetailTile
-                          label="Miles"
-                          value={vehicle.mileage}
-                          icon={Gauge}
-                          className="rounded-none border-0 border-r border-border bg-background"
-                        />
-                        <VehicleDetailTile
-                          label="Lot Age"
-                          value={vehicle.lotAge}
-                          icon={MapPin}
-                          className="rounded-none border-0 bg-background"
-                        />
-                      </div>
-                      <div
-                        className={cn(
-                          "flex items-center justify-between px-3 py-2 text-sm text-foreground",
-                          statusIcons.battery === "inactive"
-                            ? "bg-destructive/5"
-                            : "bg-background",
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          <BatteryIcon
-                            variant={statusIcons.battery}
-                            className="text-foreground"
+                  <section className="space-y-3">
+                    <h5 className="text-sm font-semibold uppercase text-foreground">
+                      Details
+                    </h5>
+                    <div className="grid grid-cols-2 gap-1">
+                      <VehicleDetailTile
+                        label="Miles"
+                        value={vehicle.mileage}
+                        icon={Gauge}
+                      />
+                      <VehicleDetailTile
+                        label="Lot Age"
+                        value={vehicle.lotAge}
+                        icon={MapPin}
+                      />
+                      <VehicleDetailTile
+                        label="VIN"
+                        value={vehicle.vin}
+                        icon={Fingerprint}
+                        copyValue={vehicle.vin}
+                        copiedValue={copiedValue}
+                        onCopy={handleCopy}
+                      />
+                      <VehicleDetailTile
+                        label="Stock"
+                        value={stockNumber}
+                        icon={Hash}
+                        copyValue={stockNumber}
+                        copiedValue={copiedValue}
+                        onCopy={handleCopy}
+                      />
+                      <VehicleDetailTile
+                        label="Color"
+                        value={exteriorColor}
+                        icon={Palette}
+                        valueAccessory={
+                          <span
+                            className="size-3.5 shrink-0 rounded-full border border-border"
+                            style={{
+                              backgroundColor:
+                                exteriorColorHex[exteriorColor] ?? "#888",
+                            }}
+                            aria-hidden
                           />
-                          <span className="font-medium">Battery Status</span>
-                        </div>
-                        <span className="font-semibold tabular-nums text-foreground">
-                          9.4v
-                        </span>
-                      </div>
+                        }
+                      />
+                      <VehicleDetailTile
+                        label="Battery"
+                        value={batteryDisplay}
+                        icon={batteryIndicator.Icon}
+                        labelIconClassName={batteryIndicator.className}
+                      />
                     </div>
                   </section>
 
