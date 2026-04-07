@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   BookUser,
   Home,
@@ -473,8 +474,9 @@ function SidebarNavItem({
 
   if (item.href) {
     return (
-      <a
+      <Link
         href={item.href}
+        onClick={onClick}
         className={cn(
           baseClasses,
           collapsed && "justify-center gap-0 px-0",
@@ -484,7 +486,7 @@ function SidebarNavItem({
         aria-current={isActive ? "page" : undefined}
       >
         {content}
-      </a>
+      </Link>
     );
   }
 

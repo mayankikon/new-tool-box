@@ -114,28 +114,29 @@ export function DesignSystemNav() {
 
   return (
     <nav
-      className="relative isolate flex min-h-screen w-[280px] shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar"
+      className="relative isolate flex h-full min-h-0 w-[280px] shrink-0 flex-col overflow-hidden border-r border-border bg-sidebar"
       aria-label="Design system navigation"
     >
       <LineFieldPatternLayers pattern={NAV_LINE_FIELD_PATTERN} />
 
       <div className="relative z-10 border-b border-border px-[var(--spacing-16)] pb-[var(--spacing-12)] pt-[var(--spacing-24)]">
-        <Link href="/design-system" className="group flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <Link
+          href="/design-system"
+          className="group flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
           <img
             src="/media/logos/logo.png"
             alt="Shift Design System logo"
             className="size-9 shrink-0 object-contain"
           />
-          <h2
-            className="font-semibold"
-            style={{
-              fontSize: "16px",
-              lineHeight: "var(--leading-5)",
-              color: "var(--theme-text-primary)",
-            }}
-          >
-            Shift Design System
-          </h2>
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="text-base font-medium leading-none text-foreground">
+              Shift Design System
+            </h2>
+            <span className="block text-xs font-normal leading-none text-muted-foreground">
+              v2.0
+            </span>
+          </div>
         </Link>
         <div className="mt-4" role="search" aria-label="Search design system sections">
           <div className="relative">

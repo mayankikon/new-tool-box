@@ -10,11 +10,12 @@ This document inventories the current design system page (`src/app/design-system
 
 | # | Section | Line range (approx) | Sub-sections / content |
 |---|--------|---------------------|-------------------------|
-| 1 | **Colors** (`ColorsSection`) | — | Theme token groups (Background, Text, Stroke, Button, Interaction States) from `themeTokenGroups` |
+| 1 | **Colors** (`ColorsSection`) | — | Brand & semantic hex palettes + data-viz scales from `color-palette-data.ts` |
 | 2 | **Typography** | — | Font family cards, Font size samples, Font weight, Line height, Letter spacing |
-| 3 | **Spacing** / **Radius** / **Shadows & Elevations** / **Stroke** | — | Separate foundation sections; data from `design-tokens.ts` (`spacingTokens`, `radiusTokens`, `strokeTokens`, etc.) |
-| 4 | **Components** | — | Single large section containing all component showcases (see below) |
-| 5 | **Patterns** | — | Page layout, tables, AI TextArea, empty state, file upload, etc. |
+| 3 | **Spacing and Layout** (`SpacingSection`) | — | Subsections **Spacing scale** and **Radius scale** (tables); `spacingTokens` and `radiusTokens` from `design-tokens.ts`. Stroke tokens are not showcased on the design system site |
+| 4 | **Shadows & Elevations** (`ShadowsElevationsSection`) | — | Placeholder / coming soon |
+| 5 | **Components** | — | Single large section containing all component showcases (see below) |
+| 6 | **Patterns** | — | Page layout, tables, AI TextArea, empty state, file upload, etc. |
 
 ### Under "Components" — subsections in order
 
@@ -85,9 +86,8 @@ Optional: **ComponentsSection** organism that only renders the list of component
 | Card description | `p.text-sm.text-muted-foreground.mb-4` (or mb-3, mb-6) | Many | Same molecule |
 | Sub-heading (h4) | `h4.text-sm.font-medium.text-foreground.mt-6.mb-2` or `mt-8.mb-2` | Many | Optional slot in molecule |
 | Inline code | `code.rounded.bg-muted.px-1.py-0.5.text-xs` or `.px-1.5.text-sm` | Dozens | Atom: **CodeInline** |
-| Token swatch (color) | Flex column: swatch box (h-10 w-10) + label | Per token | Atom: **TokenSwatch** (type: color) |
+| Token swatch (color) | Flex column: swatch box + label | Per token | Atom: **TokenSwatch** (type: color) — spacing/radius/stroke foundations |
 | Token swatch (text) | "Aa" sample + label | Per token | Atom: **TokenSwatch** (type: text) |
-| Token group card | Card with group name (h3) + grid of swatches | ~15+ | Molecule: **TokenGroupCard** |
 
 ---
 
@@ -95,9 +95,9 @@ Optional: **ComponentsSection** organism that only renders the list of component
 
 | Content | Data source | Used by (after refactor) |
 |---------|-------------|---------------------------|
-| Theme token groups (foundations **Colors**) | `themeTokenGroups` in `src/lib/design-tokens.ts` | `ColorsSection` → TokenGroupCard |
-| Radius / spacing / stroke | `radiusTokens`, `spacingTokens`, `strokeTokens` in `design-tokens.ts` | `RadiusSection`, `SpacingSection`, `StrokeSection` (etc.) |
-| Typography samples | `fontFamilyTokens`, `fontSizeTokens`, `fontWeightTokens`, `lineHeightTokens`, `letterSpacingTokens` in `design-tokens.ts` | TypographySection → TokenGroupCard / custom blocks |
+| Brand / semantic / data-viz palettes (foundations **Colors**) | `src/app/design-system/color-palette-data.ts` | `ColorsSection` → inline `PaletteSubsection` grid |
+| Radius / spacing / stroke (data only for stroke) | `radiusTokens`, `spacingTokens`, `strokeTokens` in `design-tokens.ts` | `SpacingSection` (spacing + radius scales); stroke tokens not given a dedicated section |
+| Typography samples | Inline in `TypographySection` (not `fontFamilyTokens` etc.) | `TypographySection` |
 | Button showcase config | BUTTON_SHOWCASE_SIZES, BUTTON_SHOWCASE_VARIANTS, BUTTON_SHOWCASE_STATES, BUTTON_HOVER_LOOK, BUTTON_ACTIVE_LOOK (currently in page) | ButtonShowcaseSection (extract to design-system-constants.ts or keep in organism) |
 | TopBar variants | Inline array (breadcrumbs × description × buttons) in page | PageLayoutChromeSection (keep inline or extract to constant) |
 
@@ -109,16 +109,14 @@ Optional: **ComponentsSection** organism that only renders the list of component
 
 Used by the design system left panel and section anchor IDs. One source of truth for nav config and slugs.
 
-**Foundations** (6 items; see `design-system-nav-config.ts`)
+**Foundations** (4 items; see `design-system-nav-config.ts`)
 
 | Slug | Label |
 |------|--------|
 | `colors` | Colors |
 | `typography` | Typography |
-| `spacing` | Spacing |
-| `radius` | Radius |
+| `spacing` | Spacing and Layout |
 | `shadows-elevations` | Shadows & Elevations |
-| `stroke` | Stroke |
 
 **Components** (representative slugs; full list: `design-system-nav-config.ts`; Page layout is under Patterns)
 
@@ -183,3 +181,5 @@ Changes applied in the modular overhaul pass:
 - **Paginator:** Replaced 10 static instances with one interactive playground (variant, currentPage, totalPages controls with live `onPageChange`).
 - **Stepper:** Replaced static 2–6 step blocks with a dynamic step-count + current-step selector. **Sort UI 1.3:** stepper primitives use theme tokens and outlined active indicator; horizontal connectors fill only completed segments; design-system section links six Figma node IDs and `docs/design-system/stepper-figma-parity.md`.
 - **File Upload:** Replaced 6 static `FileUploadCard` blocks with an interactive size/state/thumbnail playground. `FileUploadArea`, `AvatarUpload`, and composed example unchanged.
+- **Stroke:** Removed the dedicated Stroke foundations page from the design system nav; `strokeTokens` and layout CSS variables remain in the codebase.
+- **Spacing and Layout:** Merged the former **Radius** foundation into **`SpacingSection`** (`/design-system/foundations/spacing`): nav label **Spacing and Layout**; subsections **Spacing scale** then **Radius scale**. Slug `radius` removed from nav.

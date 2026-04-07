@@ -19,3 +19,7 @@ Static assets were spread across `public/dealership-icons/`, `public/dealership-
 - All hardcoded `/dealership-*`, `/tooltip/`, `/map-markers/` (and related) paths in app code were updated.
 - `npm run tokens:*` and `map-markers:extract` must be run after editing files under `design-tokens/` or `public/media/map-markers-source/`.
 - Documentation references token paths as `design-tokens/...` and media as `public/media/...`.
+
+### Neutral scale (2026-04)
+
+The `neutral/*` variables in `design-tokens/colors.json` were tuned to a **light-first** ramp aligned with Toolbox-Light surfaces and text grays (page white, sidebar `#FAFAFA`, card `#f4f4f4`, stroke/muted `#dcdcdc`, hover/pressed steps, then tertiary through primary text). CSS variables are emitted as `--neutral-00` (white) through `--neutral-1000` (`#111111`). Tailwind `neutral-*` utilities map to these tokens via `@theme` in `src/app/globals.css`. After editing neutrals in JSON, run `npm run tokens:colors`. Dark-mode inline tip surfaces use `var(--theme-background-container)` instead of a dark `neutral-900` swatch, since mid-scale neutrals are no longer “dark UI fills.”

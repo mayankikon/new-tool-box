@@ -164,6 +164,20 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Align Tailwind `neutral-*` utilities with design-token neutrals (`color-primitives.css`). */
+  --color-neutral-0: var(--neutral-00);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-950: var(--neutral-950);
+  --color-neutral-1000: var(--neutral-1000);
   --radius-none: var(--radius-none);
   --radius-2xs: var(--radius-2xs);
   --radius-xs: var(--radius-xs);
@@ -372,7 +386,8 @@
     white 20%
   );
 
-  --inline-tip-default-bg: var(--neutral-900);
+  /* Dark tip surface: use theme container (was neutral-900 when 900 was a dark surface). */
+  --inline-tip-default-bg: var(--theme-background-container);
   --inline-tip-default-accent: var(--neutral-500);
   --inline-tip-default-title: var(--theme-text-secondary);
   --inline-tip-info-bg: var(--blue-950);
@@ -412,8 +427,9 @@
 }
 
 @layer components {
+  /* Design-system doc copy: match product body (Saira), not Inter. */
   .ds-doc-font {
-    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-saira), ui-sans-serif, system-ui, sans-serif;
   }
 
   .ds-badge-new {

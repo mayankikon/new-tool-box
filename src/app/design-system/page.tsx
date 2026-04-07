@@ -8,7 +8,7 @@ import { buildDesignSystemItemHref } from "./design-system-routes";
 const HOME_CARDS = [
   {
     title: "Foundations",
-    description: "Colors, typography, spacing, radius, elevation, and stroke foundations.",
+    description: "Colors, typography, spacing and layout, and elevation foundations.",
     href: buildDesignSystemItemHref("foundations", "colors"),
     icon: Palette,
   },
