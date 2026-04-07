@@ -90,7 +90,7 @@ function VehicleListItem({
   className,
   ...props
 }: VehicleListItemProps) {
-  const identifier = stockNumber ?? vin;
+  const identifier = stockNumber ? `Stock ${stockNumber}` : vin;
   const identifierAndMileage = [identifier, mileage]
     .filter(Boolean)
     .join(" \u2022 ");

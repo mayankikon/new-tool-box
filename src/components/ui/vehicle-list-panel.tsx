@@ -65,9 +65,11 @@ export type VehicleListPanelRow = Pick<
 
 interface VehicleListPanelProps extends React.ComponentProps<"div"> {
   vehicles: VehicleListPanelRow[];
+  /** VIN of the currently selected vehicle (highlights the row and scrolls it into view). */
+  selectedVin?: string | null;
   onCollapse?: () => void;
   onVehicleClick?: (vehicle: VehicleListPanelRow) => void;
-  /** Replaces the default “Showing N vehicles” header row. */
+  /** Replaces the default "Showing N vehicles" header row. */
   listHeader?: React.ReactNode;
   /** Shown when `vehicles` is empty (e.g. filtered similar matches). */
   emptyState?: React.ReactNode;
@@ -75,6 +77,7 @@ interface VehicleListPanelProps extends React.ComponentProps<"div"> {
 
 function VehicleListPanel({
   vehicles,
+  selectedVin,
   onCollapse,
   onVehicleClick,
   listHeader,
@@ -82,6 +85,47 @@ function VehicleListPanel({
   className,
   ...props
 }: VehicleListPanelProps) {
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const selectedItemRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!selectedVin || !selectedItemRef.current || !scrollContainerRef.current) return;
+
+    const container = scrollContainerRef.current;
+    const item = selectedItemRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+
+    const isFullyVisible =
+      itemRect.top >= containerRect.top && itemRect.bottom <= containerRect.bottom;
+
+    if (isFullyVisible) return;
+
+    const targetScrollTop =
+      item.offsetTop - container.offsetTop - containerRect.height / 2 + itemRect.height / 2;
+
+    const start = container.scrollTop;
+    const distance = targetScrollTop - start;
+    const duration = Math.min(400, Math.max(180, Math.abs(distance) * 0.6));
+    let startTime: number | null = null;
+
+    function easeOutExpo(t: number): number {
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    function step(timestamp: number) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      container.scrollTop = start + distance * easeOutExpo(progress);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }, [selectedVin]);
+
   return (
     <div
       className={cn(
@@ -96,17 +140,25 @@ function VehicleListPanel({
           onCollapse={onCollapse}
         />
       )}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         {vehicles.length === 0 && emptyState ? (
           emptyState
         ) : (
-          vehicles.map((vehicle, index) => (
-            <VehicleListItem
-              key={vehicle.vin ?? index}
-              {...vehicle}
-              onClick={onVehicleClick ? () => onVehicleClick(vehicle) : undefined}
-            />
-          ))
+          vehicles.map((vehicle, index) => {
+            const isSelected = selectedVin != null && vehicle.vin === selectedVin;
+            return (
+              <VehicleListItem
+                key={vehicle.vin ?? index}
+                ref={isSelected ? selectedItemRef : undefined}
+                {...vehicle}
+                className={cn(
+                  "transition-[background-color,box-shadow] duration-200 ease-out",
+                  isSelected && "bg-muted/60 ring-1 ring-inset ring-border",
+                )}
+                onClick={onVehicleClick ? () => onVehicleClick(vehicle) : undefined}
+              />
+            );
+          })
         )}
       </div>
     </div>
