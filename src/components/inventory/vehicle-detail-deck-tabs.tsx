@@ -51,6 +51,7 @@ export function VehicleDetailDeckTabs({
       tabMotionVariant="sink-rise"
       centerTabList
       hideCardChrome
+      tabBackgroundClassName="bg-background dark:bg-sidebar"
     >
       {children}
     </FileCabinetTableChrome>

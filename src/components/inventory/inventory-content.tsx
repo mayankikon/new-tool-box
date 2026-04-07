@@ -1431,8 +1431,9 @@ function setupInventoryMap(
 }
 
 const PANEL_WIDTH_PX = 400;
+const DETAIL_PANEL_WIDTH_PX = 400;
 /** List / selection-driven focus: Mapbox easeTo (no flyTo zoom arc — avoids chip↔pin flicker mid-move). */
-const INVENTORY_MAP_SELECTION_FLY_DURATION_MS = 900;
+const INVENTORY_MAP_SELECTION_FLY_DURATION_MS = 500;
 const FILTER_PANEL_WIDTH_PX = 320;
 const PANEL_DURATION_S = 0.25;
 const PANEL_EASE = [0.32, 0.72, 0, 1] as const;
@@ -2655,15 +2656,23 @@ export function InventoryContent({
          * INVENTORY_MAP_VEHICLE_IMAGE_ZOOM, so reconcileInventoryVehicleHtmlMarkers switches
          * markers to pin mode until the animation finishes.
          */
+        const mapContainer = map.getContainer();
+        const containerWidth = mapContainer.offsetWidth;
+        const panelOffset = PANEL_WIDTH_PX + DETAIL_PANEL_WIDTH_PX + 48;
+        const offsetPx = Math.min(panelOffset, containerWidth * 0.6);
+        const point = map.project(ll);
+        const shiftedCenter = map.unproject([
+          point.x - offsetPx / 2,
+          point.y,
+        ]);
+
         map.easeTo({
-          center: ll,
+          center: [shiftedCenter.lng, shiftedCenter.lat],
           zoom: targetZoom,
           bearing: map.getBearing(),
           pitch: map.getPitch(),
-          padding: { left: PANEL_WIDTH_PX },
-          retainPadding: false,
           duration: durationMs,
-          essential: false,
+          essential: true,
         });
       };
 
@@ -3075,13 +3084,7 @@ export function InventoryContent({
                   </div>
                   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                     <motion.div
-                      key={
-                        similarVehiclesSession
-                          ? "similar"
-                          : selectedVehicle
-                            ? "detail"
-                            : "list"
-                      }
+                      key={similarVehiclesSession ? "similar" : "list"}
                       initial={prefersReducedMotion ? false : { opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={
@@ -3142,24 +3145,10 @@ export function InventoryContent({
                           }}
                           className="min-h-0 flex-1 border-0 bg-transparent"
                         />
-                      ) : selectedVehicle ? (
-                        <div className="min-h-0 flex-1 overflow-y-auto">
-                          <InventoryVehicleDetailPanel
-                            key={selectedVehicle.vin}
-                            vehicle={selectedVehicle}
-                            statusIcons={getVehicleStatusIcons(
-                              selectedVehicle.vin,
-                              INVENTORY_PANEL_VEHICLES.findIndex(
-                                (vehicle) => vehicle.vin === selectedVehicle.vin
-                              )
-                            )}
-                            onBack={handleVehicleDetailBack}
-                            onShowSimilarVehicles={handleShowSimilarVehicles}
-                          />
-                        </div>
                       ) : (
                         <VehicleListPanel
                           vehicles={vehicles}
+                          selectedVin={selectedVehicleVin}
                           onCollapse={() => {
                             setIsListPanelOpen(false);
                             syncInventoryMapSelectedVinRef(null);
@@ -3176,6 +3165,46 @@ export function InventoryContent({
                       )}
                     </motion.div>
                   </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+            <AnimatePresence initial={false}>
+              {isListPanelOpen && selectedVehicle ? (
+                <motion.div
+                  key="vehicle-detail-floating-panel"
+                  initial={{ x: -24, opacity: 0 }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                    transition: { duration, ease: PANEL_EASE },
+                  }}
+                  exit={{
+                    x: -24,
+                    opacity: 0,
+                    transition: {
+                      duration: duration * 0.7,
+                      ease: PANEL_EASE,
+                    },
+                  }}
+                  className="pointer-events-auto absolute bottom-4 top-4 z-20 flex flex-col overflow-hidden rounded-lg bg-sidebar shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]"
+                  style={{
+                    left: `${PANEL_WIDTH_PX + 16 + 24}px`,
+                    width: DETAIL_PANEL_WIDTH_PX,
+                    willChange: "transform, opacity",
+                  }}
+                >
+                  <InventoryVehicleDetailPanel
+                    key={selectedVehicle.vin}
+                    vehicle={selectedVehicle}
+                    statusIcons={getVehicleStatusIcons(
+                      selectedVehicle.vin,
+                      INVENTORY_PANEL_VEHICLES.findIndex(
+                        (vehicle) => vehicle.vin === selectedVehicle.vin
+                      )
+                    )}
+                    onBack={handleVehicleDetailBack}
+                    onShowSimilarVehicles={handleShowSimilarVehicles}
+                  />
                 </motion.div>
               ) : null}
             </AnimatePresence>
