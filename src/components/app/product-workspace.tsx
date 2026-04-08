@@ -524,44 +524,25 @@ export function ProductWorkspace() {
           <AppMainLineFieldPattern />
           <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {isInventory && activeItem === "Inventory" ? (
-            inventoryHomeView === "map" ? (
-              <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                {/* No `pt-6` here — padding would show as a grey band above the map; toggle uses `top-10` to align with table view (pt-6 + TopBar pt-4). */}
-                <div className="pointer-events-none absolute right-8 top-10 z-30">
-                  <div className="pointer-events-auto">
-                    <InventoryViewModeToggle
-                      aria-label="Inventory view mode"
-                      value={inventoryHomeView}
-                      onValueChange={(value) =>
-                        setInventoryHomeView(value as InventoryViewMode)
-                      }
-                      showHoverTooltips={false}
-                    />
-                  </div>
-                </div>
-                <InventoryContent viewMode={inventoryHomeView} />
-              </div>
-            ) : (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-                <TopBar
-                  title="Inventory"
-                  right={
-                    <InventoryViewModeToggle
-                      aria-label="Inventory view mode"
-                      value={inventoryHomeView}
-                      onValueChange={(value) =>
-                        setInventoryHomeView(value as InventoryViewMode)
-                      }
-                      showHoverTooltips={false}
-                    />
-                  }
-                />
-                <InventoryContent
-                  className="pt-6"
-                  viewMode={inventoryHomeView}
-                />
-              </div>
-            )
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
+              <TopBar
+                title="Inventory"
+                right={
+                  <InventoryViewModeToggle
+                    aria-label="Inventory view mode"
+                    value={inventoryHomeView}
+                    onValueChange={(value) =>
+                      setInventoryHomeView(value as InventoryViewMode)
+                    }
+                    showHoverTooltips={false}
+                  />
+                }
+              />
+              <InventoryContent
+                className="pt-6"
+                viewMode={inventoryHomeView}
+              />
+            </div>
           ) : activeInventoryPage != null && activeItem === "Dashboard" ? (
             <InventoryDashboardPage />
           ) : isInventory &&

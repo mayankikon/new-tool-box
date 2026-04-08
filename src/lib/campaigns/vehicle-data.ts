@@ -3,9 +3,28 @@
  * Edit this file directly when adding or updating inventory imagery; the repo no longer ships `evox.csv`.
  */
 
+export interface VehicleEvoxColorVariant {
+  /** Human-readable paint name or Evox color code label. */
+  label: string;
+  sideImageUrl: string;
+  /** Defaults to the model-level `trim` when omitted. */
+  trim?: string;
+  /** Optional signed Evox 3/4 (angle 032) URL. */
+  slantedImageUrl?: string;
+}
+
 export interface VehicleModel {
   model: string;
   imageUrl: string;
+  /** Representative trim label when known; Evox imagery is often model-level. */
+  trim?: string;
+  /** Optional signed Evox 3/4 (angle 032) URL; otherwise resolved by asset id from inventory front-image URLs when available. */
+  slantedImageUrl?: string;
+  /**
+   * Optional explicit color rows for the design-system Imagery page.
+   * When omitted, mock inventory (`vehicle-list-data`) may supply multiple colors per make/model.
+   */
+  colorVariants?: VehicleEvoxColorVariant[];
 }
 
 export const VEHICLE_MAKES: string[] = [

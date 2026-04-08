@@ -124,6 +124,8 @@ import { AlertDialogShowcaseSection } from "./components/organisms/AlertDialogSh
 import { BatteryThresholdShowcaseSection } from "./components/organisms/BatteryThresholdShowcaseSection";
 import { ButtonShowcaseSection } from "./components/organisms/ButtonShowcaseSection";
 import { ColorsSection } from "./components/organisms/ColorsSection";
+import { MapsSection } from "./components/organisms/MapsSection";
+import { ImagerySection } from "./components/organisms/ImagerySection";
 import { ShadowsElevationsSection } from "./components/organisms/ShadowsElevationsSection";
 import { SpacingSection } from "./components/organisms/SpacingSection";
 import { TypographySection } from "./components/organisms/TypographySection";
@@ -1335,12 +1337,16 @@ function renderFoundationShowcase(slug: string) {
   switch (slug) {
     case "colors":
       return <ColorsSection key={slug} />;
+    case "maps":
+      return <MapsSection key={slug} />;
     case "typography":
       return <TypographySection key={slug} />;
     case "spacing":
       return <SpacingSection key={slug} />;
     case "shadows-elevations":
       return <ShadowsElevationsSection key={slug} />;
+    case "imagery":
+      return <ImagerySection key={slug} />;
     default:
       return null;
   }
@@ -1356,10 +1362,14 @@ export interface DesignSystemPageEntry {
 
 const entryDescriptions: Record<string, string> = {
   "foundations:colors": "Colors define the visual language and semantic meaning across interfaces and states.",
+  "foundations:maps":
+    "2D hybrid satellite (Maps JavaScript API) with a toggle to photorealistic 3D Tiles (Map Tiles API) in CesiumJS; separate from Mapbox inventory maps.",
   "foundations:typography": "Typography establishes hierarchy, readability, and tone across product experiences.",
   "foundations:spacing":
     "Spacing and corner radius create rhythm, structure, and consistent surfaces across the product.",
   "foundations:shadows-elevations": "Shadows and elevations communicate depth, layering, and interactive prominence.",
+  "foundations:imagery":
+    "Vehicle imagery documents Evox side and 3/4 renders used across campaigns and inventory surfaces.",
   "components:button": "Buttons allow the users to take action, make choices, or navigate within a product or website.",
   "components:avatar-bar": "Avatar Bar presents account context and quick user controls at the page edge.",
   "components:top-bar": "Top Bar introduces each page with title, context, and primary actions.",

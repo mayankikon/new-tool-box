@@ -76,6 +76,11 @@
       "sourceType": "github",
       "computedHash": "d731b6bfe894c7fe661890f6b49b7aff09d45442905f6ba700f0ecb1950301ed"
     },
+    "make-interfaces-feel-better": {
+      "source": "jakubkrehel/make-interfaces-feel-better",
+      "sourceType": "github",
+      "computedHash": "41c2416e08bc9ec3c696585d31bd1243481a7a81615b810b1b8a32aded9360b5"
+    },
     "transparent-ui": {
       "source": "petekp/claude-code-setup",
       "sourceType": "github",

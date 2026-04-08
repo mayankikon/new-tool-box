@@ -11,6 +11,7 @@ This document inventories the current design system page (`src/app/design-system
 | # | Section | Line range (approx) | Sub-sections / content |
 |---|--------|---------------------|-------------------------|
 | 1 | **Colors** (`ColorsSection`) | — | Brand & semantic hex palettes + data-viz scales from `color-palette-data.ts` |
+| 1b | **Maps** (`MapsSection`) | — | 2D satellite (Maps JS) + 3D Photorealistic Tiles in Cesium (`google-maps-preview.tsx`); `@googlemaps/js-api-loader`; `public/cesium/` from `copy-cesium-assets.mjs`; Maps JS + Map Tiles API key |
 | 2 | **Typography** | — | Font family cards, Font size samples, Font weight, Line height, Letter spacing |
 | 3 | **Spacing and Layout** (`SpacingSection`) | — | Subsections **Spacing scale** and **Radius scale** (tables); `spacingTokens` and `radiusTokens` from `design-tokens.ts`. Stroke tokens are not showcased on the design system site |
 | 4 | **Shadows & Elevations** (`ShadowsElevationsSection`) | — | Placeholder / coming soon |
@@ -109,14 +110,16 @@ Optional: **ComponentsSection** organism that only renders the list of component
 
 Used by the design system left panel and section anchor IDs. One source of truth for nav config and slugs.
 
-**Foundations** (4 items; see `design-system-nav-config.ts`)
+**Foundations** (6 items; see `design-system-nav-config.ts`)
 
 | Slug | Label |
 |------|--------|
 | `colors` | Colors |
+| `maps` | Maps |
 | `typography` | Typography |
 | `spacing` | Spacing and Layout |
 | `shadows-elevations` | Shadows & Elevations |
+| `imagery` | Imagery |
 
 **Components** (representative slugs; full list: `design-system-nav-config.ts`; Page layout is under Patterns)
 

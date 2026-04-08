@@ -29,7 +29,7 @@ export function VehicleDetailsPagePattern() {
         and dealership status icons into a shopper-facing drill-down screen.
       </p>
 
-      <div className="max-w-[400px] overflow-hidden rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]">
+      <div className="max-w-[400px] overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03] dark:border-border dark:bg-sidebar">
         <InventoryVehicleDetailPanel
           vehicle={demoVehicle}
           statusIcons={{

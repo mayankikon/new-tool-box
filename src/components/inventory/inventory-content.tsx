@@ -4,9 +4,6 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useTheme } from "@/components/theme/app-theme-provider";
 import {
-  Search,
-  MapPin,
-  ChevronDown,
   Filter,
   List,
   Copy,
@@ -19,21 +16,26 @@ import {
   Square,
   ChevronLeft,
   ChevronsLeft,
+  Sparkles,
+  Hourglass,
+  Timer,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import mapboxgl from "mapbox-gl";
 import Supercluster from "supercluster";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Input,
-  InputContainer,
-  InputIcon,
-} from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DropdownButton } from "@/components/ui/dropdown-button";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MapboxMap, MapControlButton } from "@/components/ui/mapbox-map";
+import { BoundaryIcon } from "@/components/icons/boundary-icon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -46,12 +48,14 @@ import { TableHeaderCell } from "@/components/ui/table-header-cell";
 import { TableSlotCell } from "@/components/ui/table-slot-cell";
 import { Paginator } from "@/components/ui/paginator";
 import { FiltersPanel } from "@/components/ui/filters-panel";
+import { FilterButton } from "@/components/ui/filter-button";
 import { DesignSystemTableShellNoTabs } from "@/components/chrome/design-system-table-shell-no-tabs";
 import {
   VehicleListPanel,
   type VehicleListPanelRow,
 } from "@/components/ui/vehicle-list-panel";
 import { InventoryVehicleDetailPanel } from "@/components/inventory/vehicle-detail-panel";
+import { InventoryVehicleSearchField } from "@/components/inventory/inventory-vehicle-search-field";
 import { SendVehicleBrochureDialog } from "@/components/inventory/send-vehicle-brochure-dialog";
 import {
   BatteryIcon,
@@ -76,7 +80,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   DEALERSHIP_CENTER,
-  ICON_HEADQUARTERS_DISPLAY_NAME,
   mainLotGeoJSON,
 } from "@/lib/inventory/dealership-geofences";
 import { resolveIconHeadquartersFromMap } from "@/lib/inventory/icon-headquarters-building";
@@ -92,7 +95,6 @@ import {
   buildInventoryVehicleFeatureCollection,
   hashStringToSeed,
   INVENTORY_LOT_AGE_TIER_HEX,
-  INVENTORY_MAP_DEALERSHIP_LABEL_MAX_ZOOM,
   INVENTORY_MAP_VEHICLE_IMAGE_ZOOM,
   randomPointInPolygonRing,
   type InventoryVehicleMapFeatureProperties,
@@ -170,6 +172,9 @@ const INVENTORY_MAP_STANDARD_COLOR_GREENSPACE = "#6eb85a";
  * on whenever Standard is active so tree models are not suppressed in flat
  * (pitch-0) mode — in practice Mapbox ties building mesh visibility closely to
  * the same 3D stack as vegetation in many tiles.
+ *
+ * POI and landmark **labels** are off so dealership / HQ names and addresses
+ * from the basemap do not compete with inventory UI.
  */
 function configureInventoryMapStandardStyle(
   map: mapboxgl.Map,
@@ -191,6 +196,8 @@ function configureInventoryMapStandardStyle(
   setBasemapConfig("show3dTrees", true);
   setBasemapConfig("show3dBuildings", true);
   setBasemapConfig("show3dLandmarks", is3D);
+  setBasemapConfig("showPointOfInterestLabels", false);
+  setBasemapConfig("showLandmarkIconLabels", false);
   setBasemapConfig(
     "colorGreenspace",
     appearance === "dark" ? "#4a8f42" : INVENTORY_MAP_STANDARD_COLOR_GREENSPACE
@@ -229,8 +236,6 @@ const COMPOSITE_BUILDING_EXTRUDE_FILTER: mapboxgl.FilterSpecification = [
   ["==", ["get", "extrude"], true],
   ["==", ["get", "extrude"], "true"],
 ];
-const INVENTORY_DEALERSHIP_LABEL_SOURCE_ID = "inventory-dealership-label";
-const INV_LAYER_DEALERSHIP_NAME = "inventory-dealership-name";
 const INV_LAYER_CLUSTERS = "inventory-clusters";
 const INV_LAYER_CLUSTER_COUNT = "inventory-cluster-count";
 const INV_LAYER_UNCLUSTERED = "inventory-unclustered";
@@ -385,7 +390,7 @@ function ensureIconHeadquartersMarker(map: mapboxgl.Map, lngLat: [number, number
   const wrap = document.createElement("div");
   wrap.className = "pointer-events-auto";
   wrap.setAttribute("role", "img");
-  wrap.setAttribute("aria-label", ICON_HEADQUARTERS_DISPLAY_NAME);
+  wrap.setAttribute("aria-label", "Dealership headquarters");
   iconHeadquartersMarkerRoot = createRoot(wrap);
   iconHeadquartersMarkerRoot.render(
     <div className="flex flex-col items-center">
@@ -416,9 +421,6 @@ function ensureIconHeadquartersMarker(map: mapboxgl.Map, lngLat: [number, number
           <div className="h-3 w-px bg-gradient-to-b from-violet-200/90 to-transparent" />
         </div>
       </MapMarkerHoverFrame>
-      <div className="mt-1 max-w-[140px] text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-        {ICON_HEADQUARTERS_DISPLAY_NAME}
-      </div>
     </div>
   );
 
@@ -507,7 +509,6 @@ function removeInventoryVehicleMapOverlays(map: mapboxgl.Map) {
     INV_LAYER_CLUSTER_COUNT,
     INV_LAYER_CLUSTERS,
     INV_LAYER_UNCLUSTERED,
-    INV_LAYER_DEALERSHIP_NAME,
   ]) {
     if (map.getLayer(layerId)) {
       map.removeLayer(layerId);
@@ -515,9 +516,6 @@ function removeInventoryVehicleMapOverlays(map: mapboxgl.Map) {
   }
   if (map.getSource(INVENTORY_VEHICLES_SOURCE_ID)) {
     map.removeSource(INVENTORY_VEHICLES_SOURCE_ID);
-  }
-  if (map.getSource(INVENTORY_DEALERSHIP_LABEL_SOURCE_ID)) {
-    map.removeSource(INVENTORY_DEALERSHIP_LABEL_SOURCE_ID);
   }
 }
 
@@ -899,60 +897,6 @@ function addInventoryVehicleMapOverlays(
   vehicleFc: FeatureCollection<Point, InventoryVehicleMapFeatureProperties>,
   onVehicleSelect?: InventoryVehicleSelectHandler
 ) {
-  const mainLot = mainLotGeoJSON.features[0];
-  const addressLine = mainLot?.properties?.address?.trim();
-  const dealershipLabelText =
-    addressLine != null && addressLine.length > 0
-      ? `${ICON_HEADQUARTERS_DISPLAY_NAME}\n${addressLine}`
-      : ICON_HEADQUARTERS_DISPLAY_NAME;
-
-  map.addSource(INVENTORY_DEALERSHIP_LABEL_SOURCE_ID, {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: { name: dealershipLabelText },
-          geometry: {
-            type: "Point",
-            coordinates: [...DEALERSHIP_CENTER] as [number, number],
-          },
-        },
-      ],
-    },
-  });
-
-  const labelTextColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#0a0a0a"
-    : appearance === "satellite"
-      ? "#ffffff"
-      : "#f4f4f5";
-  const labelHaloColor =
-    appearance === "satellite" || appearance === "dark"
-      ? "rgba(0,0,0,0.75)"
-      : "rgba(255,255,255,0.9)";
-
-  map.addLayer({
-    id: INV_LAYER_DEALERSHIP_NAME,
-    type: "symbol",
-    source: INVENTORY_DEALERSHIP_LABEL_SOURCE_ID,
-    maxzoom: INVENTORY_MAP_DEALERSHIP_LABEL_MAX_ZOOM,
-    layout: {
-      "text-field": ["get", "name"],
-      "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
-      "text-size": 15,
-      "text-anchor": "center",
-      "text-allow-overlap": true,
-    },
-    paint: {
-      "text-color": labelTextColor,
-      "text-halo-color": labelHaloColor,
-      "text-halo-width":
-        appearance === "satellite" || appearance === "dark" ? 2 : 1.2,
-    },
-  });
-
   if (vehicleFc.features.length === 0) {
     lastInventoryVehicleFeatureCollection = vehicleFc;
     const reconcile = () => {
@@ -1218,26 +1162,54 @@ function addGeofenceInteractivity(
   activeGeofenceHandlers = { onEnter, onMove, onLeave, popup };
 }
 
+/**
+ * Main-lot geofence paints by basemap. Light map keeps a softer fill; dark + satellite
+ * use brighter, higher-chroma blues and stronger opacity so the polygon does not read
+ * washed out against night Standard or busy imagery.
+ */
+function getInventoryGeofencePaint(appearance: InventoryMapAppearance): {
+  fillColor: string;
+  fillOpacity: number;
+  lineColor: string;
+  lineWidth: number;
+  lineOpacity: number;
+} {
+  switch (appearance) {
+    case "light":
+      return {
+        fillColor: "#2563eb",
+        fillOpacity: 0.22,
+        lineColor: "#1d4ed8",
+        lineWidth: 2.5,
+        lineOpacity: 0.95,
+      };
+    case "satellite":
+      return {
+        fillColor: "#3b82f6",
+        fillOpacity: 0.42,
+        lineColor: "#dbeafe",
+        lineWidth: 3,
+        lineOpacity: 0.98,
+      };
+    default:
+      // Dark basemap: saturated fill + very light stroke so the outline pops (not a dark/muted rim).
+      return {
+        fillColor: "#60a5fa",
+        fillOpacity: 0.4,
+        lineColor: "#e0f2fe",
+        lineWidth: 3,
+        lineOpacity: 1,
+      };
+  }
+}
+
 function addGeofenceLayers(
   map: mapboxgl.Map,
   geofences: typeof mainLotGeoJSON,
   appearance: InventoryMapAppearance
 ) {
-  const fillColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#22c55e"
-    : appearance === "satellite"
-      ? "#39ff14"
-      : "#4ade80";
-  const fillOpacity = inventoryMapUsesLightBasemapUi(appearance)
-    ? 0.14
-    : appearance === "satellite"
-      ? 0.22
-      : 0.22;
-  const lineColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#15803d"
-    : appearance === "satellite"
-      ? "#bef264"
-      : "#86efac";
+  const { fillColor, fillOpacity, lineColor, lineWidth, lineOpacity } =
+    getInventoryGeofencePaint(appearance);
 
   map.addSource("geofences", {
     type: "geojson",
@@ -1260,8 +1232,8 @@ function addGeofenceLayers(
     source: "geofences",
     paint: {
       "line-color": lineColor,
-      "line-width": appearance === "satellite" ? 2.5 : 2,
-      "line-opacity": 0.92,
+      "line-width": lineWidth,
+      "line-opacity": lineOpacity,
     },
   });
 
@@ -1277,6 +1249,7 @@ function addGeofenceLayers(
 
   addGeofenceInteractivity(map, appearance);
 }
+
 
 const ROAD_HIGHLIGHT_INSERT_BEFORE_IDS = [
   "building-fill",
@@ -1430,7 +1403,8 @@ function setupInventoryMap(
   );
 }
 
-const PANEL_WIDTH_PX = 400;
+/** Matches map/table search `InputContainer` width (`max-w-sm` → 24rem at 16px root). */
+const PANEL_WIDTH_PX = 384;
 const DETAIL_PANEL_WIDTH_PX = 400;
 /** List / selection-driven focus: Mapbox easeTo (no flyTo zoom arc — avoids chip↔pin flicker mid-move). */
 const INVENTORY_MAP_SELECTION_FLY_DURATION_MS = 500;
@@ -2211,6 +2185,91 @@ function getVehicleStatusIcons(
   };
 }
 
+function parseLotAgeDays(lotAge: string): number | null {
+  const match = /(\d+)\s*days?/i.exec(lotAge);
+  return match != null ? Number(match[1]) : null;
+}
+
+function lotAgeTier(days: number): "low" | "medium" | "high" {
+  if (days < 30) return "low";
+  if (days <= 45) return "medium";
+  return "high";
+}
+
+function applyMapToolbarFilters(
+  vehicles: InventoryVehicleRecord[],
+  options: {
+    batteryLow: boolean;
+    newStock: boolean;
+    preOwned: boolean;
+    ageHigh: boolean;
+  },
+): InventoryVehicleRecord[] {
+  let list = vehicles;
+  const { batteryLow, newStock, preOwned, ageHigh } = options;
+
+  if (batteryLow) {
+    list = list.filter((vehicle, i) => {
+      const idx = INVENTORY_PANEL_VEHICLES.findIndex(
+        (row) => row.vin === vehicle.vin,
+      );
+      return (
+        getVehicleStatusIcons(vehicle.vin, idx >= 0 ? idx : i).battery ===
+        "inactive"
+      );
+    });
+  }
+
+  if (newStock || preOwned) {
+    list = list.filter((vehicle) => {
+      if (newStock && vehicle.stockType === "New") return true;
+      if (preOwned && vehicle.stockType === "Pre-Owned") return true;
+      return false;
+    });
+  }
+
+  if (ageHigh) {
+    list = list.filter((vehicle) => {
+      const days = parseLotAgeDays(vehicle.lotAge);
+      if (days == null) return false;
+      return lotAgeTier(days) === "high";
+    });
+  }
+
+  return list;
+}
+
+function InventoryMapGeofenceDropdown({
+  triggerClassName,
+}: {
+  triggerClassName?: string;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <FilterButton
+            label="All Geofences"
+            leadIcon={
+              <BoundaryIcon className="size-4 text-primary" aria-hidden />
+            }
+            showChevron
+            selected={false}
+            size="lg"
+            className={cn("h-9 min-h-9 shrink-0", triggerClassName)}
+          />
+        }
+      />
+      <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuItem>All Geofences</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Main lot</DropdownMenuItem>
+        <DropdownMenuItem>All saved geofences</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function InventoryTableView({
   vehicles,
   currentPage,
@@ -2533,6 +2592,10 @@ export function InventoryContent({
     mapAppearanceOverride ?? inventoryMapAppearanceFromTheme(resolvedTheme);
   const [isInventoryMap3D, setIsInventoryMap3D] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [mapFilterBatteryLow, setMapFilterBatteryLow] = useState(false);
+  const [mapFilterNew, setMapFilterNew] = useState(false);
+  const [mapFilterPreOwned, setMapFilterPreOwned] = useState(false);
+  const [mapFilterAgeHigh, setMapFilterAgeHigh] = useState(false);
   const [tableCurrentPage, setTableCurrentPage] = useState(1);
   const [selectedVehicleCount, setSelectedVehicleCount] = useState(0);
   const [sendBrochureDialogOpen, setSendBrochureDialogOpen] = useState(false);
@@ -2547,21 +2610,37 @@ export function InventoryContent({
   const duration = prefersReducedMotion ? 0 : PANEL_DURATION_S;
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const searchFilteredVehicles = useMemo(
-    () =>
-      INVENTORY_PANEL_VEHICLES.filter((vehicle) => {
-        if (!normalizedQuery) return true;
+  const searchFilteredVehicles = useMemo(() => {
+    const queryFiltered = INVENTORY_PANEL_VEHICLES.filter((vehicle) => {
+      if (!normalizedQuery) return true;
 
-        return [
-          vehicle.title,
-          vehicle.vin,
-          vehicle.make,
-          vehicle.model,
-          vehicle.trim,
-        ].some((value) => value.toLowerCase().includes(normalizedQuery));
-      }),
-    [normalizedQuery],
-  );
+      return [
+        vehicle.title,
+        vehicle.vin,
+        vehicle.make,
+        vehicle.model,
+        vehicle.trim,
+      ].some((value) => value.toLowerCase().includes(normalizedQuery));
+    });
+
+    if (viewMode !== "map") {
+      return queryFiltered;
+    }
+
+    return applyMapToolbarFilters(queryFiltered, {
+      batteryLow: mapFilterBatteryLow,
+      newStock: mapFilterNew,
+      preOwned: mapFilterPreOwned,
+      ageHigh: mapFilterAgeHigh,
+    });
+  }, [
+    normalizedQuery,
+    viewMode,
+    mapFilterBatteryLow,
+    mapFilterNew,
+    mapFilterPreOwned,
+    mapFilterAgeHigh,
+  ]);
 
   const vehicleRecordByVin = useMemo(
     () =>
@@ -2808,72 +2887,39 @@ export function InventoryContent({
   const handleResetFilters = useCallback(() => {
     setSearchQuery("");
     setTableCurrentPage(1);
+    setMapFilterBatteryLow(false);
+    setMapFilterNew(false);
+    setMapFilterPreOwned(false);
+    setMapFilterAgeHigh(false);
   }, []);
 
-  const mapGeofenceButton = (
-    <Button variant="secondary" size="lg" className="w-full min-w-0">
-      <MapPin className="size-4 shrink-0 text-primary" />
-      <span className="whitespace-nowrap">All Geofences</span>
-      <ChevronDown className="size-4 shrink-0" />
-    </Button>
-  );
+  const mapGeofenceButton = <InventoryMapGeofenceDropdown />;
 
   const filtersButton = (
-    <Button
-      variant="secondary"
-      size="lg"
-      className="w-full"
-      leadingIcon={<Filter />}
-      aria-pressed={isFiltersOpen}
+    <FilterButton
+      label="Filters"
+      selected={isFiltersOpen}
+      size="md"
+      className="w-full min-w-0"
       onClick={() => setIsFiltersOpen((current) => !current)}
-    >
-      Filters
-    </Button>
+    />
   );
 
   const searchInput = (
-    <InputContainer size="lg" className="w-full max-w-sm">
-      <InputIcon position="lead">
-        <Search className="size-4" />
-      </InputIcon>
-      <Input
-        standalone={false}
-        size="lg"
-        aria-label="Search vehicles"
-        placeholder="Search vehicles"
-        value={searchQuery}
-        onChange={(e) => {
-          setSearchQuery(e.target.value);
-          setTableCurrentPage(1);
-        }}
-      />
-    </InputContainer>
-  );
-
-  const mapPanelSearchInput = (
-    <InputContainer size="lg" className="w-full">
-      <InputIcon position="lead">
-        <Search className="size-4" />
-      </InputIcon>
-      <Input
-        standalone={false}
-        size="lg"
-        aria-label="Search vehicles"
-        placeholder="Search vehicles"
-        value={searchQuery}
-        onChange={(e) => {
-          setSearchQuery(e.target.value);
-          setTableCurrentPage(1);
-        }}
-      />
-    </InputContainer>
+    <InventoryVehicleSearchField
+      value={searchQuery}
+      onChange={(next) => {
+        setSearchQuery(next);
+        setTableCurrentPage(1);
+      }}
+    />
   );
 
   return (
     <div
       className={cn(
         "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
-        viewMode === "table" && "gap-6 px-8 pb-8",
+        (viewMode === "table" || viewMode === "map") && "gap-6 px-8 pb-8",
         className
       )}
     >
@@ -2902,6 +2948,103 @@ export function InventoryContent({
             </DropdownButton>
           ) : null}
           {filtersButton}
+        </div>
+      ) : null}
+
+      {viewMode === "map" ? (
+        <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2.5">
+          {searchInput}
+          {mapGeofenceButton}
+          <div className="min-w-0 flex-1" />
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              aria-pressed={mapFilterBatteryLow}
+              leadingIcon={
+                <BatteryIcon
+                  variant="inactive"
+                  className="text-muted-foreground"
+                  aria-hidden
+                />
+              }
+              className={cn(
+                "shrink-0",
+                mapFilterBatteryLow &&
+                  "border-primary bg-white shadow-sm dark:border-primary dark:bg-background",
+              )}
+              onClick={() =>
+                setMapFilterBatteryLow((current) => !current)
+              }
+            >
+              Low Battery
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              aria-pressed={mapFilterNew}
+              leadingIcon={
+                <Sparkles className="text-muted-foreground" aria-hidden />
+              }
+              className={cn(
+                "shrink-0",
+                mapFilterNew &&
+                  "border-primary bg-white shadow-sm dark:border-primary dark:bg-background",
+              )}
+              onClick={() => setMapFilterNew((current) => !current)}
+            >
+              New
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              aria-pressed={mapFilterPreOwned}
+              leadingIcon={
+                <Timer className="text-muted-foreground" aria-hidden />
+              }
+              className={cn(
+                "shrink-0",
+                mapFilterPreOwned &&
+                  "border-primary bg-white shadow-sm dark:border-primary dark:bg-background",
+              )}
+              onClick={() =>
+                setMapFilterPreOwned((current) => !current)
+              }
+            >
+              Pre-Owned
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              aria-pressed={mapFilterAgeHigh}
+              leadingIcon={
+                <Hourglass className="text-muted-foreground" aria-hidden />
+              }
+              className={cn(
+                "shrink-0",
+                mapFilterAgeHigh &&
+                  "border-primary bg-white shadow-sm dark:border-primary dark:bg-background",
+              )}
+              onClick={() =>
+                setMapFilterAgeHigh((current) => !current)
+              }
+            >
+              Aged
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              leadingIcon={<Filter />}
+              onClick={() => setIsFiltersOpen((current) => !current)}
+            >
+              Filters
+            </Button>
+          </div>
         </div>
       ) : null}
 
@@ -2970,7 +3113,7 @@ export function InventoryContent({
         >
           <div
             className={cn(
-              "relative h-full min-h-0 min-w-0 flex-1 overflow-hidden",
+              "relative h-full min-h-0 min-w-0 flex-1 overflow-hidden rounded-md border border-border",
               MAP_SURFACE_CLASS_DARK
             )}
           >
@@ -3072,16 +3215,9 @@ export function InventoryContent({
                       opacity: { duration: duration * 0.5, ease: PANEL_EASE },
                     },
                   }}
-                  className="pointer-events-auto absolute bottom-4 left-4 top-4 z-20 flex flex-col overflow-hidden rounded-lg border border-border bg-sidebar shadow-[0_12px_40px_rgba(15,23,32,0.18)]"
+                  className="pointer-events-auto absolute inset-y-0 left-0 z-20 flex flex-col overflow-hidden border-r border-border bg-sidebar shadow-[0_12px_40px_rgba(15,23,32,0.18)]"
                   style={{ willChange: "width" }}
                 >
-                  <div className="shrink-0 space-y-2.5 border-b border-border p-3">
-                    {mapPanelSearchInput}
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">{mapGeofenceButton}</div>
-                      <div className="flex-1">{filtersButton}</div>
-                    </div>
-                  </div>
                   <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                     <motion.div
                       key={similarVehiclesSession ? "similar" : "list"}
@@ -3186,9 +3322,9 @@ export function InventoryContent({
                       ease: PANEL_EASE,
                     },
                   }}
-                  className="pointer-events-auto absolute bottom-4 top-4 z-20 flex flex-col overflow-hidden rounded-lg bg-sidebar shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03]"
+                  className="pointer-events-auto absolute bottom-4 top-4 z-20 flex flex-col overflow-hidden rounded-lg border border-border bg-neutral-50 shadow-[0_4px_16px_rgba(0,0,0,0.08),0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.03] dark:border-border dark:bg-sidebar"
                   style={{
-                    left: `${PANEL_WIDTH_PX + 16 + 24}px`,
+                    left: `${PANEL_WIDTH_PX + 24}px`,
                     width: DETAIL_PANEL_WIDTH_PX,
                     willChange: "transform, opacity",
                   }}

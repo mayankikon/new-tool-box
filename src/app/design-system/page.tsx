@@ -1,14 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, LayoutDashboard, Package, Palette } from "lucide-react";
+import { ArrowRight, Download, LayoutDashboard, Package, Palette } from "lucide-react";
+
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 
 import { DesignSystemNav } from "./components/DesignSystemNav";
 import { DesignSystemTemplate } from "./components/DesignSystemTemplate";
 import { buildDesignSystemItemHref } from "./design-system-routes";
 
+const BRAND_GUIDELINES_ZIP_HREF = "/design-system/brand-guidelines.zip";
+const DESIGN_MD_HREF = "/design-system/design.md";
+
 const HOME_CARDS = [
   {
     title: "Foundations",
-    description: "Colors, typography, spacing and layout, and elevation foundations.",
+    description: "Colors, typography, spacing and layout, elevation, maps, and vehicle imagery.",
     href: buildDesignSystemItemHref("foundations", "colors"),
     icon: Palette,
   },
@@ -37,25 +43,64 @@ export default function DesignSystemHomePage() {
           </p>
         </div>
 
-        <div className="flex max-w-3xl flex-col gap-4">
-          {HOME_CARDS.map((card) => (
-            <Link
-              key={card.title}
-              href={card.href}
-              className="group rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm transition-all hover:-translate-y-px hover:border-sidebar-border/70 hover:bg-muted/20 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-md border border-emerald-200/80 bg-emerald-100/70 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300">
-                    <card.icon className="size-5" aria-hidden />
+        <div className="flex max-w-5xl flex-col gap-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {HOME_CARDS.map((card) => (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group flex h-full flex-col rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm transition-all hover:-translate-y-px hover:border-sidebar-border/70 hover:bg-muted/20 hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-emerald-200/80 bg-emerald-100/70 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300">
+                      <card.icon className="size-5" aria-hidden />
+                    </div>
+                    <h2 className="text-lg font-medium tracking-tight text-foreground sm:text-xl">{card.title}</h2>
                   </div>
-                  <h2 className="text-xl font-medium tracking-tight text-foreground">{card.title}</h2>
+                  <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" aria-hidden />
                 </div>
-                <ArrowRight className="mt-1 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" aria-hidden />
-              </div>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{card.description}</p>
-            </Link>
-          ))}
+                <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{card.description}</p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm">
+              <h2 className="text-xl font-medium tracking-tight text-foreground">Download brand guidelines</h2>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                Brand sample logos, app icons, and Ikon marks for use in decks, specs, and partner handoffs.
+              </p>
+              <a
+                href={BRAND_GUIDELINES_ZIP_HREF}
+                download="shift-brand-guidelines.zip"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "default" }),
+                  "mt-5 inline-flex w-fit items-center gap-1.5",
+                )}
+              >
+                <Download className="size-4 shrink-0" aria-hidden />
+                Download
+              </a>
+            </div>
+            <div className="rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm">
+              <h2 className="text-xl font-medium tracking-tight text-foreground">Download design.md</h2>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                Offline summary of the Shift Design System structure and pointers to repository documentation.
+              </p>
+              <a
+                href={DESIGN_MD_HREF}
+                download="design.md"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "default" }),
+                  "mt-5 inline-flex w-fit items-center gap-1.5",
+                )}
+              >
+                <Download className="size-4 shrink-0" aria-hidden />
+                Download
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </DesignSystemTemplate>

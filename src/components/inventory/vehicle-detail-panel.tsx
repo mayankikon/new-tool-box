@@ -1,13 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useTheme } from "@/components/theme/app-theme-provider";
 import { useCallback, useState, type ReactNode } from "react";
 import {
-  BatteryFull,
-  BatteryLow,
-  BatteryMedium,
-  BatteryWarning,
   CarFront,
   Check,
   ChevronLeft,
@@ -29,9 +24,8 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
-import { VehicleDetailDeckTabs } from "@/components/inventory/vehicle-detail-deck-tabs";
 import { SendVehicleBrochureDialog } from "@/components/inventory/send-vehicle-brochure-dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BatteryIcon,
   KeyPairedIcon,
@@ -121,6 +115,7 @@ function VehicleDetailTile({
   label,
   value,
   icon: Icon,
+  labelIcon,
   className,
   labelIconClassName,
   copyValue,
@@ -130,7 +125,8 @@ function VehicleDetailTile({
 }: {
   label: string;
   value: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
+  labelIcon?: ReactNode;
   className?: string;
   labelIconClassName?: string;
   copyValue?: string;
@@ -139,23 +135,27 @@ function VehicleDetailTile({
   valueAccessory?: ReactNode;
 }) {
   const isCopied = copyValue != null && copiedValue === copyValue;
+  const copyIconTransition =
+    "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
   const valueRow = (
-    <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
-      <span className="min-w-0 break-all text-pretty">{value}</span>
+    <span className="inline-flex min-w-0 flex-nowrap items-center gap-2">
+      <span className="min-w-0 truncate text-pretty">{value}</span>
       {valueAccessory}
       {copyValue != null && onCopy ? (
-        <span className="relative inline-flex size-3.5 shrink-0 items-center justify-center">
+        <span className="relative inline-flex size-10 shrink-0 items-center justify-center">
           <Copy
             className={cn(
-              "absolute size-3 transition-all duration-300 ease-in-out",
-              isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
+              "absolute size-3",
+              copyIconTransition,
+              isCopied ? "scale-[0.25] opacity-0" : "scale-100 opacity-100",
             )}
             aria-hidden
           />
           <Check
             className={cn(
-              "absolute size-3 text-emerald-500 transition-all duration-300 ease-in-out",
-              isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
+              "absolute size-3 text-emerald-500",
+              copyIconTransition,
+              isCopied ? "scale-100 opacity-100" : "scale-[0.25] opacity-0",
             )}
             aria-hidden
           />
@@ -172,14 +172,18 @@ function VehicleDetailTile({
       )}
     >
       <div className="mb-3 flex items-center gap-2 text-xs font-medium text-[color-mix(in_srgb,var(--theme-text-secondary)_91%,rgb(0_0_0)_9%)]">
-        <Icon className={cn("size-3.5", labelIconClassName)} aria-hidden />
+        {labelIcon ?? (
+          Icon ? (
+            <Icon className={cn("size-3.5", labelIconClassName)} aria-hidden />
+          ) : null
+        )}
         <span>{label}</span>
       </div>
       {copyValue != null && onCopy ? (
         <button
           type="button"
           onClick={() => onCopy(copyValue)}
-          className="w-full text-left text-sm font-medium text-[var(--theme-text-secondary)] transition-colors hover:text-foreground"
+          className="flex min-h-10 w-full min-w-0 items-center text-left text-xs font-medium text-[var(--theme-text-secondary)] transition-colors hover:text-foreground sm:text-sm"
           aria-label={`Copy ${label}`}
         >
           {valueRow}
@@ -233,11 +237,11 @@ function StarRating({ value }: { value: number }) {
   );
 }
 
-function getBatteryIndicator(voltage: number) {
-  if (voltage >= 12.4) return { Icon: BatteryFull, className: "text-emerald-500" };
-  if (voltage >= 11.8) return { Icon: BatteryMedium, className: "text-amber-500" };
-  if (voltage >= 10.5) return { Icon: BatteryLow, className: "text-orange-500" };
-  return { Icon: BatteryWarning, className: "text-red-500" };
+/** Matches dealership BatteryIconSvg: healthy charge → active (green fill), otherwise inactive. */
+function getBatteryVoltageVariant(
+  voltage: number,
+): "active" | "inactive" {
+  return voltage >= 12.4 ? "active" : "inactive";
 }
 
 function getVehicleBasics(vehicle: InventoryVehicleRecord) {
@@ -266,10 +270,6 @@ export function InventoryVehicleDetailPanel({
   onBack,
   onShowSimilarVehicles,
 }: InventoryVehicleDetailPanelProps) {
-  const { resolvedTheme } = useTheme();
-  const previewSurface: DashPreviewSurface =
-    resolvedTheme === "dark" ? "dark" : "light";
-
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [sendBrochureOpen, setSendBrochureOpen] = useState(false);
   const [detailDeckTab, setDetailDeckTab] = useState("info");
@@ -279,7 +279,7 @@ export function InventoryVehicleDetailPanel({
   const exteriorColor = exteriorColors[stockSeed % exteriorColors.length];
   const batteryVoltage = 9.0 + ((stockSeed * 7) % 50) / 10;
   const batteryDisplay = `${batteryVoltage.toFixed(1)}V`;
-  const batteryIndicator = getBatteryIndicator(batteryVoltage);
+  const batteryVoltageVariant = getBatteryVoltageVariant(batteryVoltage);
 
   const handleCopy = useCallback((value: string) => {
     void navigator.clipboard.writeText(value).then(
@@ -298,14 +298,14 @@ export function InventoryVehicleDetailPanel({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-lg border border-border/45 bg-sidebar/75 shadow-[0_8px_40px_rgba(0,0,0,0.1)] backdrop-blur-xl",
-        "dark:border-border/30 dark:bg-sidebar/65 dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]",
+        "flex h-full flex-col overflow-hidden rounded-lg border border-border/35 bg-transparent shadow-[0_8px_40px_rgba(0,0,0,0.08)]",
+        "dark:border-border/25 dark:shadow-[0_8px_40px_rgba(0,0,0,0.3)]",
       )}
     >
       <div className="flex-1 cursor-default select-none overflow-y-auto bg-transparent">
         <div className="overflow-hidden">
           <div className="px-1 pt-1">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-muted">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-muted">
             <Image
               src={vehicle.imageSrc}
               alt={vehicle.imageAlt ?? vehicle.title}
@@ -413,12 +413,17 @@ export function InventoryVehicleDetailPanel({
 
           </div>
 
-          <VehicleDetailDeckTabs
+          <Tabs
             value={detailDeckTab}
             onValueChange={setDetailDeckTab}
-            surface={previewSurface}
           >
-            <div className="px-4 pb-4 pt-[4px]">
+            <div className="flex justify-center px-4">
+              <TabsList variant="filter">
+                <TabsTrigger value="info">Info</TabsTrigger>
+                <TabsTrigger value="trips">Trips</TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="mt-2 px-4 pb-4">
               {detailDeckTab === "info" ? (
                 <div className="space-y-6">
                   <section className="space-y-3">
@@ -509,8 +514,12 @@ export function InventoryVehicleDetailPanel({
                       <VehicleDetailTile
                         label="Battery"
                         value={batteryDisplay}
-                        icon={batteryIndicator.Icon}
-                        labelIconClassName={batteryIndicator.className}
+                        labelIcon={
+                          <BatteryIcon
+                            variant={batteryVoltageVariant}
+                            className="size-3.5"
+                          />
+                        }
                       />
                     </div>
                   </section>
@@ -585,7 +594,7 @@ export function InventoryVehicleDetailPanel({
                 </div>
               )}
             </div>
-          </VehicleDetailDeckTabs>
+          </Tabs>
         </div>
       </div>
       <SendVehicleBrochureDialog
