@@ -50,10 +50,10 @@ Every page follows a three-layer structure. Do not deviate.
 {/* Layer 1: Outer wrapper — flex column, overflow-hidden, pt-6 gap below avatar bar */}
 <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
 
-  {/* Layer 2: TopBar — already carries px-8 internally */}
-  <TopBar title="Page Title" right={<Button size="header">Action</Button>} />
+  {/* Layer 2: TitleBar — already carries px-8 internally */}
+  <TitleBar title="Page Title" right={<Button size="header">Action</Button>} />
 
-  {/* Layer 3: Scrollable body — px-8 for 32px left padding, pt-6 gap below TopBar */}
+  {/* Layer 3: Scrollable body — px-8 for 32px left padding, pt-6 gap below TitleBar */}
   <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6">
     {/* Page content goes here */}
   </div>
@@ -63,16 +63,16 @@ Every page follows a three-layer structure. Do not deviate.
 ### Layer-by-layer rules
 
 1. **Outer wrapper** — `flex min-h-0 flex-1 flex-col overflow-hidden pt-6`
-   - `pt-6` (24 px) is the gap between the avatar bar and the TopBar. Never change this.
+   - `pt-6` (24 px) is the gap between the avatar bar and the TitleBar. Never change this.
    - `overflow-hidden` prevents the page from scrolling at this level.
 
-2. **TopBar** — Use `<TopBar />` from `@/components/app/top-bar`. It already has `px-8`.
+2. **TitleBar** — Use `<TitleBar />` from `@/components/app/title-bar`. It already has `px-8`.
    - Pass `title` (required), optional `subtitle`, optional `breadcrumbs`, and optional `right` (action buttons).
    - Action buttons in `right` use `size="header"`.
 
 3. **Scrollable body** — `flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6`
    - `px-8` (32 px) horizontal padding — left-aligned content.
-   - `pt-6` (24 px) spacing below the TopBar.
+   - `pt-6` (24 px) spacing below the TitleBar.
    - `pb-8` or `pb-10` bottom padding for scroll breathing room.
    - `gap-6` (24 px) vertical rhythm between top-level content sections.
    - Use `overflow-y-auto overflow-x-hidden` if horizontal overflow needs to be suppressed.
@@ -139,9 +139,9 @@ When unsure, match these canonical implementations:
 ## Quick Checklist
 
 - [ ] Every UI element uses a design system component from `src/components/ui/` (no custom buttons, inputs, selects, file pickers, etc.)
-- [ ] Page uses the three-layer skeleton: outer wrapper (`pt-6`) → `TopBar` → scrollable body (`px-8 pt-6 pb-8 gap-6`)
+- [ ] Page uses the three-layer skeleton: outer wrapper (`pt-6`) → `TitleBar` → scrollable body (`px-8 pt-6 pb-8 gap-6`)
 - [ ] Horizontal padding is exactly 32 px (`px-8`) on the scrollable body
 - [ ] Content is left-aligned (no `mx-auto` / `max-w-*` unless intentional)
 - [ ] Tabs / filters sit on the page background, not inside a card
 - [ ] Rich content (uploads, grids, forms) is inside a white card surface (`rounded-md` + `bg-card` + border)
-- [ ] TopBar action buttons use `size="header"`
+- [ ] TitleBar action buttons use `size="header"`

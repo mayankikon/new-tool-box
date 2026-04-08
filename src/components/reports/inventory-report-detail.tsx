@@ -6,7 +6,7 @@ import { LocateFixed, Search } from "lucide-react";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { DesignSystemTableShellNoTabs } from "@/components/chrome/design-system-table-shell-no-tabs";
 import {
   AlertDialog,
@@ -313,7 +313,7 @@ export function InventoryReportDetail({
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <div className="shrink-0 pt-6">
-        <TopBar
+        <TitleBar
           className="pb-0"
           breadcrumbs={[
             { label: "Reports", onClick: onBack },

@@ -17,13 +17,14 @@ import {
   Upload,
 } from "lucide-react";
 
+import { InteractiveTitleBarShowcase } from "@/app/design-system/components/organisms/interactive-title-bar-showcase";
 import { PageLayoutChromeShowcase } from "@/app/design-playground/showcases/page-layout-chrome-showcase";
 import { FileCabinetTabRow } from "@/app/design-playground/components/file-cabinet-tab-row";
 import { CAMPAIGN_RECOMMENDATIONS } from "@/lib/campaigns/mock-data";
 import { inventoryDashboardData } from "@/lib/inventory/dashboard-data";
 import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
 import { AvatarBar, AvatarBarShiftActions } from "@/components/app/avatar-bar";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar, type TitleBarBreadcrumbItem } from "@/components/app/title-bar";
 import { CampaignSuggestionCard } from "@/components/campaigns/campaign-suggestion-card";
 import {
   InventoryDonutCard,
@@ -46,7 +47,7 @@ import {
 import { AutomotiveSystemSwitch } from "@/components/ui/automotive-system-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { Badge, BadgeDot, type BadgeTone } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckboxCardGroup, CheckboxCardOption } from "@/components/ui/checkbox-card";
@@ -119,9 +120,9 @@ import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-
 
 import { SectionTitle } from "./components/atoms/SectionTitle";
 import { ShowcaseCard } from "./components/atoms/ShowcaseCard";
-import { ComponentShowcaseBlock } from "./components/molecules/ComponentShowcaseBlock";
 import { AlertDialogShowcaseSection } from "./components/organisms/AlertDialogShowcaseSection";
 import { BatteryThresholdShowcaseSection } from "./components/organisms/BatteryThresholdShowcaseSection";
+import { BadgeShowcaseSection } from "./components/organisms/BadgeShowcaseSection";
 import { ButtonShowcaseSection } from "./components/organisms/ButtonShowcaseSection";
 import { ColorsSection } from "./components/organisms/ColorsSection";
 import { MapsSection } from "./components/organisms/MapsSection";
@@ -167,81 +168,11 @@ const SAMPLE_VEHICLES = [
   },
 ];
 
-const BADGE_TONES: BadgeTone[] = [
-  "gray",
-  "red",
-  "orange",
-  "amber",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "teal",
-  "cyan",
-  "sky",
-  "blue",
-  "indigo",
-  "violet",
-  "purple",
-  "fuchsia",
-  "pink",
-  "rose",
-];
-
 const {
   underGlowPx: fileCabinetUnderGlowPx,
   tabAccent: fileCabinetTabAccent,
   tabTopRadiusPx: fileCabinetTabTopRadiusPx,
 } = FILE_CABINET_BILLING_TABLE_DEFAULTS;
-
-function InteractiveBadgeShowcase() {
-  const [variant, setVariant] = React.useState<"soft" | "outline" | "ghost" | "link">("soft");
-  const [tone, setTone] = React.useState<BadgeTone>("green");
-  const [size, setSize] = React.useState<"sm" | "md">("md");
-  const [shape, setShape] = React.useState<"default" | "pill">("pill");
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {(["soft", "outline", "ghost", "link"] as const).map((nextVariant) => (
-          <Button
-            key={nextVariant}
-            size="2xs"
-            variant={variant === nextVariant ? "default" : "outline"}
-            onClick={() => setVariant(nextVariant)}
-          >
-            {nextVariant}
-          </Button>
-        ))}
-        {(["sm", "md"] as const).map((nextSize) => (
-          <Button key={nextSize} size="2xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
-            {nextSize}
-          </Button>
-        ))}
-        {(["default", "pill"] as const).map((nextShape) => (
-          <Button key={nextShape} size="2xs" variant={shape === nextShape ? "default" : "outline"} onClick={() => setShape(nextShape)}>
-            {nextShape}
-          </Button>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {BADGE_TONES.map((nextTone) => (
-          <Button key={nextTone} size="2xs" variant={tone === nextTone ? "default" : "outline"} onClick={() => setTone(nextTone)}>
-            {nextTone}
-          </Button>
-        ))}
-      </div>
-      <div className="rounded-md border border-border bg-muted/20 p-4">
-        <Badge variant={variant} tone={tone} size={size} shape={shape}>
-          <span className="inline-flex items-center gap-1.5">
-            <BadgeDot tone={tone} />
-            Interactive badge
-          </span>
-        </Badge>
-      </div>
-    </div>
-  );
-}
 
 function InteractiveToggleSwitchShowcase() {
   const [size, setSize] = React.useState<"sm" | "default" | "lg">("default");
@@ -314,6 +245,63 @@ function InteractiveTabsShowcase() {
         </div>
       </div>
     </div>
+  );
+}
+
+const BREADCRUMB_DEPTH_EXAMPLES: Record<
+  1 | 2 | 3 | 4 | 5,
+  TitleBarBreadcrumbItem[]
+> = {
+  1: [{ label: "Vehicle detail" }],
+  2: [
+    { label: "Vehicles", href: "#" },
+    { label: "Vehicle detail" },
+  ],
+  3: [
+    { label: "Inventory", href: "#" },
+    { label: "Vehicles", href: "#" },
+    { label: "Vehicle detail" },
+  ],
+  4: [
+    { label: "Inventory", href: "#" },
+    { label: "Vehicles", href: "#" },
+    { label: "Lot 12", href: "#" },
+    { label: "Vehicle detail" },
+  ],
+  5: [
+    { label: "Inventory", href: "#" },
+    { label: "Vehicles", href: "#" },
+    { label: "Lot 12", href: "#" },
+    { label: "Unit A", href: "#" },
+    { label: "Vehicle detail" },
+  ],
+};
+
+function InteractiveBreadcrumbsShowcase() {
+  const [segmentCount, setSegmentCount] = React.useState<1 | 2 | 3 | 4 | 5>(3);
+
+  return (
+    <>
+      <div className="space-y-3 border-b border-border px-6 py-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Segments
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {([1, 2, 3, 4, 5] as const).map((n) => (
+            <Button
+              key={n}
+              size="2xs"
+              variant={segmentCount === n ? "default" : "outline"}
+              onClick={() => setSegmentCount(n)}
+              type="button"
+            >
+              {n}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <TitleBar breadcrumbs={BREADCRUMB_DEPTH_EXAMPLES[segmentCount]} title="" />
+    </>
   );
 }
 
@@ -421,7 +409,16 @@ function InteractiveAiTextAreaShowcase() {
 
 function inferGroupBySlug(slug: string): DesignSystemGroup | null {
   if (designSystemNavConfig.foundations.some((item) => item.slug === slug)) return "foundations";
-  if (designSystemNavConfig.components.some((item) => item.slug === slug || (slug === "alert-dialog" && item.slug === "modal"))) return "components";
+  if (
+    designSystemNavConfig.components.some(
+      (item) =>
+        item.slug === slug ||
+        (slug === "alert-dialog" && item.slug === "modal") ||
+        (slug === "top-bar" && item.slug === "title-bar"),
+    )
+  ) {
+    return "components";
+  }
   if (designSystemNavConfig.patterns.some((item) => item.slug === slug)) return "patterns";
   return null;
 }
@@ -452,7 +449,9 @@ function wrapSection(id: string, title: string, description: React.ReactNode, co
 }
 
 function renderComponentShowcase(slug: string, label: string) {
-  switch (slug) {
+  const componentSlug = slug === "top-bar" ? "title-bar" : slug;
+  const sectionId = componentSlug;
+  switch (componentSlug) {
     case "button":
       return (
         <ButtonShowcaseSection
@@ -463,17 +462,17 @@ function renderComponentShowcase(slug: string, label: string) {
         />
       );
     case "badge":
-      return wrapSection(
-        slug,
-        label,
-        "Status and contextual labels with interactive tone, shape, size, and variant controls.",
-        <ComponentShowcaseBlock title="Badge" useCard={true} className="space-y-6">
-          <InteractiveBadgeShowcase />
-        </ComponentShowcaseBlock>,
+      return (
+        <BadgeShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "input":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Default, shortcut, add-on, inline add-on, lead/tail button, quantity, soft, and state variants.",
         <ShowcaseCard className="space-y-6">
@@ -576,7 +575,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "checkbox": {
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Portfolio 3.0 checkboxes: basic states plus group, list, and card patterns (segmented controls use the legacy primitives separately).",
         <ShowcaseCard className="space-y-8">
@@ -631,14 +630,12 @@ function renderComponentShowcase(slug: string, label: string) {
                 value="sms"
                 title="SMS channel"
                 description="Fastest response rate for service reminders."
-                subDetail="Avg response time: 11 min"
                 trailing={<Badge variant="soft" tone="green">High</Badge>}
               />
               <CheckboxCardOption
                 value="email"
                 title="Email channel"
                 description="Best for richer offer content and visuals."
-                subDetail="Avg open rate: 34%"
                 trailing={<Badge variant="soft" tone="blue">Medium</Badge>}
               />
             </CheckboxCardGroup>
@@ -648,7 +645,7 @@ function renderComponentShowcase(slug: string, label: string) {
     }
     case "radio":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Portfolio 3.0 radios: mutually exclusive controls with basic, list, and card patterns.",
         <ShowcaseCard className="space-y-8">
@@ -722,7 +719,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "toggle-switch":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Two-state segmented toggle with live size and content-mode controls.",
         <ShowcaseCard>
@@ -731,7 +728,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "automotive-system-toggle":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Automotive-styled illuminated switch.",
         <ShowcaseCard>
@@ -743,7 +740,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "card":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Standard cards with title, body and footer actions.",
         <div className="grid gap-4">
@@ -761,7 +758,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "tabs":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "File-cabinet tabs used by the table-with-tabs surface.",
         <ShowcaseCard className="space-y-8">
@@ -770,7 +767,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "table":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Bordered table shell without the file-cabinet tab strip.",
         <ShowcaseCard>
@@ -779,7 +776,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "table-with-tabs":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "File-cabinet table shell with sink-rise tabs, sortable rows, and inline pagination.",
         <ShowcaseCard>
@@ -788,7 +785,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "tooltip":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Tooltip placements for all four sides, plus the card variant.",
         <ShowcaseCard>
@@ -830,7 +827,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "map-view-tooltip":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Rich map/table preview tooltip variants.",
         <ShowcaseCard className="bg-[rgb(23,23,26)]">
@@ -842,7 +839,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "progress-bar":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Linear and dashed progress indicators with selectable values.",
         <ShowcaseCard className="space-y-5">
@@ -851,7 +848,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "slider":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Single and range slider controls with marks.",
         <ShowcaseCard className="space-y-6">
@@ -870,7 +867,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "campaign-suggestion-card":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Recommendation card used in campaign dashboards.",
         <ShowcaseCard>
@@ -879,7 +876,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "dashboard-widgets":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Production dashboard widget primitives (KPI, status, donut, lot aging) used in inventory dashboards.",
         <div className="space-y-4">
@@ -929,7 +926,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "map-markers":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Pin, chip, and cluster markers for inventory map overlays.",
         <ShowcaseCard>
@@ -944,7 +941,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "stepper":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Horizontal and vertical progress stepper components.",
         <ShowcaseCard className="space-y-8">
@@ -962,7 +959,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "paginator":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Simple, inline, numbered and dots pagination with live page controls.",
         <ShowcaseCard className="space-y-6">
@@ -971,7 +968,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "inline-tips":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Contextual inline guidance and status messages.",
         <ShowcaseCard className="space-y-3">
@@ -984,7 +981,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "dropdown-menu":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Menu primitives including search, rows, and footer action.",
         <ShowcaseCard>
@@ -1024,7 +1021,7 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "date-picker":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Single-date, range, and full trigger-state matrix (including preset side panel).",
         <ShowcaseCard className="space-y-6">
@@ -1081,59 +1078,34 @@ function renderComponentShowcase(slug: string, label: string) {
       );
     case "avatar-bar":
       return wrapSection(
-        slug,
+        sectionId,
         label,
-        "Top account strip shown above TopBar in app chrome.",
+        "Top account strip shown above the title bar in app chrome.",
         <ShowcaseCard className="overflow-hidden p-0">
           <AvatarBar>
             <AvatarBarShiftActions displayName="Mayank Kinger" role="Admin" />
           </AvatarBar>
         </ShowcaseCard>,
       );
-    case "top-bar":
+    case "title-bar":
       return wrapSection(
-        slug,
+        sectionId,
         label,
-        "Page header with title, subtitle and right-side actions.",
-        <ShowcaseCard className="overflow-hidden p-0">
-          <TopBar
-            breadcrumbs={[
-              { label: "Marketing", href: "#" },
-              { label: "Campaigns", href: "#" },
-              { label: "Create" },
-            ]}
-            title="Create Campaign"
-            subtitle="Configure targeting, channels and schedule."
-            right={
-              <>
-                <Button variant="secondary" size="lg">
-                  Cancel
-                </Button>
-                <Button size="lg">Save Draft</Button>
-              </>
-            }
-          />
-        </ShowcaseCard>,
+        "Page title bar with optional breadcrumbs, description, and actions. Use the controls to preview combinations.",
+        <InteractiveTitleBarShowcase />,
       );
     case "breadcrumbs":
       return wrapSection(
-        slug,
+        sectionId,
         label,
-        "Breadcrumb treatment used in page top bars.",
+        "Breadcrumb treatment used in the title bar. Pick one through five segments to preview trail depth.",
         <ShowcaseCard className="overflow-hidden p-0">
-          <TopBar
-            breadcrumbs={[
-              { label: "Inventory", href: "#" },
-              { label: "Vehicles", href: "#" },
-              { label: "Vehicle detail" },
-            ]}
-            title=""
-          />
+          <InteractiveBreadcrumbsShowcase />
         </ShowcaseCard>,
       );
     case "filter-button":
       return wrapSection(
-        slug,
+        sectionId,
         label,
         "Filter trigger with selected state and value.",
         <ShowcaseCard>
@@ -1375,7 +1347,7 @@ const entryDescriptions: Record<string, string> = {
     "Vehicle imagery documents Evox side and 3/4 renders used across campaigns and inventory surfaces.",
   "components:button": "Buttons allow the users to take action, make choices, or navigate within a product or website.",
   "components:avatar-bar": "Avatar Bar presents account context and quick user controls at the page edge.",
-  "components:top-bar": "Top Bar introduces each page with title, context, and primary actions.",
+  "components:title-bar": "Title Bar introduces each page with title, context, and primary actions.",
   "components:breadcrumbs": "Breadcrumbs reveal navigation hierarchy and help users move through nested views.",
   "components:filter-button": "Filter Button toggles filter criteria and surfaces active filter selections.",
   "components:badge": "Badges highlight compact status, metadata, and categorical labels in context.",
@@ -1456,6 +1428,13 @@ export const designSystemEntries: DesignSystemPageEntry[] = [
     description: entryDescriptions["components:modal"],
   },
   {
+    group: "components",
+    slug: "top-bar",
+    canonicalSlug: "title-bar",
+    title: "Title Bar",
+    description: entryDescriptions["components:title-bar"],
+  },
+  {
     group: "patterns",
     slug: "user-personas",
     title: "User Personas",
@@ -1464,7 +1443,12 @@ export const designSystemEntries: DesignSystemPageEntry[] = [
 ];
 
 export function getDesignSystemDescription(group: DesignSystemGroup, slug: string): string {
-  const normalizedSlug = group === "components" && slug === "alert-dialog" ? "modal" : slug;
+  const normalizedSlug =
+    group === "components" && slug === "alert-dialog"
+      ? "modal"
+      : group === "components" && slug === "top-bar"
+        ? "title-bar"
+        : slug;
   return (
     entryDescriptions[`${group}:${normalizedSlug}`] ??
     "Design system reference and usage guidance."

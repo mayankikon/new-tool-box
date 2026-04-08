@@ -13,7 +13,7 @@ export interface AvatarBarProps {
 }
 
 /**
- * 64px strip at the top of the main column (right of the sidebar), above the page `TopBar`.
+ * 64px strip at the top of the main column (right of the sidebar), above the page `TitleBar`.
  * Uses `bg-sidebar` so the chrome matches the left nav. Use for global account / avatar affordances.
  */
 export function AvatarBar({ children, className }: AvatarBarProps) {

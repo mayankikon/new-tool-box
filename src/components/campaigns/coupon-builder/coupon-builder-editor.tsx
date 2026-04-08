@@ -124,7 +124,7 @@ export interface CouponBuilderFormProps {
   onCancel?: () => void;
   /** Called with the offer the user would save (after normalization). */
   onSave: (offer: CampaignOffer) => void;
-  /** For submit buttons outside the form (e.g. TopBar). */
+  /** For submit buttons outside the form (e.g. TitleBar). */
   formId?: string;
 }
 

@@ -8,7 +8,7 @@ import {
   type SidebarProductConfig,
 } from "@/components/ui/sidebar";
 import { AvatarBar, AvatarBarShiftActions } from "@/components/app/avatar-bar";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { AtlasAiPage } from "@/components/atlas-ai/atlas-ai-page";
 import { CampaignDashboard } from "@/components/campaigns/campaign-dashboard";
@@ -212,7 +212,7 @@ function InventoryPlaceholderPage({
 }: InventoryPageConfig & { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-      <TopBar title={title} right={right} />
+      <TitleBar title={title} right={right} />
       <div className="flex flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6">
         {children}
       </div>
@@ -525,7 +525,7 @@ export function ProductWorkspace() {
           <div className="relative z-[1] flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {isInventory && activeItem === "Inventory" ? (
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-              <TopBar
+              <TitleBar
                 title="Inventory"
                 right={
                   <InventoryViewModeToggle
@@ -566,7 +566,7 @@ export function ProductWorkspace() {
             <ReportsPage />
           ) : activeItem === "General" ? (
             <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-              <TopBar
+              <TitleBar
                 title={inventoryPageConfigs.General.title}
                 right={inventoryPageConfigs.General.right}
               />
@@ -581,7 +581,7 @@ export function ProductWorkspace() {
           ) : activeItem === "Brand Profile" ? (
             <BrandProfileSettings
               topBar={
-                <TopBar
+                <TitleBar
                   title="Brand Profile"
                   right={
                     <Button size="header" leadingIcon={<Save />}>
@@ -594,7 +594,7 @@ export function ProductWorkspace() {
           ) : activeProduct === "marketing" && activeItem === "Media Library" ? (
             <MediaLibraryPage
               topBar={
-                <TopBar
+                <TitleBar
                   title="Media Library"
                   right={
                     <Button size="header" leadingIcon={<Save />}>
@@ -608,7 +608,7 @@ export function ProductWorkspace() {
             activeItem === "Customization" ? (
             <ConnectAppEditor
               topBar={
-                <TopBar
+                <TitleBar
                   title="Customization"
                   right={
                     <Button size="header" leadingIcon={<Save />}>
@@ -653,7 +653,7 @@ export function ProductWorkspace() {
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <ConfigurationsPage
                 topBar={
-                  <TopBar
+                  <TitleBar
                     title={activeInventoryPage.title}
                     right={activeInventoryPage.right}
                   />
@@ -677,7 +677,7 @@ export function ProductWorkspace() {
             </InventoryPlaceholderPage>
           ) : activeItem === DEV_CONSOLE_LABEL ? (
             <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-              <TopBar title={DEV_CONSOLE_LABEL} />
+              <TitleBar title={DEV_CONSOLE_LABEL} />
               <div className="flex flex-1 flex-col gap-6 overflow-auto px-8 pb-8 pt-6">
                 <Card>
                   <CardHeader>
@@ -704,7 +704,7 @@ export function ProductWorkspace() {
             </div>
           ) : isCampaignsView && isCreatingCampaign ? (
             <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-              <TopBar title="Campaigns" />
+              <TitleBar title="Campaigns" />
               <CampaignWizard
                 key={
                   campaignWizardInitialData == null
@@ -731,7 +731,7 @@ export function ProductWorkspace() {
             />
           ) : isCampaignsView ? (
             <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-              <TopBar
+              <TitleBar
                 title="Campaigns"
                 right={
                   <Button

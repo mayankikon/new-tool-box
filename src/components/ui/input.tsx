@@ -110,7 +110,7 @@ function InputHelperText({
  * -------------------------------------------------------------------------*/
 
 const inputContainerVariants = cva(
-  "flex w-full items-center overflow-clip rounded-sm transition-colors has-[:focus-visible]:border-ring has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50 has-[aria-invalid]:border-destructive has-[aria-invalid]:ring-3 has-[aria-invalid]:ring-destructive/20 dark:has-[aria-invalid]:border-destructive/50 dark:has-[aria-invalid]:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "flex w-full items-center overflow-clip rounded-sm transition-colors has-[:focus-visible]:border-ring-input has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring-input/50 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50 has-[aria-invalid]:border-destructive has-[aria-invalid]:ring-3 has-[aria-invalid]:ring-destructive/20 dark:has-[aria-invalid]:border-destructive/50 dark:has-[aria-invalid]:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       inputStyle: {
@@ -165,7 +165,7 @@ const inputVariants = cva(
         lg: "h-9 px-2.5 py-1.5",
       },
       standalone: {
-        true: "rounded-sm border border-input bg-white hover:border-input-hover hover:bg-[var(--theme-background-input-hover)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:bg-input/50 disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-white aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-sidebar dark:hover:bg-[var(--theme-background-input-hover)] dark:disabled:bg-input/80 dark:disabled:hover:bg-sidebar dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        true: "rounded-sm border border-input bg-white hover:border-input-hover hover:bg-[var(--theme-background-input-hover)] focus-visible:border-ring-input focus-visible:ring-3 focus-visible:ring-ring-input/50 disabled:bg-input/50 disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-white aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-sidebar dark:hover:bg-[var(--theme-background-input-hover)] dark:disabled:bg-input/80 dark:disabled:hover:bg-sidebar dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
         false: "border-none focus-visible:ring-0 focus-visible:ring-offset-0",
       },
     },

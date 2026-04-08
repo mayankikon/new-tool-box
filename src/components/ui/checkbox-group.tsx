@@ -47,7 +47,7 @@ function CheckboxGroupItemWithDescription({
       htmlFor={id}
       className={cn(
         "flex cursor-pointer items-start gap-3 rounded-md py-1 -my-1 transition-colors",
-        "hover:bg-accent/50",
+        "hover:bg-muted/50",
         "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
         className
       )}

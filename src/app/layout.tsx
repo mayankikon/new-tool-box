@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Agentation } from "agentation";
 import { Saira, Inter, JetBrains_Mono, Onest } from "next/font/google";
 import { GroovedPanelPreferenceProvider } from "@/components/chrome/grooved-panel-preference";
+import { AgentationDevOverlay } from "@/components/dev/agentation-dev-overlay";
 import { BrandProfileProvider } from "@/lib/branding/brand-profile-provider";
 import { NavVisibilityProvider } from "@/lib/nav-visibility/nav-visibility-provider";
 import { AppThemeProvider } from "@/components/theme/app-theme-provider";
@@ -52,7 +52,7 @@ export default function RootLayout({
               </GroovedPanelPreferenceProvider>
             </NavVisibilityProvider>
           </BrandProfileProvider>
-          {process.env.NODE_ENV === "development" && <Agentation />}
+          {process.env.NODE_ENV === "development" && <AgentationDevOverlay />}
         </AppThemeProvider>
       </body>
     </html>

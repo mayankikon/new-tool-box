@@ -46,7 +46,7 @@ function RadioListItem({
       htmlFor={id}
       className={cn(
         "group/list-item flex cursor-pointer items-start gap-3 rounded-md border border-transparent px-3 py-2.5 transition-colors",
-        "hover:bg-accent/50",
+        "hover:bg-muted/50",
         "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
         "[&_[data-slot=radio-list-item-right]]:text-muted-foreground group-has-data-[checked]/list-item:[&_[data-slot=radio-list-item-right]]:text-primary",
         className

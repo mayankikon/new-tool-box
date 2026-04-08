@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   UserPlus,
 } from "lucide-react";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { DesignSystemTableShellNoTabs } from "@/components/chrome/design-system-table-shell-no-tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -297,7 +297,7 @@ export function StaffPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title="Staff"
         right={
           <>

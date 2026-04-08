@@ -21,7 +21,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, InputContainer, InputIcon } from "@/components/ui/input";
@@ -136,7 +136,7 @@ export function ReportsPage() {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <div className="shrink-0 pt-6">
-        <TopBar
+        <TitleBar
           title="Reports"
           right={
             <>

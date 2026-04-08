@@ -331,7 +331,7 @@ export function InventoryVehicleDetailPanel({
               size="icon-sm"
               aria-label="Close"
               onClick={onBack}
-              className="absolute right-2 top-2 rounded-md border-transparent bg-black/50 text-white hover:border-transparent hover:bg-black/60"
+              className="absolute right-2 top-2 rounded-full border-transparent bg-black/50 text-white hover:border-transparent hover:bg-black/60"
             >
               <X className="size-4" aria-hidden />
             </Button>
