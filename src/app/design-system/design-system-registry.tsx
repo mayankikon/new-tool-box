@@ -135,6 +135,7 @@ import {
   DesignSystemTableViewPatternNoTabs,
 } from "./components/patterns/table-view-pattern";
 import { VehicleDetailsPagePattern } from "./components/patterns/vehicle-details-page-pattern";
+import { UserPersonasSection } from "./components/organisms/UserPersonasSection";
 import { designSystemNavConfig } from "./design-system-nav-config";
 import { type DesignSystemGroup } from "./design-system-routes";
 
@@ -1177,6 +1178,8 @@ function renderPatternShowcase(slug: string, label: string) {
           <VehicleDetailsPagePattern />
         </section>
       );
+    case "user-personas":
+      return <UserPersonasSection key={slug} />;
     case "ai-textarea":
       return wrapSection(
         slug,
@@ -1410,6 +1413,7 @@ const entryDescriptions: Record<string, string> = {
   "patterns:vehicle-list-item": "Vehicle List Item patterns present compact inventory details for quick scanning.",
   "patterns:vehicle-list-panel": "Vehicle List Panel patterns combine list content with summary and browsing controls.",
   "patterns:vehicle-details-page": "Vehicle Details Page patterns structure deep inventory information and actions.",
+  "patterns:user-personas": "User Personas define the four retention segments — Loyalist, At-Risk, Actively Defecting, and Relocated — with signals, goals, discount policy, and triggers.",
 };
 
 const titleOverrides: Record<string, string> = {
@@ -1450,6 +1454,12 @@ export const designSystemEntries: DesignSystemPageEntry[] = [
     canonicalSlug: "modal",
     title: "Modal",
     description: entryDescriptions["components:modal"],
+  },
+  {
+    group: "patterns",
+    slug: "user-personas",
+    title: "User Personas",
+    description: entryDescriptions["patterns:user-personas"],
   },
 ];
 

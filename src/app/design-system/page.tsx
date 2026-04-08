@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Download, LayoutDashboard, Package, Palette } from "lucide-react";
+import { ArrowRight, Download, LayoutDashboard, Package, Palette, Users } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
@@ -64,6 +64,24 @@ export default function DesignSystemHomePage() {
               </Link>
             ))}
           </div>
+
+          <Link
+            href={buildDesignSystemItemHref("patterns", "user-personas")}
+            className="group flex h-full flex-col rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm transition-all hover:-translate-y-px hover:border-sidebar-border/70 hover:bg-muted/20 hover:shadow-md"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-emerald-200/80 bg-emerald-100/70 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300">
+                  <Users className="size-5" aria-hidden />
+                </div>
+                <h2 className="text-lg font-medium tracking-tight text-foreground sm:text-xl">User Personas</h2>
+              </div>
+              <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" aria-hidden />
+            </div>
+            <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">
+              Retention personas for smart marketing — Loyalist, At-Risk, Actively Defecting, and Relocated — with signals, goals, and triggers.
+            </p>
+          </Link>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-[8px] border border-border/70 bg-muted/10 p-6 shadow-sm">
