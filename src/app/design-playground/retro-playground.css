@@ -355,7 +355,7 @@
   overflow: hidden;
 }
 
-.fluid-shell-pilot-main [aria-label="Top bar"] {
+.fluid-shell-pilot-main [aria-label="Title bar"] {
   border-bottom: 0 !important;
   box-shadow: none !important;
 }

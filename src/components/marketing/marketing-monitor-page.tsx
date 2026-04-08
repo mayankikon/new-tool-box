@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -348,7 +348,7 @@ export function MarketingMonitorPage({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title="Monitor"
         subtitle="Defection Monitoring — rank competitor pull, preview on the map, and draft win-backs."
         right={

@@ -19,7 +19,7 @@ These are the canonical spacing values for the app shell. Every page and content
 │                  │                                │
 │                  │  ↕ 24 px gap below top bar     │
 │                  │                                │
-│                  │  Top bar (TopBar) / Content    │
+│                  │  Title bar (TitleBar) / Content    │
 │                  │                                │
 └──────────────────┴───────────────────────────────-┘
 ```
@@ -34,13 +34,13 @@ These are the canonical spacing values for the app shell. Every page and content
 
 ## Implementation Rules
 
-1. **Below the avatar bar**: The inner `<div>` inside `<main>` that wraps the page `<TopBar />` should use `pt-6` (24 px) top padding so there is consistent space between the avatar bar and the top bar (see `src/app/page.tsx`).
+1. **Below the avatar bar**: The inner `<div>` inside `<main>` that wraps the page `<TitleBar />` should use `pt-6` (24 px) top padding so there is consistent space between the avatar bar and the title bar (see `src/app/page.tsx`).
 
-   **Main column line field:** `AppMainLineFieldPattern` paints behind **all** routes in `<main>` (see `page.tsx`). Pages use the normal **`pt-6`** wrapper before `TopBar` (same as Staff / Customers); the pattern shows through the padding.
+   **Main column line field:** `AppMainLineFieldPattern` paints behind **all** routes in `<main>` (see `page.tsx`). Pages use the normal **`pt-6`** wrapper before `TitleBar` (same as Staff / Customers); the pattern shows through the padding.
 
-2. **From the sidebar (left padding)**: All content inside the main column uses `px-8` (32 px) horizontal padding. This applies to `<AvatarBar>`, the page-level `<TopBar>`, and `<main>` content containers.
+2. **From the sidebar (left padding)**: All content inside the main column uses `px-8` (32 px) horizontal padding. This applies to `<AvatarBar>`, the page-level `<TitleBar>`, and `<main>` content containers.
 
-3. **Do not nest these paddings.** The `TopBar` component already carries `px-8`. Child content sections that sit inside `<main>` should also use `px-8` individually (not inherit it from a parent wrapper that double-pads).
+3. **Do not nest these paddings.** The `TitleBar` component already carries `px-8`. Child content sections that sit inside `<main>` should also use `px-8` individually (not inherit it from a parent wrapper that double-pads).
 
 ## Current Implementation Reference
 
@@ -50,17 +50,17 @@ Matches `src/app/page.tsx` (inside `AppGroovedMainColumn`):
 <AvatarBar />
 <main className="flex flex-1 flex-col overflow-hidden">
   <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-    <TopBar breadcrumbs={…} title={…} right={…} />
+    <TitleBar breadcrumbs={…} title={…} right={…} />
     {/* …page body; use px-8 where needed */}
   </div>
 </main>
 ```
 
-`pt-6` is the 24px gap **below the avatar bar** and **above** the page `TopBar`.
+`pt-6` is the 24px gap **below the avatar bar** and **above** the page `TitleBar`.
 
 ## Quick Checklist
 
-- [ ] Gap between the avatar bar and the page `TopBar` is exactly 24 px (`pt-6` on the page wrapper).
+- [ ] Gap between the avatar bar and the page `TitleBar` is exactly 24 px (`pt-6` on the page wrapper).
 - [ ] Horizontal padding from sidebar edge is exactly 32 px (`px-8`).
 - [ ] Avatar bar height remains 64 px (`h-16`).
 - [ ] New page components do not introduce extra top/left padding that compounds with these values.

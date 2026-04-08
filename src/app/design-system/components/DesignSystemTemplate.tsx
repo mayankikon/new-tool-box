@@ -4,7 +4,7 @@ export interface DesignSystemTemplateProps {
   children: React.ReactNode;
   /** Optional left nav (e.g. DesignSystemNav). When provided, layout is two-column: nav + main. */
   left?: React.ReactNode;
-  /** Optional page-level top bar (e.g. app TopBar component). */
+  /** Optional page-level title bar (e.g. app TitleBar component). */
   topBar?: React.ReactNode;
 }
 

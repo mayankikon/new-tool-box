@@ -148,6 +148,8 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  /* Form controls (input, textarea, select trigger): blue focus ring; `--ring` stays brand accent for links/buttons. */
+  --color-ring-input: var(--ring-input);
   --color-input: var(--input);
   --color-input-hover: var(--input-hover);
   --color-border: var(--border);
@@ -220,6 +222,7 @@
   --input: var(--theme-stroke-default);
   --input-hover: var(--theme-stroke-hover);
   --ring: var(--theme-stroke-accent);
+  --ring-input: var(--theme-stroke-informative);
   --primary-hover: var(--theme-background-button-primary-hover);
   --chart-1: oklch(0.696 0.146 163.2);
   --chart-2: oklch(0.685 0.150 237.3);
@@ -297,6 +300,7 @@
   --input: rgb(220 220 220);
   --input-hover: rgb(180 180 180);
   --ring: rgb(74 200 166);
+  --ring-input: rgb(67 125 252);
 }
 
 .dark {
@@ -356,6 +360,7 @@
   --input: var(--theme-stroke-default);
   --input-hover: var(--theme-stroke-hover);
   --ring: var(--theme-stroke-accent);
+  --ring-input: var(--theme-stroke-informative);
   --primary-hover: var(--theme-background-button-primary-hover);
   --chart-1: oklch(0.696 0.146 163.2);
   --chart-2: oklch(0.685 0.150 237.3);

@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, UserPlus } from "lucide-react";
 
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { PortfolioCheckboxControl } from "@/components/ui/portfolio-checkbox";
 import { PortfolioRadioButton } from "@/components/ui/portfolio-radio";
@@ -180,7 +180,7 @@ export function RegisterCustomerPage({ onCancel }: RegisterCustomerPageProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         breadcrumbs={[
           { label: "Customers", onClick: onCancel },
           { label: "Register" },

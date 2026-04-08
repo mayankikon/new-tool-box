@@ -171,7 +171,7 @@ function DatePickerInput({
       className={cn(
         datePickerContainerVariants({ inputStyle, size }),
         isOpen &&
-          "border-ring ring-3 ring-ring/50",
+          "border-ring-input ring-3 ring-ring-input/50",
         invalid &&
           !isOpen &&
           "border-destructive",

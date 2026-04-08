@@ -11,9 +11,26 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  GoogleMapsPreview3dHtmlMarkers,
+  type GoogleMapsPreview3dMarker,
+} from "@/components/design-system/google-maps-preview-3d-html-markers";
+import { GoogleMapsGeofenceCesiumSync } from "@/components/design-system/google-maps-preview-geofence-cesium";
+import { GoogleMapsGeofencePanel } from "@/components/design-system/google-maps-preview-geofence-panel";
 import { MapControlButton } from "@/components/ui/mapbox-map";
+import {
+  buildGeofenceInteriorPreviewMarkers,
+} from "@/lib/design-system/design-system-maps-geofence-interior-markers";
+import { resolveMarker3dTier, geofenceCentroid } from "@/lib/design-system/design-system-maps-3d-marker-tiers";
+import { minVertexEllipsoidHeightM } from "@/lib/design-system/design-system-maps-geofence-interior-markers";
+import {
+  clearDesignSystemMapsGeofence,
+  loadDesignSystemMapsGeofence,
+  type DesignSystemMapsGeofenceVertex,
+  saveDesignSystemMapsGeofence,
+} from "@/lib/design-system/design-system-maps-geofence-storage";
 import { cn } from "@/lib/utils";
 
 /** Default view: 1101 W State Hwy 114, Grapevine, TX 76051 */
@@ -32,6 +49,28 @@ const MIN_SURFACE_HEIGHT_M = 45;
 const MAX_SURFACE_HEIGHT_M = 400_000;
 
 const EARTH_CIRCUMFERENCE_M = 40_075_016.686;
+
+/** Sample WGS84 pins around the default Grapevine, TX framing — same design-system assets as Components → Map Markers. */
+const PREVIEW_3D_MAP_MARKERS: readonly GoogleMapsPreview3dMarker[] = [
+  { id: "preview-keys", lng: -97.09135, lat: 32.928, heightM: 14, variant: "keys" },
+  { id: "preview-teal", lng: -97.09305, lat: 32.92785, heightM: 14, variant: "teal" },
+  { id: "preview-gold", lng: -97.09185, lat: 32.92655, heightM: 14, variant: "gold" },
+  { id: "preview-teal-2", lng: -97.09075, lat: 32.92745, heightM: 14, variant: "teal" },
+  { id: "preview-teal-3", lng: -97.09255, lat: 32.92815, heightM: 14, variant: "teal" },
+  { id: "preview-teal-4", lng: -97.094, lat: 32.9276, heightM: 14, variant: "teal" },
+  { id: "preview-teal-5", lng: -97.08995, lat: 32.92685, heightM: 14, variant: "teal" },
+  { id: "preview-gold-2", lng: -97.09115, lat: 32.92695, heightM: 14, variant: "gold" },
+  { id: "preview-gold-3", lng: -97.09335, lat: 32.92725, heightM: 14, variant: "gold" },
+  { id: "preview-gold-4", lng: -97.0902, lat: 32.92835, heightM: 14, variant: "gold" },
+  { id: "preview-gold-5", lng: -97.0921, lat: 32.92595, heightM: 14, variant: "gold" },
+  { id: "preview-red", lng: -97.09045, lat: 32.92705, heightM: 14, variant: "red" },
+  { id: "preview-red-2", lng: -97.09285, lat: 32.92635, heightM: 14, variant: "red" },
+  { id: "preview-red-3", lng: -97.09365, lat: 32.92845, heightM: 14, variant: "red" },
+  { id: "preview-red-4", lng: -97.08895, lat: 32.92755, heightM: 14, variant: "red" },
+];
+
+/** Cycle for vehicle pin tones when many markers are placed inside a saved geofence. */
+const PREVIEW_3D_MARKER_VARIANT_CYCLE = PREVIEW_3D_MAP_MARKERS.map((m) => m.variant);
 
 const MISSING_KEY_HELP =
   "Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY or NEXT_PUBLIC_GOOGLE_MAP_TILES_API_KEY to .env.local. Enable the Maps JavaScript API (for 2D satellite) and Map Tiles API / Photorealistic 3D Tiles (for 3D) for that key.";
@@ -127,7 +166,45 @@ export function GoogleMapsPreview() {
   /** Eye height above ellipsoid — drives zoom button enable/disable. */
   const [surfaceHeightM, setSurfaceHeightM] = useState(0);
 
+  const [geofencePanelOpen, setGeofencePanelOpen] = useState(true);
+  const [geofenceDrawing, setGeofenceDrawing] = useState(false);
+  const [geofenceDraft, setGeofenceDraft] = useState<DesignSystemMapsGeofenceVertex[]>([]);
+  const [geofenceSavedRing, setGeofenceSavedRing] = useState<DesignSystemMapsGeofenceVertex[] | null>(
+    null,
+  );
+
+  /** When a geofence is saved, show preview pins inside its footprint at the geofence floor (not on roofs). */
+  const preview3dMarkers = useMemo((): readonly GoogleMapsPreview3dMarker[] => {
+    if (geofenceSavedRing != null && geofenceSavedRing.length >= 3) {
+      const interior = buildGeofenceInteriorPreviewMarkers(
+        geofenceSavedRing,
+        PREVIEW_3D_MARKER_VARIANT_CYCLE,
+      );
+      if (interior.length > 0) {
+        return interior;
+      }
+    }
+    return PREVIEW_3D_MAP_MARKERS;
+  }, [geofenceSavedRing]);
+
+  const savedGeofenceCentroid = useMemo(
+    () => (geofenceSavedRing != null && geofenceSavedRing.length >= 3 ? geofenceCentroid(geofenceSavedRing) : null),
+    [geofenceSavedRing],
+  );
+
+  const savedGeofenceFloorM = useMemo(
+    () => (geofenceSavedRing != null && geofenceSavedRing.length >= 3 ? minVertexEllipsoidHeightM(geofenceSavedRing) + 0.5 : undefined),
+    [geofenceSavedRing],
+  );
+
   const keyMissing = !keyOnMount;
+
+  useEffect(() => {
+    const stored = loadDesignSystemMapsGeofence();
+    if (stored != null && stored.ring.length >= 3) {
+      setGeofenceSavedRing(stored.ring);
+    }
+  }, []);
 
   useEffect(() => {
     const apiKey = resolveGoogleMapsApiKey();
@@ -327,6 +404,8 @@ export function GoogleMapsPreview() {
     sync();
 
     return () => {
+      // Init effect may destroy the viewer first; avoid touching camera after destroy.
+      if (viewer.isDestroyed()) return;
       viewer.camera.changed.removeEventListener(sync);
     };
   }, [cesiumStatus]);
@@ -471,6 +550,62 @@ export function GoogleMapsPreview() {
     });
   }, []);
 
+  const handleSetTilt = useCallback((tiltDeg: number) => {
+    const viewer = viewerRef.current;
+    if (viewer == null) return;
+    const c = viewer.camera;
+    const newPitch = CesiumMath.clamp(
+      CesiumMath.toRadians(-tiltDeg),
+      -CesiumMath.PI_OVER_TWO + 0.02,
+      0,
+    );
+    c.setView({
+      orientation: {
+        heading: c.heading,
+        pitch: newPitch,
+        roll: c.roll,
+      },
+    });
+  }, []);
+
+  const handleGeofenceAddPoint = useCallback((lng: number, lat: number, heightM: number) => {
+    setGeofenceDraft((prev) => [...prev, [lng, lat, heightM]]);
+  }, []);
+
+  const handleGeofenceStart = useCallback(() => {
+    setGeofenceDraft([]);
+    setGeofenceDrawing(true);
+  }, []);
+
+  const handleGeofenceCancel = useCallback(() => {
+    setGeofenceDraft([]);
+    setGeofenceDrawing(false);
+  }, []);
+
+  const handleGeofenceComplete = useCallback(() => {
+    setGeofenceDraft((current) => {
+      if (current.length < 3) return current;
+      const ring: DesignSystemMapsGeofenceVertex[] = current.map(([lng, lat, h]) => [
+        lng,
+        lat,
+        h ?? 0,
+      ]);
+      saveDesignSystemMapsGeofence(ring);
+      queueMicrotask(() => {
+        setGeofenceSavedRing(ring);
+        setGeofenceDrawing(false);
+      });
+      return [];
+    });
+  }, []);
+
+  const handleGeofenceClearSaved = useCallback(() => {
+    clearDesignSystemMapsGeofence();
+    setGeofenceSavedRing(null);
+  }, []);
+
+  const geofenceMapReady = mapMode === "3d" && cesiumStatus === "ready";
+
   const normalizedBearing = ((headingDeg % 360) + 360) % 360;
   const defaultPitchDeg = CesiumMath.toDegrees(DEFAULT_PITCH_RAD);
   const isCompassActive =
@@ -526,6 +661,38 @@ export function GoogleMapsPreview() {
         )}
         role="application"
         aria-label="Google Photorealistic 3D map preview"
+      />
+
+      <GoogleMapsPreview3dHtmlMarkers
+        viewerRef={viewerRef}
+        visible={mapMode === "3d" && cesiumStatus === "ready"}
+        markers={preview3dMarkers}
+        surfaceHeightM={surfaceHeightM}
+        geofenceCentroid={savedGeofenceCentroid}
+        dealershipHeightM={savedGeofenceFloorM}
+      />
+
+      <GoogleMapsGeofenceCesiumSync
+        viewerRef={viewerRef}
+        active={geofenceMapReady}
+        savedRing={geofenceSavedRing}
+        draftPoints={geofenceDraft}
+        isDrawing={geofenceDrawing}
+        onAddPoint={handleGeofenceAddPoint}
+      />
+
+      <GoogleMapsGeofencePanel
+        expanded={geofencePanelOpen}
+        onExpandedChange={setGeofencePanelOpen}
+        isDrawing={geofenceDrawing}
+        onStartDrawing={handleGeofenceStart}
+        onCancelDrawing={handleGeofenceCancel}
+        onCompleteDrawing={handleGeofenceComplete}
+        draftPointCount={geofenceDraft.length}
+        draftVertices={geofenceDraft}
+        hasSavedGeofence={geofenceSavedRing != null && geofenceSavedRing.length >= 3}
+        onClearSaved={handleGeofenceClearSaved}
+        drawDisabled={!geofenceMapReady}
       />
 
       <div
@@ -592,7 +759,47 @@ export function GoogleMapsPreview() {
       ) : null}
 
       {mapMode === "3d" && cesiumStatus === "ready" ? (
-        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-end justify-end">
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-end justify-between">
+          <div className="pointer-events-auto flex flex-col items-start gap-1.5">
+            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Eye height</p>
+              <p className="tabular-nums text-sm font-semibold text-foreground">
+                {surfaceHeightM >= 1000
+                  ? `${(surfaceHeightM / 1000).toFixed(2)} km`
+                  : `${Math.round(surfaceHeightM)} m`}
+              </p>
+            </div>
+            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Marker tier</p>
+              <p className="tabular-nums text-sm font-semibold text-foreground capitalize">
+                {resolveMarker3dTier(surfaceHeightM)}
+              </p>
+            </div>
+            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-2 shadow-sm backdrop-blur-sm dark:bg-card/90">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                Tilt · <span className="tabular-nums font-semibold text-foreground">{tiltDisplayDeg}°</span>
+              </p>
+              <div className="mt-1.5 flex gap-1" role="group" aria-label="Tilt presets">
+                {[0, 15, 30, 45, 60, 90].map((deg) => (
+                  <button
+                    key={deg}
+                    type="button"
+                    onClick={() => handleSetTilt(deg)}
+                    aria-label={`Set tilt to ${deg}°`}
+                    aria-pressed={tiltDisplayDeg === deg}
+                    className={cn(
+                      "h-6 min-w-[2rem] rounded-md px-1 text-[11px] font-medium tabular-nums transition-colors",
+                      tiltDisplayDeg === deg
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    {deg}°
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="pointer-events-auto flex flex-col gap-2">
             <MapControlButton
               aria-label="Zoom in"

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Copy, Pencil, Plus, TicketPercent, Trash2 } from "lucide-react";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
@@ -113,7 +113,7 @@ export function CouponLibraryPage() {
   if (view === "editor") {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-        <TopBar
+        <TitleBar
           breadcrumbs={[
             {
               label: "Coupon",
@@ -150,7 +150,7 @@ export function CouponLibraryPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title="Coupon"
         subtitle={listSubtitle}
         right={

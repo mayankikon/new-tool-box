@@ -22,7 +22,7 @@ This document inventories the current design system page (`src/app/design-system
 
 | # | Subsection | Primary UI pattern | One-line description |
 |---|------------|--------------------|------------------------|
-| 1 | Page layout & chrome | Single card + nested cards | TopBar variants (breadcrumbs × description × buttons), main content area |
+| 1 | Page layout & chrome | Single card + nested cards | TitleBar variants (breadcrumbs × description × buttons), main content area |
 | 2 | Button | Matrix + slots row | ButtonComponentShowcase: sizes, variants×states matrix, leading/trailing/badge slots |
 | 3 | Link Button | Single card, flex wrap | Variants (default/muted/primary/disabled), underline, lead/tail icons, href |
 | 4 | Filter Button | Single card, flex wrap | Unselected/selected, valueLabel, sizes (xs/md/lg), disabled |
@@ -100,7 +100,7 @@ Optional: **ComponentsSection** organism that only renders the list of component
 | Radius / spacing / stroke (data only for stroke) | `radiusTokens`, `spacingTokens`, `strokeTokens` in `design-tokens.ts` | `SpacingSection` (spacing + radius scales); stroke tokens not given a dedicated section |
 | Typography samples | Inline in `TypographySection` (not `fontFamilyTokens` etc.) | `TypographySection` |
 | Button showcase config | BUTTON_SHOWCASE_SIZES, BUTTON_SHOWCASE_VARIANTS, BUTTON_SHOWCASE_STATES, BUTTON_HOVER_LOOK, BUTTON_ACTIVE_LOOK (currently in page) | ButtonShowcaseSection (extract to design-system-constants.ts or keep in organism) |
-| TopBar variants | Inline array (breadcrumbs × description × buttons) in page | PageLayoutChromeSection (keep inline or extract to constant) |
+| TitleBar variants | Interactive showcase on Title Bar component page | `InteractiveTitleBarShowcase` + breadcrumbs depth demo |
 
 **Quarks:** Design tokens = `src/lib/design-tokens.ts` + generated CSS primitives (`color-primitives.css`, `typography-primitives.css`, `layout-primitives.css`, `theme-primitives.css`). No structural change to quarks.
 
@@ -163,7 +163,7 @@ Used by the design system left panel and section anchor IDs. One source of truth
 
 New sections: add a row here and the same slug/label to `design-system-nav-config.ts`, and add `id="{slug}"` to the section in the page.
 
-**Chrome naming:** The design system distinguishes **Avatar bar** (`AvatarBar`, slug `avatar-bar`) from **Top bar** (`TopBar`, slug `top-bar`; formerly documented as “Title bar” / slug `title-bar`).
+**Chrome naming:** The design system distinguishes **Avatar bar** (`AvatarBar`, slug `avatar-bar`) from **Title bar** (`TitleBar`, slug `title-bar`; legacy URL `top-bar` redirects to `title-bar`).
 
 ---
 
@@ -174,7 +174,7 @@ Changes applied in the modular overhaul pass:
 - **Foundation tokens:** Removed radius `2xl` (24px), `3xl` (28px), `Card-lg` (16px) from showcase. Removed spacing `96` (96px). CSS primitives still define the vars; they are just no longer showcased.
 - **Typography:** Token arrays now include actual values (e.g. `xs (12px)`, `semibold (600)`) so the showcase displays metadata alongside token names.
 - **Button:** Removed the "Slots" section (leading/trailing icons, badge). Sizes and Variants×States matrix remain.
-- **Page layout & chrome:** Replaced 12 static TopBar permutations with an interactive playground (breadcrumb count, description toggle, button count controls). Static "Inventory" reference and main content area skeleton kept.
+- **Page layout & chrome:** Title Bar component page uses an interactive playground (breadcrumbs on/off, description on/off, actions: primary only / primary+secondary / none). Static "Inventory" reference and main content area skeleton kept on the Page layout & chrome pattern.
 - **Badge:** Merged two duplicate sections into one showing all variants: default, secondary, outline, ghost, destructive, link.
 - **Checkbox / Radio:** Removed `CheckboxSegmented` and `RadioSegmented` from showcase (components remain in `ui/`). Fixed "NEW" badge font to use `font-headline` (Saira).
 - **Tabs:** Replaced 5 static pill tab blocks (2–6 tabs) with a dynamic tab-count selector. Fixed line variant active background (removed white bg on active).

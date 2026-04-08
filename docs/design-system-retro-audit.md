@@ -93,7 +93,7 @@ These are **composite surfaces** in the product — not all are in the design-sy
 
 | Area | Typical entry / folder | Why extract | Retro lever |
 |------|-------------------------|-------------|-------------|
-| App shell | `src/components/app/top-bar.tsx`, `src/components/ui/sidebar.tsx` | Every page shares chrome; high visibility | Bezel title bar, “instrument” breadcrumbs |
+| App shell | `src/components/app/title-bar.tsx`, `src/components/ui/sidebar.tsx` | Every page shares chrome; high visibility | Bezel title bar, “instrument” breadcrumbs |
 | Campaign dashboard | `src/components/campaigns/campaign-dashboard.tsx`, KPI cards, suggestion card | Dense dashboard = dash metaphor | LED status strips, gauge-style KPIs |
 | Campaign wizard | `src/components/campaigns/campaign-wizard.tsx`, `wizard-stepper.tsx` | Stepper = sequential mode control | Segment LEDs, mechanical step keys |
 | Coupon / offer cards | `coupon-card-preview.tsx`, `coupon-builder-editor.tsx` | Card chrome + CTA | Recessed display, illuminated CTA |

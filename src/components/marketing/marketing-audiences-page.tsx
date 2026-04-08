@@ -6,7 +6,7 @@ import { useTheme } from "@/components/theme/app-theme-provider";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -107,7 +107,7 @@ export function MarketingAudiencesPage({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title="Audiences"
         right={
           <>

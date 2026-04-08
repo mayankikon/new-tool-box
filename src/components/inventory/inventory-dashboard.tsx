@@ -2,7 +2,7 @@
 
 import { CalendarDays, Download } from "lucide-react";
 import { useMemo, useState } from "react";
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -228,7 +228,7 @@ export function InventoryDashboardPage() {
     <div className="flex flex-1 flex-col min-h-0 overflow-auto">
       <div className="flex w-full flex-col px-8 pb-10 pt-10">
         <div className="w-full">
-          <TopBar
+          <TitleBar
             title="Dashboard"
             className="min-h-[52px] gap-0 px-0 pt-0 pb-0"
             right={

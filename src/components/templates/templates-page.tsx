@@ -24,7 +24,7 @@ import {
   MarketingTemplatePreviewArtifact,
 } from "@/components/templates/marketing-template-preview-artifact";
 
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -246,7 +246,7 @@ function TemplateDetailPage({
   if (!template) {
     return (
       <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-        <TopBar
+        <TitleBar
           breadcrumbs={[
             { label: "Templates" },
             { label: "Missing template" },
@@ -272,7 +272,7 @@ function TemplateDetailPage({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         breadcrumbs={[
           { label: "Templates" },
           { label: template.title },
@@ -719,7 +719,7 @@ export function TemplatesPage({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title="Templates"
         subtitle="Build reusable dealership messaging across the full owner lifecycle, from purchase to retention."
         right={

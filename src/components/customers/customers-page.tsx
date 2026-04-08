@@ -3,7 +3,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { Download, Filter, Search, UserPlus } from "lucide-react";
 
-import { TopBar } from "@/components/app/top-bar";
+import { TitleBar } from "@/components/app/title-bar";
 import { DesignSystemTableShellNoTabs } from "@/components/chrome/design-system-table-shell-no-tabs";
 import { CustomersFileCabinetTable } from "@/components/customers/customers-file-cabinet-table";
 import {
@@ -17,7 +17,7 @@ import { Input, InputContainer, InputIcon } from "@/components/ui/input";
 import { Paginator } from "@/components/ui/paginator";
 
 interface CustomersPageProps {
-  /** Shown in the page TopBar; Smart Marketing uses "Audiences". */
+  /** Shown in the page TitleBar; Smart Marketing uses "Audiences". */
   pageTitle?: string;
   onRegisterCustomer?: () => void;
 }
@@ -71,7 +71,7 @@ export function CustomersPage({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 overflow-hidden pt-6">
-      <TopBar
+      <TitleBar
         title={pageTitle}
         right={
           <>

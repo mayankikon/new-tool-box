@@ -17,10 +17,10 @@ const aiTextAreaContainerVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-border bg-white hover:border-input-hover focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-sidebar",
+          "border border-border bg-white hover:border-input-hover focus-within:border-ring-input focus-within:ring-3 focus-within:ring-ring-input/50 dark:bg-sidebar",
         shadow:
-          "relative border border-border bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:border-input-hover focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-sidebar dark:shadow-[0px_1px_2px_0px_rgba(0,0,0,0.25)]",
-        soft: "bg-muted/60 focus-within:ring-3 focus-within:ring-ring/50 dark:bg-muted/40",
+          "relative border border-border bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:border-input-hover focus-within:border-ring-input focus-within:ring-3 focus-within:ring-ring-input/50 dark:bg-sidebar dark:shadow-[0px_1px_2px_0px_rgba(0,0,0,0.25)]",
+        soft: "bg-muted/60 focus-within:ring-3 focus-within:ring-ring-input/50 dark:bg-muted/40",
       },
     },
     defaultVariants: { variant: "default" },

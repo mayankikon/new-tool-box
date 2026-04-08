@@ -2,6 +2,63 @@
  * Constants for design system showcase sections (e.g. button matrix).
  */
 
+import type { BadgeTone } from "@/components/ui/badge";
+
+/** Badge showcase: tone options for previews and reference matrix (id = Badge `tone` prop). */
+export const BADGE_DOC_TONES: { id: BadgeTone; label: string }[] = [
+  { id: "default", label: "Default" },
+  { id: "gray", label: "Gray" },
+  { id: "red", label: "Red" },
+  { id: "orange", label: "Orange" },
+  { id: "amber", label: "Amber" },
+  { id: "yellow", label: "Yellow" },
+  { id: "lime", label: "Lime" },
+  { id: "green", label: "Green" },
+  { id: "emerald", label: "Emerald" },
+  { id: "teal", label: "Teal" },
+  { id: "cyan", label: "Cyan" },
+  { id: "sky", label: "Sky" },
+  { id: "blue", label: "Blue" },
+  { id: "indigo", label: "Indigo" },
+  { id: "violet", label: "Violet" },
+  { id: "purple", label: "Purple" },
+  { id: "fuchsia", label: "Fuchsia" },
+  { id: "pink", label: "Pink" },
+  { id: "rose", label: "Rose" },
+];
+
+/** Variant blocks for badge documentation (tone-aware surfaces). */
+export const BADGE_DOC_VARIANT_EXAMPLES = [
+  {
+    id: "soft" as const,
+    title: "Soft",
+    description: "Filled semantic tints for status chips, counts, and metadata. Pair with any tone.",
+  },
+  {
+    id: "outline" as const,
+    title: "Outline",
+    description: "Subtle border using the tone’s text color; calmer than soft on dense surfaces.",
+  },
+  {
+    id: "ghost" as const,
+    title: "Ghost",
+    description: "Transparent background with tone-colored text; use in toolbars and tables.",
+  },
+  {
+    id: "link" as const,
+    title: "Link",
+    description: "Underline on hover; use when the badge should read as inline emphasis.",
+  },
+] as const;
+
+/** Matrix rows for reference table (id = Badge `variant` prop). */
+export const BADGE_SHOWCASE_MATRIX_VARIANTS = [
+  { id: "soft" as const, label: "Soft" },
+  { id: "outline" as const, label: "Outline" },
+  { id: "ghost" as const, label: "Ghost" },
+  { id: "link" as const, label: "Link" },
+] as const;
+
 /** Button showcase: size options for the matrix (id = Button size prop). */
 export const BUTTON_SHOWCASE_SIZES = [
   { id: "2xs" as const, label: "2xs", px: 24 },
