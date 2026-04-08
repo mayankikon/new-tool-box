@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { Check, Plus, Trash2 } from "lucide-react";
+import { MiniCouponStrip } from "@/components/branding/mini-coupon-strip-preview";
 import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
+import { DEFAULT_DEALERSHIP_LOGO_SRC } from "@/lib/branding/brand-profile-types";
 import {
   BRAND_THEME_PALETTES,
   type BrandThemePreset,
@@ -29,7 +31,14 @@ import type {
 import { createDefaultConnectAppConfig } from "@/lib/connect-app/connect-app-types";
 import { MEDIA_LIBRARY_CHANGED_EVENT } from "@/lib/media/media-library-storage";
 import { getMediaAssetById } from "@/lib/media/media-library-storage";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { FileUploadArea } from "@/components/ui/file-upload-area";
 import {
   Input,
   InputContainer,
@@ -200,6 +209,15 @@ function ThemePresetChoice({
   );
 }
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 function FormSection({
   title,
   description,
@@ -232,7 +250,7 @@ export function ConnectAppEditor({
   topBar: React.ReactNode;
 }) {
   const baseId = useId();
-  const { profile } = useBrandProfile();
+  const { profile, updateProfile } = useBrandProfile();
   const [config, setConfig] = useState<ConnectAppConfig>(() =>
     loadConnectAppConfig(),
   );
@@ -259,6 +277,26 @@ export function ConnectAppEditor({
   const setPartial = useCallback((patch: Partial<ConnectAppConfig>) => {
     setConfig(updateConnectAppConfig(patch));
   }, []);
+
+  const onLogoFiles = useCallback(
+    async (files: File[]) => {
+      const f = files[0];
+      if (!f || !f.type.startsWith("image/")) return;
+      const url = await readFileAsDataUrl(f);
+      updateProfile({ logoUrl: url });
+    },
+    [updateProfile],
+  );
+
+  const onIconFiles = useCallback(
+    async (files: File[]) => {
+      const f = files[0];
+      if (!f || !f.type.startsWith("image/")) return;
+      const url = await readFileAsDataUrl(f);
+      updateProfile({ appIconUrl: url, logomarkUrl: url });
+    },
+    [updateProfile],
+  );
 
   const palette = useMemo(
     () => resolveConnectPalette(config, profile),
@@ -321,6 +359,70 @@ export function ConnectAppEditor({
                         }
                       />
                     ))}
+                  </div>
+                </FormSection>
+
+                <FormSection
+                  title="Logo & app icon"
+                  description="Shown on the storefront hero, tab bar, and coupon previews. Changes apply everywhere your brand profile is used."
+                >
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-3">
+                      <Label htmlFor={`${baseId}-logo`}>Logo</Label>
+                      <div className="flex items-center justify-center rounded-lg border border-sidebar-border bg-background p-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          id={`${baseId}-logo`}
+                          src={profile.logoUrl}
+                          alt=""
+                          className="h-10 max-w-full object-contain"
+                        />
+                      </div>
+                      <FileUploadArea
+                        accept="image/*"
+                        multiple={false}
+                        hint="PNG or SVG, 5 MB max"
+                        onFilesSelected={onLogoFiles}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          updateProfile({
+                            logoUrl: DEFAULT_DEALERSHIP_LOGO_SRC,
+                          })
+                        }
+                      >
+                        Reset to default
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor={`${baseId}-app-icon`}>App icon</Label>
+                      <div className="flex items-center justify-center rounded-lg border border-sidebar-border bg-background p-4">
+                        <div
+                          id={`${baseId}-app-icon`}
+                          className="size-16 overflow-hidden rounded-xl border border-sidebar-border bg-background shadow-sm"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              profile.appIconUrl ||
+                              profile.logomarkUrl ||
+                              profile.logoUrl
+                            }
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      <FileUploadArea
+                        accept="image/*"
+                        multiple={false}
+                        hint="Square image, 512×512 recommended"
+                        onFilesSelected={onIconFiles}
+                      />
+                    </div>
                   </div>
                 </FormSection>
 
@@ -672,15 +774,34 @@ export function ConnectAppEditor({
             </Button>
           </div>
 
-          <div className="sticky top-6 flex w-full min-w-0 justify-center self-start px-1 xl:basis-0 xl:flex-[3] xl:px-2">
-            <ConnectAppPhonePreview
-              config={config}
-              profile={profile}
-              palette={palette}
-              fontPreset={fontPreset}
-              promotionOffers={promotionOffers}
-              galleryUrls={galleryUrls}
-            />
+          <div className="sticky top-6 flex w-full min-w-0 max-w-[320px] flex-col items-center gap-4 self-start px-1 pb-10 xl:basis-0 xl:max-w-none xl:flex-[3] xl:px-2">
+            <p className="w-full text-xs font-medium text-muted-foreground">
+              Live preview
+            </p>
+            <div className="-mt-[40px] w-full">
+              <ConnectAppPhonePreview
+                config={config}
+                profile={profile}
+                palette={palette}
+                fontPreset={fontPreset}
+                promotionOffers={promotionOffers}
+                galleryUrls={galleryUrls}
+              />
+            </div>
+            <Card className="w-full overflow-visible shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs">Coupon</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-5 pt-0">
+                <div className="mx-[10px]">
+                  <MiniCouponStrip
+                    palette={palette}
+                    logoUrl={profile.logoUrl}
+                    dealershipName={profile.dealershipName}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
