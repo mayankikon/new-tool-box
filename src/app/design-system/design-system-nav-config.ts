@@ -1,7 +1,7 @@
 /**
  * Design system left nav structure. Must stay in sync with:
- * - docs/design-system-audit.md § 1.5 Left nav structure
- * - Section id attributes in src/app/design-system/page.tsx
+ * - docs/design-system-audit.md § 1.5 Left nav structure (foundations include Maps)
+ * - Section id attributes on foundation organisms (e.g. `id="imagery"`)
  */
 
 export interface NavItem {
@@ -18,9 +18,11 @@ export interface DesignSystemNavConfig {
 export const designSystemNavConfig: DesignSystemNavConfig = {
   foundations: [
     { slug: "colors", label: "Colors" },
+    { slug: "maps", label: "Maps" },
     { slug: "typography", label: "Typography" },
     { slug: "spacing", label: "Spacing and Layout" },
     { slug: "shadows-elevations", label: "Shadows & Elevations" },
+    { slug: "imagery", label: "Imagery" },
   ],
   components: [
     { slug: "button", label: "Button" },

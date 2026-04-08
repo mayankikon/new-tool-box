@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@cesium/engine", "@cesium/widgets", "cesium"],
   turbopack: {
     root: path.resolve(__dirname),
   },

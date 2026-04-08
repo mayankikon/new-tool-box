@@ -7,14 +7,13 @@ import { Filter, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const filterButtonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius-sm,6px)] border font-medium transition-all outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius-sm,6px)] border-0 font-medium transition-all outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       selected: {
-        false:
-          "border-dashed border-border bg-background text-muted-foreground hover:bg-muted/50 hover:border-border",
+        false: "bg-background text-muted-foreground hover:bg-muted/50",
         true:
-          "border-solid border-border bg-background text-muted-foreground shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:bg-muted/50 focus-visible:border-border",
+          "bg-background text-muted-foreground shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:bg-muted/50",
       },
       size: {
         xs: "px-1.5 py-1 text-xs leading-4 gap-1",

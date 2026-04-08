@@ -4,7 +4,8 @@ import * as React from "react"
 import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button, type buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button-variants"
 import type { VariantProps } from "class-variance-authority"
 import {
   DropdownMenu,
