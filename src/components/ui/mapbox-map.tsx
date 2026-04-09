@@ -92,16 +92,25 @@ export function MapboxMap({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const lastAppliedStyleRef = useRef<MapboxStyleInput | null>(null);
   const stylePropRef = useRef(style);
-  stylePropRef.current = style;
   const onMapReadyRef = useRef(onMapReady);
-  onMapReadyRef.current = onMapReady;
   const onBeforeStyleChangeRef = useRef(onBeforeStyleChange);
-  onBeforeStyleChangeRef.current = onBeforeStyleChange;
   const [isLoaded, setIsLoaded] = useState(false);
   const [cameraState, setCameraState] = useState<CameraState>({
     zoom,
     bearing: 0,
   });
+
+  useEffect(() => {
+    stylePropRef.current = style;
+  }, [style]);
+
+  useEffect(() => {
+    onMapReadyRef.current = onMapReady;
+  }, [onMapReady]);
+
+  useEffect(() => {
+    onBeforeStyleChangeRef.current = onBeforeStyleChange;
+  }, [onBeforeStyleChange]);
 
   const syncCameraState = useCallback((map: mapboxgl.Map) => {
     setCameraState({

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Pentagon, Trash2 } from "lucide-react";
+import { ChevronRight, Pentagon, Trash2 } from "lucide-react";
 import { useCallback, useId } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -64,20 +64,7 @@ export function GoogleMapsGeofencePanel({
       )}
     >
       <div className="pointer-events-auto flex min-h-0 flex-1 flex-col items-stretch">
-        {!expanded ? (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="absolute right-0 top-0 z-10 h-10 w-10 shrink-0 rounded-l-md rounded-r-none border border-border px-0 shadow-md"
-            aria-expanded={false}
-            aria-controls={headingId}
-            onClick={() => onExpandedChange(true)}
-          >
-            <ChevronLeft className="size-4" aria-hidden />
-            <span className="sr-only">Expand geofence panel</span>
-          </Button>
-        ) : (
+        {expanded ? (
           <div
             id={headingId}
             className="flex h-full min-h-0 flex-col rounded-l-md border border-border bg-card/95 shadow-lg backdrop-blur-md dark:bg-card/90"
@@ -186,7 +173,7 @@ export function GoogleMapsGeofencePanel({
               ) : null}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

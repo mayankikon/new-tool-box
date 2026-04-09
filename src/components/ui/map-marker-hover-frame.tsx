@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface MapMarkerHoverFrameProps {
@@ -12,6 +13,12 @@ interface MapMarkerHoverFrameProps {
   backdropOffsetX?: number;
   backdropOffsetY?: number;
   contentClassName?: string;
+  hoverScale?: number;
+  hoverLiftPx?: number;
+  hoverOverlayIntensity?: number;
+  hoverBackgroundAlpha?: number;
+  hoverShadowIntensity?: number;
+  shadowIntensity?: number;
 }
 
 function applyAlpha(color: string, alpha: number) {
@@ -45,31 +52,58 @@ export function MapMarkerHoverFrame({
   backdropOffsetX = 0,
   backdropOffsetY = 0,
   contentClassName,
+  hoverScale = 1.05,
+  hoverLiftPx = 0,
+  hoverOverlayIntensity = 5,
+  hoverBackgroundAlpha = 0.2,
+  hoverShadowIntensity = 3,
+  shadowIntensity = 0,
 }: MapMarkerHoverFrameProps) {
+  const [hovered, setHovered] = useState(false);
+  const overlayOpacity = useMemo(
+    () => (hovered ? Math.max(0, Math.min(1, hoverBackgroundAlpha * (hoverOverlayIntensity / 10))) : 0),
+    [hoverBackgroundAlpha, hoverOverlayIntensity, hovered],
+  );
+  const baseShadowOpacity = Math.max(0, Math.min(1, shadowIntensity / 10));
+  const hoverShadowOpacity = Math.max(0, Math.min(1, hoverShadowIntensity / 10));
+  const baseFilter = baseShadowOpacity > 0 ? `drop-shadow(0 10px 16px rgba(15,23,32,${baseShadowOpacity * 0.55}))` : undefined;
+  const hoverFilter = hovered
+    ? `drop-shadow(0 16px 24px rgba(15,23,32,${hoverShadowOpacity * 0.55}))`
+    : baseFilter;
+
   return (
     <div
       className={cn(
         "group relative inline-flex items-center justify-center p-[2px]",
         className
       )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-150 ease-out"
+        style={{ opacity: overlayOpacity }}
       >
         <div
           className={backdropClassName}
           style={{
             transform: `translate(${backdropOffsetX}px, ${backdropOffsetY}px)`,
             ...backdropStyle,
-            backgroundColor: applyAlpha(backdropColor, 0.2),
+            backgroundColor: applyAlpha(backdropColor, hoverBackgroundAlpha),
           }}
         />
       </div>
       <div
         className={cn(
-          "relative z-10 inline-flex items-center justify-center origin-center transition-transform duration-150 ease-out will-change-transform group-hover:scale-[1.05] group-hover:drop-shadow-[0_16px_24px_rgba(15,23,32,0.28)]",
+          "relative z-10 inline-flex items-center justify-center origin-center transition-all duration-150 ease-out will-change-transform",
           contentClassName
         )}
+        style={{
+          transform: hovered
+            ? `translateY(-${Math.max(0, hoverLiftPx)}px) scale(${Math.max(0.1, hoverScale)})`
+            : "translateY(0px) scale(1)",
+          filter: hoverFilter,
+        }}
       >
         {children}
       </div>

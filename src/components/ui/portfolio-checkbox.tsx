@@ -45,10 +45,9 @@ function PortfolioCheckboxControl({
       disabled={disabled}
       className={cn(
         "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none transition-colors",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#1A9375]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-65",
         "data-checked:text-white data-indeterminate:text-white",
-        showFocusRing && "ring-1 ring-[#1A9375]/32 ring-offset-1 ring-offset-background",
         isVisuallyDisabled && "opacity-65",
         className
       )}
@@ -63,7 +62,13 @@ function PortfolioCheckboxControl({
       }
       {...props}
     >
-      <span className="relative size-4 shrink-0 overflow-hidden rounded-[4px]">
+      <span
+        className={cn(
+          "relative size-4 shrink-0 overflow-hidden rounded-[4px]",
+          "group-focus-visible:ring-2 group-focus-visible:ring-[#1A9375]/32 group-focus-visible:ring-offset-1 group-focus-visible:ring-offset-background",
+          showFocusRing && "ring-2 ring-[#1A9375]/32 ring-offset-1 ring-offset-background"
+        )}
+      >
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 rounded-[4px]"

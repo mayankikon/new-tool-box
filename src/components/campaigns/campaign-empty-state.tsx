@@ -4,7 +4,6 @@ import { Target, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
-  EmptyStateIllustration,
   EmptyStateContent,
   EmptyStateTitle,
   EmptyStateDescription,

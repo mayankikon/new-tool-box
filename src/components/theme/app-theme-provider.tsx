@@ -39,7 +39,7 @@ export function AppThemeProvider({
   children: React.ReactNode;
 }) {
   const [theme, setThemeState] = React.useState<AppTheme>(
-    () => readStoredTheme() ?? "dark",
+    () => readStoredTheme() ?? "light",
   );
 
   React.useLayoutEffect(() => {
@@ -62,7 +62,7 @@ export function AppThemeProvider({
       const nextTheme =
         event.newValue === "light" || event.newValue === "dark"
           ? event.newValue
-          : "dark";
+          : "light";
       setThemeState(nextTheme);
       applyThemeToDocument(nextTheme);
     };

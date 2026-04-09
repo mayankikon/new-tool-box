@@ -285,7 +285,7 @@ function CampaignTableView({
       paddingRight: cellPaddingXPx,
       boxSizing: "border-box",
     }),
-    [bodyCellHeightPx, cellPaddingXPx],
+    [],
   );
 
   const slotClass = cn("text-foreground", slotLabelOverrideClass);

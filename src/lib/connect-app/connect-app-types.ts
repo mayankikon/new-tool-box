@@ -90,7 +90,8 @@ export function normalizeConnectAppConfig(
     }
   }
 
-  const { carouselImageUrls: _legacyCarousel, ...rest } = config;
+  const rest = { ...config };
+  delete rest.carouselImageUrls;
 
   return {
     ...rest,

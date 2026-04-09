@@ -268,7 +268,6 @@ export function InventoryVehicleDetailPanel({
   vehicle,
   statusIcons,
   onBack,
-  onShowSimilarVehicles,
 }: InventoryVehicleDetailPanelProps) {
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [sendBrochureOpen, setSendBrochureOpen] = useState(false);

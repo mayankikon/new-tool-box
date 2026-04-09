@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
@@ -77,7 +77,6 @@ import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
 import { useNavVisibility } from "@/lib/nav-visibility/nav-visibility-provider";
 import type { NavVisibilitySectionData } from "@/lib/nav-visibility/nav-visibility-storage";
 import {
-  DEFAULT_WORKSPACE_PATH,
   DEV_CONSOLE_LABEL,
   getDefaultHrefForProduct,
   getWorkspaceHref,
@@ -228,12 +227,6 @@ export function ProductWorkspace() {
   const normalizedPath = normalizeWorkspacePathname(pathname ?? "");
   const resolved = resolveWorkspaceRoute(normalizedPath);
 
-  useEffect(() => {
-    if (resolved == null) {
-      router.replace(DEFAULT_WORKSPACE_PATH);
-    }
-  }, [resolved, router]);
-
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
   const [isRegisteringCustomer, setIsRegisteringCustomer] = useState(false);
   const [inventoryHomeView, setInventoryHomeView] =
@@ -252,96 +245,78 @@ export function ProductWorkspace() {
     MarketingAudienceTabValue | undefined
   >(undefined);
 
-  const handleProductChange = useCallback(
-    (productId: string) => {
-      router.push(getDefaultHrefForProduct(productId));
-      setSelectedCampaignId(null);
-      setIsRegisteringCustomer(false);
-    },
-    [router]
-  );
+  const handleProductChange = (productId: string) => {
+    router.push(getDefaultHrefForProduct(productId));
+    setSelectedCampaignId(null);
+    setIsRegisteringCustomer(false);
+  };
 
-  const handleNavItemClick = useCallback((_label: string) => {
+  const handleNavItemClick = () => {
     setSelectedCampaignId(null);
     setIsCreatingCampaign(false);
     setCampaignWizardInitialData(undefined);
     setIsRegisteringCustomer(false);
     setAudienceInitialTab(undefined);
-  }, []);
+  };
 
-  const handleViewCampaign = useCallback((campaignId: string) => {
+  const handleViewCampaign = (campaignId: string) => {
     setSelectedCampaignId(campaignId);
-  }, []);
+  };
 
-  const handleCampaignBack = useCallback(() => {
+  const handleCampaignBack = () => {
     setSelectedCampaignId(null);
-  }, []);
+  };
 
-  const handleCreateCampaignFromAtlas = useCallback(
-    (draft: {
-      name: string;
-      type: WizardFormData["type"];
-      templateId: string | null;
-      audienceSegments: WizardFormData["audienceSegments"];
-      audienceSize: number;
-      trigger?: WizardFormData["trigger"];
-      suggestedOffer?: Partial<CampaignOffer>;
-      suggestedOffers?: Partial<CampaignOffer>[];
-    }) => {
-      router.push(getWorkspaceHref("marketing", "Campaigns")!);
-      setSelectedCampaignId(null);
-      setCampaignWizardInitialData({
-        name: draft.name,
-        type: draft.type,
-        templateId: draft.templateId,
-        audienceSegments: draft.audienceSegments,
-        audienceSize: draft.audienceSize,
-        trigger: draft.trigger,
-        ...(draft.suggestedOffers?.length
-          ? { atlasSuggestedOffers: draft.suggestedOffers }
-          : draft.suggestedOffer
-            ? { atlasSuggestedOffer: draft.suggestedOffer }
-            : {}),
-      });
-      setIsCreatingCampaign(true);
-    },
-    [router]
-  );
+  const handleCreateCampaignFromAtlas = (draft: {
+    name: string;
+    type: WizardFormData["type"];
+    templateId: string | null;
+    audienceSegments: WizardFormData["audienceSegments"];
+    audienceSize: number;
+    trigger?: WizardFormData["trigger"];
+    suggestedOffer?: Partial<CampaignOffer>;
+    suggestedOffers?: Partial<CampaignOffer>[];
+  }) => {
+    router.push(getWorkspaceHref("marketing", "Campaigns")!);
+    setSelectedCampaignId(null);
+    setCampaignWizardInitialData({
+      name: draft.name,
+      type: draft.type,
+      templateId: draft.templateId,
+      audienceSegments: draft.audienceSegments,
+      audienceSize: draft.audienceSize,
+      trigger: draft.trigger,
+      ...(draft.suggestedOffers?.length
+        ? { atlasSuggestedOffers: draft.suggestedOffers }
+        : draft.suggestedOffer
+          ? { atlasSuggestedOffer: draft.suggestedOffer }
+          : {}),
+    });
+    setIsCreatingCampaign(true);
+  };
 
-  const handleNavigateToAudiences = useCallback(
-    (tab: MarketingAudienceTabValue) => {
-      setAudienceInitialTab(tab);
-      router.push(getWorkspaceHref("marketing", "Audiences")!);
-    },
-    [router]
-  );
+  const handleNavigateToAudiences = (tab: MarketingAudienceTabValue) => {
+    setAudienceInitialTab(tab);
+    router.push(getWorkspaceHref("marketing", "Audiences")!);
+  };
 
-  const handleCreateCampaignFromMonitor = useCallback(
-    (suggestion: CampaignRecommendation) => {
-      router.push(getWorkspaceHref("marketing", "Campaigns")!);
-      setSelectedCampaignId(null);
-      setCampaignWizardInitialData({
-        name: suggestion.title,
-        type: "service-reminder",
-        templateId: suggestion.templateId ?? null,
-        audienceSegments: [],
-        audienceSize: suggestion.estimatedReach,
-      });
-      setIsCreatingCampaign(true);
-    },
-    [router]
-  );
+  const handleCreateCampaignFromMonitor = (
+    suggestion: CampaignRecommendation,
+  ) => {
+    router.push(getWorkspaceHref("marketing", "Campaigns")!);
+    setSelectedCampaignId(null);
+    setCampaignWizardInitialData({
+      name: suggestion.title,
+      type: "service-reminder",
+      templateId: suggestion.templateId ?? null,
+      audienceSegments: [],
+      audienceSize: suggestion.estimatedReach,
+    });
+    setIsCreatingCampaign(true);
+  };
 
-  if (resolved == null) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background font-sans">
-        <span className="text-sm text-muted-foreground">Loading…</span>
-      </div>
-    );
-  }
-
-  const activeProduct = resolved.productId;
-  const activeItem = resolved.itemLabel;
+  const activeProduct = resolved?.productId ?? "marketing";
+  const activeItem = resolved?.itemLabel ?? "Campaigns";
 
   const isInventory = activeProduct === "inventory";
   const mainItems = isInventory ? inventoryMainItems : marketingMainItems;

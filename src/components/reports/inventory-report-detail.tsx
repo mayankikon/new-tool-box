@@ -2,31 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "@/components/theme/app-theme-provider";
-import { LocateFixed, Search } from "lucide-react";
 
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
 import { TitleBar } from "@/components/app/title-bar";
 import { DesignSystemTableShellNoTabs } from "@/components/chrome/design-system-table-shell-no-tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Input,
-  InputContainer,
-  InputGroup,
-  InputIcon,
-  InputLabel,
-} from "@/components/ui/input";
 import { Paginator } from "@/components/ui/paginator";
 import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 import type { InventoryReportId } from "@/lib/inventory/report-catalog";
@@ -99,8 +80,7 @@ export function InventoryReportDetail({
     () => config.deckTabs?.[0]?.value ?? "",
   );
 
-  const [locationVinQuery, setLocationVinQuery] = useState("");
-  const [locationVinSubmitted, setLocationVinSubmitted] = useState("");
+  const [locationVinSubmitted] = useState("");
   const [locationVinModalOpen, setLocationVinModalOpen] = useState(
     () => reportId === "location-history",
   );
@@ -185,16 +165,6 @@ export function InventoryReportDetail({
     },
     [resetPage],
   );
-
-  const handleSearchLocationHistory = useCallback(() => {
-    const trimmed = locationVinQuery.trim();
-    if (!trimmed) {
-      return;
-    }
-    setLocationVinSubmitted(trimmed);
-    setLocationVinModalOpen(false);
-    setCurrentPage(1);
-  }, [locationVinQuery]);
 
   const handleOpenLocationVinModal = useCallback(() => {
     setLocationVinModalOpen(true);

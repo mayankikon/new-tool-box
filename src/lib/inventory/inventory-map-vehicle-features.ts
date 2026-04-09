@@ -117,6 +117,7 @@ export function randomPointInPolygonRing(
 
 export interface InventoryVehicleMapFeatureProperties {
   vin: string;
+  stockNumber: string;
   lotAgeDays: number;
   ageTier: InventoryLotAgeTier;
   title: string;
@@ -159,6 +160,7 @@ export function buildInventoryVehicleFeatureCollection(
       },
       properties: {
         vin: v.vin,
+        stockNumber: v.stockNumber,
         lotAgeDays,
         ageTier,
         title: v.title,

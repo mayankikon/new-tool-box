@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { MiniCouponStrip } from "@/components/branding/mini-coupon-strip-preview";
 import { useBrandProfile } from "@/lib/branding/brand-profile-provider";
 import { DEFAULT_DEALERSHIP_LOGO_SRC } from "@/lib/branding/brand-profile-types";
@@ -319,6 +319,8 @@ export function ConnectAppEditor({
   }, [config.promotionRefs]);
 
   const galleryUrls = useMemo(() => {
+    // Recompute URLs when media library storage changes.
+    void mediaLibraryEpoch;
     return config.galleryMediaIds
       .map((id) => getMediaAssetById(id)?.url)
       .filter((u): u is string => Boolean(u));

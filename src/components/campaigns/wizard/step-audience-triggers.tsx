@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Plus,
   Trash2,
@@ -409,9 +410,12 @@ export function StepAudienceTriggers({
                     >
                       <span className="flex items-center gap-2 truncate">
                         {segment.value && OEM_LOGO_BY_MAKE[segment.value] && (
-                          <img
+                          <Image
                             src={OEM_LOGO_BY_MAKE[segment.value]}
                             alt={segment.value}
+                            width={16}
+                            height={16}
+                            unoptimized
                             className="size-4 shrink-0 object-contain"
                           />
                         )}
@@ -434,9 +438,12 @@ export function StepAudienceTriggers({
                     >
                       <span className="flex items-center gap-2 truncate">
                         {selectedModelData?.imageUrl && (
-                          <img
+                          <Image
                             src={selectedModelData.imageUrl}
                             alt={selectedModelData.model}
+                            width={32}
+                            height={16}
+                            unoptimized
                             className="h-4 w-8 shrink-0 object-contain"
                           />
                         )}
@@ -522,9 +529,12 @@ export function StepAudienceTriggers({
                         )}
                       >
                         {OEM_LOGO_BY_MAKE[make] ? (
-                          <img
+                          <Image
                             src={OEM_LOGO_BY_MAKE[make]}
                             alt={make}
+                            width={80}
+                            height={40}
+                            unoptimized
                             className="h-10 w-auto object-contain"
                           />
                         ) : (
@@ -572,11 +582,12 @@ export function StepAudienceTriggers({
                         )}
                       >
                         {vm.imageUrl ? (
-                          <img
+                          <Image
                             src={vm.imageUrl}
                             alt={vm.model}
                             width={160}
                             height={80}
+                            unoptimized
                             className="h-16 w-full rounded object-contain"
                           />
                         ) : (

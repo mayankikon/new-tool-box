@@ -54,18 +54,19 @@ export function ImageUpload({
   const imagesRef = useRef(images);
   const isMaxReached = images.length >= maxImages;
 
-  imagesRef.current = images;
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
 
   useEffect(() => {
-    const current = imagesRef.current;
     return () => {
-      current.forEach((img) => {
+      imagesRef.current.forEach((img) => {
         if (img.url.startsWith("blob:")) URL.revokeObjectURL(img.url);
         if (img.gifPreviewUrl?.startsWith("blob:"))
           URL.revokeObjectURL(img.gifPreviewUrl);
       });
     };
-  }, [images]);
+  }, []);
 
   const processFiles = useCallback(
     (fileList: FileList) => {

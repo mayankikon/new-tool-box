@@ -170,13 +170,23 @@ export function MarketingMonitorPage({
   const [mapOverlayEpoch, setMapOverlayEpoch] = useState(0);
   const [showActivityHeatmap, setShowActivityHeatmap] = useState(false);
   const showActivityHeatmapRef = useRef(false);
-  showActivityHeatmapRef.current = showActivityHeatmap;
+  const basemapRef = useRef(basemap);
 
-  listHoveredCompetitorIdRef.current = listHoveredCompetitorId;
+  useEffect(() => {
+    showActivityHeatmapRef.current = showActivityHeatmap;
+  }, [showActivityHeatmap]);
 
-  mapHoverReportRef.current = (id: string | null) => {
-    setMapHoveredFeatureId(id);
-  };
+  useEffect(() => {
+    listHoveredCompetitorIdRef.current = listHoveredCompetitorId;
+  }, [listHoveredCompetitorId]);
+
+  useEffect(() => {
+    mapHoverReportRef.current = setMapHoveredFeatureId;
+  }, []);
+
+  useEffect(() => {
+    basemapRef.current = basemap;
+  }, [basemap]);
 
   const highlightFeatureId =
     listHoveredCompetitorId ?? mapHoveredFeatureId;
@@ -247,9 +257,6 @@ export function MarketingMonitorPage({
       removeListAnchorPopup();
     };
   }, [listHoveredCompetitorId, mapOverlayEpoch, basemap]);
-
-  const basemapRef = useRef(basemap);
-  basemapRef.current = basemap;
 
   const onMapReady = useCallback((map: mapboxgl.Map) => {
     overlayCleanupRef.current?.();

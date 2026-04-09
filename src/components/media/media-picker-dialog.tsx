@@ -59,6 +59,7 @@ export function MediaPickerDialog({
   }, [open]);
 
   const assets = useMemo(() => {
+    void libraryEpoch;
     const list = listMediaAssets({
       kind: kindFilter,
     });
@@ -66,7 +67,7 @@ export function MediaPickerDialog({
       return list.filter((a) => a.category === categoryFilter);
     }
     return list;
-  }, [kindFilter, categoryFilter, open, libraryEpoch]);
+  }, [kindFilter, categoryFilter, libraryEpoch]);
 
   const firstSelectedAsset = useMemo(() => {
     const id = Array.from(selected)[0];
@@ -74,7 +75,7 @@ export function MediaPickerDialog({
     return (
       getMediaAssetById(id) ?? pendingAssetByIdRef.current.get(id) ?? null
     );
-  }, [selected, libraryEpoch, assets]);
+  }, [selected]);
 
   const uploadAccept = useMemo(() => {
     if (kindFilter === "video") return "video/*";

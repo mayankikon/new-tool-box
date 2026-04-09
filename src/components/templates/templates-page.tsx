@@ -4,19 +4,9 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  BadgePercent,
-  CalendarClock,
-  CarFront,
   ChevronDown,
-  Handshake,
-  MessageSquareText,
-  RefreshCw,
   Search,
-  ShieldCheck,
-  Sparkles,
-  Star,
   WandSparkles,
-  Wrench,
 } from "lucide-react";
 
 import {
@@ -240,7 +230,7 @@ function TemplateDetailPage({
   const [isTriggerEditorOpen, setIsTriggerEditorOpen] = useState(false);
   const campaignsUsing = useMemo(
     () => (template ? listCampaignsUsingLibraryTemplate(template.id) : []),
-    [template?.id],
+    [template],
   );
 
   if (!template) {

@@ -91,7 +91,7 @@ function ProgressBarLabel({
     <span
       data-slot="progress-bar-label"
       className={cn(
-        "text-sm font-medium leading-5 text-[var(--theme-text-primary,#111115)]",
+        "text-sm font-medium leading-5 capitalize text-[var(--theme-text-primary,#111115)]",
         className
       )}
       {...props}

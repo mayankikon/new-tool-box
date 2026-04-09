@@ -4,7 +4,6 @@ import type { CampaignWorkflow } from "./types";
 import {
   layoutWorkflowNodes,
   mergeWorkflowLayout,
-  WORKFLOW_LAYOUT_NODE_HEIGHT,
   WORKFLOW_LAYOUT_NODE_WIDTH,
 } from "./workflow-layout";
 

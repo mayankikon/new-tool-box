@@ -913,7 +913,7 @@ export function TableShowcase() {
       }
       return base;
     },
-    [headerBorderResolved, headerCellHeightPx, headerFillResolved, tabTopRadiusPx],
+    [headerBorderResolved, headerFillResolved],
   );
 
   const headerThStyleTelemetry = React.useCallback(
@@ -950,9 +950,7 @@ export function TableShowcase() {
     },
     [
       headerBorderResolvedTelemetry,
-      headerCellHeightPx,
       headerFillResolvedTelemetry,
-      tabTopRadiusPx,
     ],
   );
 
@@ -990,9 +988,7 @@ export function TableShowcase() {
     },
     [
       headerBorderResolvedPresetLed,
-      headerCellHeightPx,
       headerFillResolvedPresetLed,
-      tabTopRadiusPx,
     ],
   );
 

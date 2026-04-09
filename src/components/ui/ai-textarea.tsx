@@ -77,7 +77,7 @@ function AiTextArea({
  * Figma: pt=10px, px=12px, pb varies (6px gap to toolbar, or 12px if standalone).
  * -------------------------------------------------------------------------*/
 
-interface AiTextAreaInputProps extends React.ComponentProps<"textarea"> {}
+type AiTextAreaInputProps = React.ComponentProps<"textarea">
 
 function AiTextAreaInput({ className, ...props }: AiTextAreaInputProps) {
   return (
