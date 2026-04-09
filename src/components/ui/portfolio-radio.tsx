@@ -80,10 +80,9 @@ function PortfolioRadioButton({
       disabled={disabled}
       className={cn(
         "group peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none transition-colors",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#1A9375]/32 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-65",
         "data-disabled:[&_[data-slot=portfolio-radio-inner-dot]]:bg-[color:var(--portfolio-radio-disabled)]",
-        showFocusRing && "ring-1 ring-[#1A9375]/32 ring-offset-1 ring-offset-background",
         isVisuallyDisabled && "opacity-65",
         className
       )}
@@ -105,7 +104,13 @@ function PortfolioRadioButton({
       }
       {...props}
     >
-      <span className="relative size-4 shrink-0 overflow-hidden rounded-full">
+      <span
+        className={cn(
+          "relative size-4 shrink-0 overflow-hidden rounded-full",
+          "group-focus-visible:ring-2 group-focus-visible:ring-[#1A9375]/32 group-focus-visible:ring-offset-1 group-focus-visible:ring-offset-background",
+          showFocusRing && "ring-2 ring-[#1A9375]/32 ring-offset-1 ring-offset-background"
+        )}
+      >
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 rounded-full"

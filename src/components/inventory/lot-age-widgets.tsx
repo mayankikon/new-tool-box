@@ -10,10 +10,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import { curveMonotoneX, stack } from "d3-shape";
-import { Group } from "@visx/group";
-import { AreaClosed } from "@visx/shape";
-import { scaleLinear, scaleBand } from "@visx/scale";
+import { area, curveMonotoneX, stack } from "d3-shape";
+import { scaleBand, scaleLinear, type ScaleBand } from "d3-scale";
 import { AlertTriangle, BarChart3, LayoutGrid, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
@@ -92,7 +90,7 @@ function svgPointerToChartX(
   return ratio * chartWidth;
 }
 
-function nearestSeriesIndex(innerX: number, labels: string[], xScale: ReturnType<typeof scaleBand<string>>): number {
+function nearestSeriesIndex(innerX: number, labels: string[], xScale: ScaleBand<string>): number {
   let best = 0;
   let bestDist = Infinity;
   labels.forEach((label, i) => {
@@ -109,7 +107,7 @@ function nearestSeriesIndex(innerX: number, labels: string[], xScale: ReturnType
 function findHistogramBinAtInnerX(
   innerX: number,
   bins: VehicleAgeHistogramBin[],
-  xScale: ReturnType<typeof scaleBand<string>>
+  xScale: ScaleBand<string>
 ): VehicleAgeHistogramBin | null {
   for (const bin of bins) {
     const key = `${bin.daysStart}-${bin.daysEnd}`;
@@ -196,17 +194,15 @@ function LotAgeStackedAreaChart({
 
     const maxY = Math.max(...series.map((d) => d.fresh + d.moderate + d.aged), 1);
 
-    const xScaleInner = scaleBand<string>({
-      domain: series.map((d) => d.label),
-      range: [0, innerWidth],
-      paddingInner: 0.15,
-    });
+    const xScaleInner = scaleBand<string>()
+      .domain(series.map((d) => d.label))
+      .range([0, innerWidth])
+      .paddingInner(0.15);
 
-    const yScaleInner = scaleLinear<number>({
-      domain: [0, maxY],
-      range: [innerH, 0],
-      nice: true,
-    });
+    const yScaleInner = scaleLinear()
+      .domain([0, maxY])
+      .range([innerH, 0])
+      .nice();
 
     return {
       stackedSeries: stacked,
@@ -300,7 +296,7 @@ function LotAgeStackedAreaChart({
             <stop offset="100%" stopColor={lotAgeTierColors.aged} stopOpacity={0.3} />
           </linearGradient>
         </defs>
-        <Group left={margin.left} top={margin.top}>
+        <g transform={`translate(${margin.left}, ${margin.top})`}>
           {yTicks.map((tick) => {
             const y = yScale(tick) ?? 0;
             return (
@@ -324,15 +320,15 @@ function LotAgeStackedAreaChart({
                 : key === "moderate"
                   ? `url(#${moderateGrad})`
                   : `url(#${agedGrad})`;
+            const layerArea = area<(typeof layer)[number]>()
+              .curve(curveMonotoneX)
+              .x((d) => (xScale(d.data.label) ?? 0) + xScale.bandwidth() / 2)
+              .y0((d) => yScale(d[0]) ?? 0)
+              .y1((d) => yScale(d[1]) ?? 0);
             return (
-              <AreaClosed
+              <path
                 key={key}
-                data={layer}
-                curve={curveMonotoneX}
-                x={(d) => (xScale(d.data.label) ?? 0) + xScale.bandwidth() / 2}
-                y0={(d) => yScale(d[0])}
-                y1={(d) => yScale(d[1])}
-                yScale={yScale}
+                d={layerArea(layer) ?? undefined}
                 fill={fillId}
               />
             );
@@ -354,7 +350,7 @@ function LotAgeStackedAreaChart({
               />
             );
           })}
-        </Group>
+        </g>
       </svg>
     </div>
   );
@@ -630,22 +626,20 @@ export function VehicleAgeDistributionCard({
     const innerH = height - margin.top - margin.bottom;
 
     const domain = data.bins.map((b) => `${b.daysStart}-${b.daysEnd}`);
-    const xScaleInner = scaleBand<string>({
-      domain,
-      range: [0, innerWidth],
-      paddingInner: 0.2,
-    });
+    const xScaleInner = scaleBand<string>()
+      .domain(domain)
+      .range([0, innerWidth])
+      .paddingInner(0.2);
 
     const maxC = Math.max(
       ...data.bins.map((b) => Math.max(b.count, b.baselineCap ?? 0)),
       1
     );
 
-    const yScaleInner = scaleLinear<number>({
-      domain: [0, maxC],
-      range: [innerH, 0],
-      nice: true,
-    });
+    const yScaleInner = scaleLinear()
+      .domain([0, maxC])
+      .range([innerH, 0])
+      .nice();
 
     const parts = data.tierStats.map((s) => `${s.label} ${s.percentLabel}`).join(", ");
     const ariaSummaryInner = `Vehicle age histogram by days on lot. Tier mix: ${parts}. ${data.nextWindowVehicleCount} vehicles ${data.nextWindowMessage} in the next ${data.nextDaysWindow} days.`;
@@ -744,7 +738,7 @@ export function VehicleAgeDistributionCard({
               onPointerLeave={clearHistTooltip}
               onPointerDown={handleHistPointer}
             >
-              <Group left={margin.left} top={margin.top}>
+              <g transform={`translate(${margin.left}, ${margin.top})`}>
                 {data.bins.map((bin) => {
                   const key = `${bin.daysStart}-${bin.daysEnd}`;
                   const x = xScale(key) ?? 0;
@@ -754,7 +748,7 @@ export function VehicleAgeDistributionCard({
                   const hFore = innerHeight - (yScale(bin.count) ?? innerHeight);
                   const fill = histogramFill(bin.daysStart, bin.daysEnd);
                   return (
-                    <Group key={key}>
+                    <g key={key}>
                       {bin.baselineCap != null ? (
                         <rect
                           x={x}
@@ -775,10 +769,10 @@ export function VehicleAgeDistributionCard({
                         fill={fill}
                         opacity={0.92}
                       />
-                    </Group>
+                    </g>
                   );
                 })}
-              </Group>
+              </g>
               <text
                 x={chartWidth / 2}
                 y={HIST_CHART.height - 6}

@@ -16,9 +16,8 @@ const pageItemVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "flex items-center justify-center rounded-sm text-sm font-medium min-h-8 min-w-8 w-8",
-        dot: "rounded-full size-2.5",
+        default: "flex items-center justify-center rounded-sm font-medium text-xs min-h-7 min-w-7 w-7",
+        dot: "rounded-full size-2",
       },
       state: {
         default: "",
@@ -113,7 +112,7 @@ function PageItem({
 /* ------------------------------------------------------------------ */
 
 const navButtonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-sm min-h-8 min-w-8 transition-colors",
+  "inline-flex shrink-0 items-center justify-center rounded-sm min-h-7 min-w-7 transition-colors",
   {
     variants: {
       disabled: {
@@ -145,9 +144,9 @@ function NavButton({
       {...props}
     >
       {direction === "prev" ? (
-        <ChevronLeft className="size-5" />
+        <ChevronLeft className="size-4" />
       ) : (
-        <ChevronRight className="size-5" />
+        <ChevronRight className="size-4" />
       )}
     </button>
   )
@@ -233,12 +232,19 @@ function Paginator({
     if (!isLastPage) onPageChange?.(currentPage + 1)
   }
 
+  const inlineTextClass = "text-[11px]"
+  const simpleTextClass = "text-xs"
+  const simpleButtonClass = "px-2 py-1 text-xs"
+  const trackGapClass = "gap-2"
+  const numberGapClass = "gap-1"
+  const dotGapClass = "gap-1.5"
+
   if (variant === "inline") {
     const total = totalItems ?? 0
-    const size = pageSize ?? 0
+    const pageWindowSize = pageSize ?? 0
     const itemEnd =
-      total === 0 ? 0 : Math.min(currentPage * size, total)
-    const itemStart = total === 0 ? 0 : (currentPage - 1) * size + 1
+      total === 0 ? 0 : Math.min(currentPage * pageWindowSize, total)
+    const itemStart = total === 0 ? 0 : (currentPage - 1) * pageWindowSize + 1
     const hasRange = totalItems != null && pageSize != null
 
     /**
@@ -261,11 +267,11 @@ function Paginator({
       >
         <div className="flex min-h-0 min-w-0 shrink items-center justify-center">
           {hasRange ? (
-            <span className="whitespace-nowrap text-xs font-medium tabular-nums text-muted-foreground">
+            <span className={cn("whitespace-nowrap font-medium tabular-nums text-muted-foreground", inlineTextClass)}>
               {itemStart}–{itemEnd} of {total} results
             </span>
           ) : (
-            <span className="text-xs font-medium tabular-nums text-muted-foreground">
+            <span className={cn("font-medium tabular-nums text-muted-foreground", inlineTextClass)}>
               Page {currentPage} of {totalPages}
             </span>
           )}
@@ -280,11 +286,11 @@ function Paginator({
             onClick={handlePrev}
             aria-label="Previous page"
             className={cn(
-              "aspect-square !size-9 shrink-0 !gap-0 !rounded-sm !p-0",
+              "aspect-square !size-7 shrink-0 !gap-0 !rounded-sm !p-0",
               inlineIconNavBtnClass,
             )}
           >
-            <ChevronLeft className="size-5 shrink-0" aria-hidden />
+            <ChevronLeft className="size-4 shrink-0" aria-hidden />
           </Button>
           <Button
             type="button"
@@ -294,11 +300,11 @@ function Paginator({
             onClick={handleNext}
             aria-label="Next page"
             className={cn(
-              "aspect-square !size-9 shrink-0 !gap-0 !rounded-sm !p-0",
+              "aspect-square !size-7 shrink-0 !gap-0 !rounded-sm !p-0",
               inlineIconNavBtnClass,
             )}
           >
-            <ChevronRight className="size-5 shrink-0" aria-hidden />
+            <ChevronRight className="size-4 shrink-0" aria-hidden />
           </Button>
         </div>
       </nav>
@@ -317,11 +323,11 @@ function Paginator({
         {...props}
       >
         {displayedCount ? (
-          <span className="text-sm text-muted-foreground">
+          <span className={cn("text-muted-foreground", simpleTextClass)}>
             {itemStart}–{itemEnd} of {totalItems} results
           </span>
         ) : (
-          <span className="text-sm text-muted-foreground">
+          <span className={cn("text-muted-foreground", simpleTextClass)}>
             Page {currentPage} of {totalPages}
           </span>
         )}
@@ -330,7 +336,8 @@ function Paginator({
             disabled={isFirstPage}
             onClick={handlePrev}
             className={cn(
-              "inline-flex items-center justify-center rounded-sm px-2.5 py-1.5 text-sm font-medium transition-colors",
+              "inline-flex items-center justify-center rounded-sm font-medium transition-colors",
+              simpleButtonClass,
               isFirstPage
                 ? "bg-foreground/8 text-foreground/30 cursor-default"
                 : "bg-foreground/6 text-muted-foreground hover:bg-foreground/10 cursor-pointer"
@@ -342,7 +349,8 @@ function Paginator({
             disabled={isLastPage}
             onClick={handleNext}
             className={cn(
-              "inline-flex items-center justify-center rounded-sm px-2.5 py-1.5 text-sm font-medium transition-colors",
+              "inline-flex items-center justify-center rounded-sm font-medium transition-colors",
+              simpleButtonClass,
               isLastPage
                 ? "bg-foreground/8 text-foreground/30 cursor-default"
                 : "bg-foreground/6 text-muted-foreground hover:bg-foreground/10 cursor-pointer"
@@ -361,7 +369,7 @@ function Paginator({
       <nav
         data-slot="paginator"
         aria-label="Pagination"
-        className={cn("flex items-center gap-3", className)}
+        className={cn("flex items-center", trackGapClass, className)}
         {...props}
       >
         <NavButton
@@ -370,7 +378,7 @@ function Paginator({
           onClick={handlePrev}
           aria-label="Previous page"
         />
-        <div className="flex items-center gap-1">
+        <div className={cn("flex items-center", numberGapClass)}>
           {pages.map((page, idx) =>
             page === "ellipsis" ? (
               <PageItem
@@ -405,7 +413,7 @@ function Paginator({
     <nav
       data-slot="paginator"
       aria-label="Pagination"
-      className={cn("flex items-center gap-3", className)}
+      className={cn("flex items-center", trackGapClass, className)}
       {...props}
     >
       <NavButton
@@ -414,7 +422,7 @@ function Paginator({
         onClick={handlePrev}
         aria-label="Previous page"
       />
-      <div className="flex items-center gap-2">
+      <div className={cn("flex items-center", dotGapClass)}>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <PageItem
             key={page}

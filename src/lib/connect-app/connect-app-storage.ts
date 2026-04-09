@@ -30,7 +30,8 @@ export function loadConnectAppConfig(): ConnectAppConfig {
     const parsed = JSON.parse(raw) as Partial<ConnectAppConfigPersisted> & {
       useBrandProfileTheme?: boolean;
     };
-    const { useBrandProfileTheme: _legacyUseBrandTheme, ...rest } = parsed;
+    const rest = { ...parsed };
+    delete rest.useBrandProfileTheme;
     const base = { ...createDefaultConnectAppConfig(), ...rest };
     const merged = normalizeConnectAppConfig(base);
     const normalizedHeroChanged =

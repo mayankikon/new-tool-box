@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { SectionTitle } from "../atoms/SectionTitle";
 
 export interface DesignSystemPlaceholderSectionProps {
@@ -24,9 +26,9 @@ export function DesignSystemPlaceholderSection({
         description={
           <>
             Live showcase not wired in this build. Try{" "}
-            <a href="/design-playground" className="text-primary underline-offset-2 hover:underline">
+            <Link href="/design-playground" className="text-primary underline-offset-2 hover:underline">
               Design playground
-            </a>{" "}
+            </Link>{" "}
             for experimental variants, or see{" "}
             <code className="rounded bg-muted px-1.5 py-0.5 text-sm">docs/design-system-audit.md</code>.
           </>

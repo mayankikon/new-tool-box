@@ -3,7 +3,6 @@ import type {
   CouponAccentPreset,
   CouponBadgeKind,
   CouponConditionRule,
-  CouponCornerStyle,
   CouponRules,
   CouponTemplateId,
   CouponVisualSpec,

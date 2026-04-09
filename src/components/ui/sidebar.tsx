@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   BookUser,
   Home,
@@ -236,14 +237,17 @@ function SidebarUserBar({
         style={{ minHeight: 52, backgroundColor: "var(--theme-background-account-selector)" }}
       >
         <div
-          className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-sm)] bg-muted text-muted-foreground"
+          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-sm)] bg-muted text-muted-foreground"
           style={{ fontSize: "var(--text-sm)" }}
           aria-hidden
         >
           {user.logoSrc ? (
-            <img
+            <Image
               src={user.logoSrc}
               alt=""
+              fill
+              sizes="40px"
+              unoptimized
               className="size-full object-contain"
             />
           ) : (
@@ -418,9 +422,12 @@ function SidebarNavStaticIcon({ src }: { src: string }) {
     return <BoundaryIcon className="size-[18px]" />;
   }
   return (
-    <img
+    <Image
       src={src}
       alt=""
+      width={18}
+      height={18}
+      unoptimized
       className="size-[18px] shrink-0 object-contain opacity-90"
       aria-hidden
     />

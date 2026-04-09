@@ -436,7 +436,9 @@ export function FileCabinetTableChrome({
   const [layout, setLayout] = React.useState<ChromeLayout>(ZERO_LAYOUT);
   const [exitStroke, setExitStroke] = React.useState<ExitStrokeLayer | null>(null);
 
-  layoutRef.current = layout;
+  React.useEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
 
   const chromeDebugEnabled = isFileCabinetChromeDebugEnabled();
 

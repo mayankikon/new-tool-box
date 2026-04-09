@@ -44,7 +44,7 @@ function LocationIconSvg({ className, variant: _unusedVariant }: StatusIconProps
   );
 }
 
-function KeyIconSvg({ variant = "inactive", className }: StatusIconProps) {
+function KeyIconSvg({ className }: StatusIconProps) {
   const clipPathId = React.useId().replace(/:/g, "");
 
   return (

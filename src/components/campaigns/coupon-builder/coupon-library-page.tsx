@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowLeft, Copy, Pencil, Plus, TicketPercent, Trash2 } from "lucide-react";
 import { TitleBar } from "@/components/app/title-bar";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,9 @@ function offerWithFallbackLogo(
 export function CouponLibraryPage() {
   const { profile } = useBrandProfile();
   const accountLogoUrl = profile.logoUrl;
-  const [coupons, setCoupons] = useState<CampaignOffer[]>([]);
+  const [coupons, setCoupons] = useState<CampaignOffer[]>(() =>
+    loadCouponLibrary(),
+  );
   const [view, setView] = useState<"list" | "editor">("list");
   const [editorMode, setEditorMode] = useState<"create" | "edit">("create");
   const [editingOffer, setEditingOffer] = useState<CampaignOffer | null>(null);
@@ -53,10 +55,6 @@ export function CouponLibraryPage() {
   const refresh = useCallback(() => {
     setCoupons(loadCouponLibrary());
   }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const handleNew = useCallback(() => {
     setEditorMode("create");

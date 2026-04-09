@@ -3,12 +3,8 @@
 import { Cartographic, Math as CesiumMath } from "@cesium/engine";
 import type { Viewer } from "@cesium/widgets";
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Compass,
   Minus,
+  Pentagon,
   Plus,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -42,17 +38,33 @@ const DEFAULT_SATELLITE_ZOOM = 18;
 const DEFAULT_CAMERA_HEIGHT_M = 280;
 const DEFAULT_HEADING_RAD = CesiumMath.toRadians(25);
 const DEFAULT_PITCH_RAD = CesiumMath.toRadians(-40);
-const TILT_STEP_RAD = CesiumMath.toRadians(5);
-/** Per-click rotation around vertical axis (compass row). */
-const ROTATE_HEADING_STEP_RAD = CesiumMath.toRadians(10);
 const MIN_SURFACE_HEIGHT_M = 45;
 const MAX_SURFACE_HEIGHT_M = 400_000;
+const APPLIED_MAP_TUNING = {
+  camera: {
+    tilt: 40,
+    compassDirection: 279,
+  },
+  geofence: {
+    extrusion: 5.5,
+    strokeShade: "blue" as const,
+    opacity: 5.5,
+  },
+  markers: {
+    vehicleSize: 0.9,
+    keysSize: 0.9,
+    hoverScale: 1.1,
+    hoverOverlayIntensity: 5,
+    hoverLiftHeight: 0,
+    hoverShadowIntensity: 5,
+    pinShadow: 3,
+  },
+} as const;
 
 const EARTH_CIRCUMFERENCE_M = 40_075_016.686;
 
 /** Sample WGS84 pins around the default Grapevine, TX framing — same design-system assets as Components → Map Markers. */
 const PREVIEW_3D_MAP_MARKERS: readonly GoogleMapsPreview3dMarker[] = [
-  { id: "preview-keys", lng: -97.09135, lat: 32.928, heightM: 14, variant: "keys" },
   { id: "preview-teal", lng: -97.09305, lat: 32.92785, heightM: 14, variant: "teal" },
   { id: "preview-gold", lng: -97.09185, lat: 32.92655, heightM: 14, variant: "gold" },
   { id: "preview-teal-2", lng: -97.09075, lat: 32.92745, heightM: 14, variant: "teal" },
@@ -113,14 +125,6 @@ function zoomStepMeters(viewer: Viewer): number {
   return CesiumMath.clamp(h * 0.12, 25, 350);
 }
 
-function normalizeHeadingZeroToTwoPi(headingRad: number): number {
-  let h = headingRad % CesiumMath.TWO_PI;
-  if (h < 0) {
-    h += CesiumMath.TWO_PI;
-  }
-  return h;
-}
-
 declare global {
   interface Window {
     CESIUM_BASE_URL?: string;
@@ -159,8 +163,6 @@ export function GoogleMapsPreview() {
   const [cesiumStatus, setCesiumStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [cesiumErrorMessage, setCesiumErrorMessage] = useState<string | null>(null);
 
-  /** Heading in degrees (0 = north), for compass rose — mirrors inventory Mapbox `bearing`. */
-  const [headingDeg, setHeadingDeg] = useState(0);
   /** Pitch in degrees; negative = look toward surface (Cesium convention). */
   const [pitchDeg, setPitchDeg] = useState(0);
   /** Eye height above ellipsoid — drives zoom button enable/disable. */
@@ -367,7 +369,6 @@ export function GoogleMapsPreview() {
         }
 
         viewerRef.current = viewer;
-        setHeadingDeg(CesiumMath.toDegrees(viewer.camera.heading));
         setPitchDeg(CesiumMath.toDegrees(viewer.camera.pitch));
         setSurfaceHeightM(Cartographic.fromCartesian(viewer.camera.position).height);
         setCesiumStatus("ready");
@@ -395,7 +396,6 @@ export function GoogleMapsPreview() {
 
     const sync = () => {
       const c = viewer.camera;
-      setHeadingDeg(CesiumMath.toDegrees(c.heading));
       setPitchDeg(CesiumMath.toDegrees(c.pitch));
       setSurfaceHeightM(Cartographic.fromCartesian(c.position).height);
     };
@@ -409,6 +409,27 @@ export function GoogleMapsPreview() {
       viewer.camera.changed.removeEventListener(sync);
     };
   }, [cesiumStatus]);
+
+  useEffect(() => {
+    const map = googleMapRef.current;
+    if (map == null || mapMode !== "2d") return;
+    map.setHeading(APPLIED_MAP_TUNING.camera.compassDirection);
+    // Maps JS only supports non-zero tilt in supported imagery contexts; it safely clamps/ignores otherwise.
+    map.setTilt(APPLIED_MAP_TUNING.camera.tilt);
+  }, [mapMode]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (viewer == null || viewer.isDestroyed() || mapMode !== "3d" || cesiumStatus !== "ready") return;
+    const c = viewer.camera;
+    c.setView({
+      orientation: {
+        heading: CesiumMath.toRadians(APPLIED_MAP_TUNING.camera.compassDirection),
+        pitch: CesiumMath.toRadians(-APPLIED_MAP_TUNING.camera.tilt),
+        roll: c.roll,
+      },
+    });
+  }, [cesiumStatus, mapMode]);
 
   const viewportHeightPx = () => wrapperRef.current?.clientHeight ?? 560;
 
@@ -472,84 +493,6 @@ export function GoogleMapsPreview() {
     viewer.camera.moveBackward(zoomStepMeters(viewer));
   }, []);
 
-  const handleResetCompass = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (viewer == null) return;
-    const position = viewer.camera.position.clone();
-    viewer.camera.setView({
-      destination: position,
-      orientation: {
-        heading: 0,
-        pitch: DEFAULT_PITCH_RAD,
-        roll: 0,
-      },
-    });
-  }, []);
-
-  const handleRotateLeft = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (viewer == null) return;
-    const c = viewer.camera;
-    const newHeading = normalizeHeadingZeroToTwoPi(c.heading - ROTATE_HEADING_STEP_RAD);
-    c.setView({
-      orientation: {
-        heading: newHeading,
-        pitch: c.pitch,
-        roll: c.roll,
-      },
-    });
-  }, []);
-
-  const handleRotateRight = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (viewer == null) return;
-    const c = viewer.camera;
-    const newHeading = normalizeHeadingZeroToTwoPi(c.heading + ROTATE_HEADING_STEP_RAD);
-    c.setView({
-      orientation: {
-        heading: newHeading,
-        pitch: c.pitch,
-        roll: c.roll,
-      },
-    });
-  }, []);
-
-  const handleTiltUp = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (viewer == null) return;
-    const c = viewer.camera;
-    const newPitch = CesiumMath.clamp(
-      c.pitch + TILT_STEP_RAD,
-      -CesiumMath.PI_OVER_TWO + 0.02,
-      0,
-    );
-    c.setView({
-      orientation: {
-        heading: c.heading,
-        pitch: newPitch,
-        roll: c.roll,
-      },
-    });
-  }, []);
-
-  const handleTiltDown = useCallback(() => {
-    const viewer = viewerRef.current;
-    if (viewer == null) return;
-    const c = viewer.camera;
-    const newPitch = CesiumMath.clamp(
-      c.pitch - TILT_STEP_RAD,
-      -CesiumMath.PI_OVER_TWO + 0.02,
-      0,
-    );
-    c.setView({
-      orientation: {
-        heading: c.heading,
-        pitch: newPitch,
-        roll: c.roll,
-      },
-    });
-  }, []);
-
   const handleSetTilt = useCallback((tiltDeg: number) => {
     const viewer = viewerRef.current;
     if (viewer == null) return;
@@ -605,14 +548,7 @@ export function GoogleMapsPreview() {
   }, []);
 
   const geofenceMapReady = mapMode === "3d" && cesiumStatus === "ready";
-
-  const normalizedBearing = ((headingDeg % 360) + 360) % 360;
-  const defaultPitchDeg = CesiumMath.toDegrees(DEFAULT_PITCH_RAD);
-  const isCompassActive =
-    Math.abs(headingDeg) > 1 || Math.abs(pitchDeg - defaultPitchDeg) > 2;
   const tiltDisplayDeg = Math.round(-pitchDeg);
-  const canTiltUp = pitchDeg < -1;
-  const canTiltDown = pitchDeg > -CesiumMath.toDegrees(CesiumMath.PI_OVER_TWO) + 2;
   const canZoomIn = cesiumStatus === "ready" && surfaceHeightM > MIN_SURFACE_HEIGHT_M;
   const canZoomOut = cesiumStatus === "ready" && surfaceHeightM < MAX_SURFACE_HEIGHT_M;
 
@@ -670,6 +606,15 @@ export function GoogleMapsPreview() {
         surfaceHeightM={surfaceHeightM}
         geofenceCentroid={savedGeofenceCentroid}
         dealershipHeightM={savedGeofenceFloorM}
+        markerTuning={{
+          vehicleScale: APPLIED_MAP_TUNING.markers.vehicleSize,
+          keysScale: APPLIED_MAP_TUNING.markers.keysSize,
+          hoverScale: APPLIED_MAP_TUNING.markers.hoverScale,
+          hoverOverlayIntensity: APPLIED_MAP_TUNING.markers.hoverOverlayIntensity,
+          hoverLiftPx: APPLIED_MAP_TUNING.markers.hoverLiftHeight,
+          hoverShadowIntensity: APPLIED_MAP_TUNING.markers.hoverShadowIntensity,
+          shadowIntensity: APPLIED_MAP_TUNING.markers.pinShadow,
+        }}
       />
 
       <GoogleMapsGeofenceCesiumSync
@@ -678,6 +623,11 @@ export function GoogleMapsPreview() {
         savedRing={geofenceSavedRing}
         draftPoints={geofenceDraft}
         isDrawing={geofenceDrawing}
+        geofenceTuning={{
+          extrusion: APPLIED_MAP_TUNING.geofence.extrusion,
+          strokeShade: APPLIED_MAP_TUNING.geofence.strokeShade,
+          opacity: APPLIED_MAP_TUNING.geofence.opacity,
+        }}
         onAddPoint={handleGeofenceAddPoint}
       />
 
@@ -758,49 +708,66 @@ export function GoogleMapsPreview() {
         </div>
       ) : null}
 
-      {mapMode === "3d" && cesiumStatus === "ready" ? (
+      {mapMode === "3d" ? (
         <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex items-end justify-between">
-          <div className="pointer-events-auto flex flex-col items-start gap-1.5">
-            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Eye height</p>
-              <p className="tabular-nums text-sm font-semibold text-foreground">
-                {surfaceHeightM >= 1000
-                  ? `${(surfaceHeightM / 1000).toFixed(2)} km`
-                  : `${Math.round(surfaceHeightM)} m`}
-              </p>
-            </div>
-            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Marker tier</p>
-              <p className="tabular-nums text-sm font-semibold text-foreground capitalize">
-                {resolveMarker3dTier(surfaceHeightM)}
-              </p>
-            </div>
-            <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-2 shadow-sm backdrop-blur-sm dark:bg-card/90">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                Tilt · <span className="tabular-nums font-semibold text-foreground">{tiltDisplayDeg}°</span>
-              </p>
-              <div className="mt-1.5 flex gap-1" role="group" aria-label="Tilt presets">
-                {[0, 15, 30, 45, 60, 90].map((deg) => (
-                  <button
-                    key={deg}
-                    type="button"
-                    onClick={() => handleSetTilt(deg)}
-                    aria-label={`Set tilt to ${deg}°`}
-                    aria-pressed={tiltDisplayDeg === deg}
-                    className={cn(
-                      "h-6 min-w-[2rem] rounded-md px-1 text-[11px] font-medium tabular-nums transition-colors",
-                      tiltDisplayDeg === deg
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {deg}°
-                  </button>
-                ))}
+          {cesiumStatus === "ready" ? (
+            <div className="pointer-events-auto flex flex-col items-start gap-1.5">
+              <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Eye height</p>
+                <p className="tabular-nums text-sm font-semibold text-foreground">
+                  {surfaceHeightM >= 1000
+                    ? `${(surfaceHeightM / 1000).toFixed(2)} km`
+                    : `${Math.round(surfaceHeightM)} m`}
+                </p>
+              </div>
+              <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm dark:bg-card/90">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Marker tier</p>
+                <p className="tabular-nums text-sm font-semibold text-foreground capitalize">
+                  {resolveMarker3dTier(surfaceHeightM)}
+                </p>
+              </div>
+              <div className="min-w-[7rem] rounded-[8px] border border-border bg-card/95 px-2.5 py-2 shadow-sm backdrop-blur-sm dark:bg-card/90">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Tilt · <span className="tabular-nums font-semibold text-foreground">{tiltDisplayDeg}°</span>
+                </p>
+                <div className="mt-1.5 flex gap-1" role="group" aria-label="Tilt presets">
+                  {[0, 15, 30, 45, 60, 90].map((deg) => (
+                    <button
+                      key={deg}
+                      type="button"
+                      onClick={() => handleSetTilt(deg)}
+                      aria-label={`Set tilt to ${deg}°`}
+                      aria-pressed={tiltDisplayDeg === deg}
+                      className={cn(
+                        "h-6 min-w-[2rem] rounded-md px-1 text-[11px] font-medium tabular-nums transition-colors",
+                        tiltDisplayDeg === deg
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
+                    >
+                      {deg}°
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div />
+          )}
           <div className="pointer-events-auto flex flex-col gap-2">
+            <MapControlButton
+              aria-label={geofenceMapReady ? "Open geofence controls" : "Geofence controls unavailable"}
+              onClick={() => {
+                setGeofencePanelOpen(true);
+                if (!geofenceDrawing) {
+                  handleGeofenceStart();
+                }
+              }}
+              disabled={!geofenceMapReady}
+              className="size-10"
+            >
+              <Pentagon className="size-4" strokeWidth={1.9} />
+            </MapControlButton>
             <MapControlButton
               aria-label="Zoom in"
               onClick={handleZoomIn}
@@ -815,44 +782,6 @@ export function GoogleMapsPreview() {
             >
               <Minus className="size-5" strokeWidth={1.9} />
             </MapControlButton>
-            <div
-              className="mt-1 flex items-center gap-1"
-              role="group"
-              aria-label="Map rotation and north"
-            >
-              <MapControlButton aria-label="Rotate view left" onClick={handleRotateLeft}>
-                <ChevronLeft className="size-5" strokeWidth={1.9} />
-              </MapControlButton>
-              <MapControlButton
-                aria-label={isCompassActive ? "Reset map orientation" : "Map is facing north"}
-                aria-pressed={isCompassActive}
-                onClick={handleResetCompass}
-                className={cn(
-                  isCompassActive
-                    ? "border-[rgba(21,92,255,0.22)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(238,244,255,0.98))] text-primary shadow-[0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_8px_18px_rgba(21,92,255,0.12),0px_0px_0px_1px_rgba(21,92,255,0.08)]"
-                    : undefined,
-                )}
-              >
-                <Compass
-                  className="size-5 transition-transform duration-200 ease-out motion-reduce:transition-none"
-                  style={{ transform: `rotate(${normalizedBearing}deg)` }}
-                  strokeWidth={1.9}
-                />
-              </MapControlButton>
-              <MapControlButton aria-label="Rotate view right" onClick={handleRotateRight}>
-                <ChevronRight className="size-5" strokeWidth={1.9} />
-              </MapControlButton>
-            </div>
-            <MapControlButton aria-label="Increase tilt" onClick={handleTiltUp} disabled={!canTiltUp}>
-              <ChevronUp className="size-5" strokeWidth={1.9} />
-            </MapControlButton>
-            <MapControlButton aria-label="Decrease tilt" onClick={handleTiltDown} disabled={!canTiltDown}>
-              <ChevronDown className="size-5" strokeWidth={1.9} />
-            </MapControlButton>
-            <div className="mt-1 min-w-[4.5rem] rounded-[8px] border border-border bg-card/95 px-2 py-1.5 text-center shadow-sm backdrop-blur-sm dark:bg-card/90">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Tilt</p>
-              <p className="tabular-nums text-sm font-medium text-foreground">{tiltDisplayDeg}°</p>
-            </div>
           </div>
         </div>
       ) : null}

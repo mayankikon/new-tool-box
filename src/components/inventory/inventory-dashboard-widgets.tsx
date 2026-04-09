@@ -9,9 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Group } from "@visx/group";
-import { Pie } from "@visx/shape";
-import { Text } from "@visx/text";
+import { arc as d3Arc, pie as d3Pie, type PieArcDatum } from "d3-shape";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -1017,29 +1015,29 @@ function InventoryDonutChart({
 }) {
   const radius = size / 2;
   const innerRadius = Math.max(radius - ringThickness, 24);
+  const pie = d3Pie<InventoryMetricSlice>()
+    .value((slice) => slice.value)
+    .padAngle(0.01)
+    .sort(null);
+  const arcs = pie(slices);
+  const arcPath = d3Arc<PieArcDatum<InventoryMetricSlice>>()
+    .outerRadius(radius)
+    .innerRadius(innerRadius)
+    .cornerRadius(3);
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={centerLabel}>
-      <Group top={radius} left={radius}>
-        <Pie
-          data={slices}
-          pieValue={(slice) => slice.value}
-          outerRadius={radius}
-          innerRadius={innerRadius}
-          cornerRadius={3}
-          padAngle={0.01}
-        >
-          {(pie) =>
-            pie.arcs.map((arc) => (
-              <g key={arc.data.label}>
-                <path d={pie.path(arc) ?? undefined} fill={arc.data.color} />
-              </g>
-            ))
-          }
-        </Pie>
-        <Text
+      <g transform={`translate(${radius}, ${radius})`}>
+        {arcs.map((arc) => (
+          <path
+            key={arc.data.label}
+            d={arcPath(arc) ?? undefined}
+            fill={arc.data.color}
+          />
+        ))}
+        <text
           textAnchor="middle"
-          verticalAnchor="end"
+          dominantBaseline="text-after-edge"
           y={-2}
           fill="var(--theme-text-tertiary)"
           style={{
@@ -1049,10 +1047,10 @@ function InventoryDonutChart({
           }}
         >
           {centerLabel}
-        </Text>
-        <Text
+        </text>
+        <text
           textAnchor="middle"
-          verticalAnchor="start"
+          dominantBaseline="hanging"
           y={8}
           fill="var(--theme-text-primary)"
           style={{
@@ -1062,8 +1060,8 @@ function InventoryDonutChart({
           }}
         >
           {centerValue}
-        </Text>
-      </Group>
+        </text>
+      </g>
     </svg>
   );
 }

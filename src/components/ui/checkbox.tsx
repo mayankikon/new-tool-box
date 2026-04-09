@@ -11,7 +11,7 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
       data-slot="checkbox"
       className={cn(
         "peer group relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center outline-none",
-        "focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         "group-has-disabled/field:opacity-50",
         className
       )}
@@ -20,6 +20,7 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
       <span
         className={cn(
           "relative flex size-4 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[4px] border border-input transition-colors outline-none",
+          "group-focus-visible:ring-4 group-focus-visible:ring-ring/50 group-focus-visible:ring-offset-1 group-focus-visible:ring-offset-background",
           "group-hover:border-input-hover group-hover:bg-accent/50",
           "group-focus-visible:border-ring",
           "group-disabled:cursor-not-allowed group-disabled:opacity-50 group-disabled:hover:border-input group-disabled:hover:bg-transparent",

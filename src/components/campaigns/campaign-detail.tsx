@@ -36,16 +36,15 @@ interface CampaignDetailProps {
   onBack: () => void;
 }
 
-export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
+function CampaignDetailContent({ campaign, onBack }: CampaignDetailProps) {
   const [isLoading, setIsLoading] = useState(true);
   const isActive = campaign.status === "active";
   const isPaused = campaign.status === "paused";
 
   useEffect(() => {
-    setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
-  }, [campaign.id]);
+  }, []);
 
   if (isLoading) {
     return <CampaignDetailSkeleton />;
@@ -130,5 +129,15 @@ export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export function CampaignDetail({ campaign, onBack }: CampaignDetailProps) {
+  return (
+    <CampaignDetailContent
+      key={campaign.id}
+      campaign={campaign}
+      onBack={onBack}
+    />
   );
 }

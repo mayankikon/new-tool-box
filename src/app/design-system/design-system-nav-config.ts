@@ -45,6 +45,7 @@ export const designSystemNavConfig: DesignSystemNavConfig = {
     { slug: "table-with-tabs", label: "Table With Tabs" },
     { slug: "tooltip", label: "Tooltip" },
     { slug: "map-view-tooltip", label: "Map View Tooltip" },
+    { slug: "inventory-vehicle-hover-tooltip", label: "Inventory Vehicle Hover Tooltip" },
     { slug: "progress-bar", label: "Progress Bar" },
     { slug: "slider", label: "Slider" },
     { slug: "battery-threshold", label: "Battery Threshold" },

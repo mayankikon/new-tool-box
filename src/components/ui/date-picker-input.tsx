@@ -166,8 +166,8 @@ function DatePickerInput({
       type="button"
       data-slot="date-picker-input"
       disabled={disabled}
-      aria-invalid={invalid || undefined}
       data-state={isOpen ? "open" : "closed"}
+      data-invalid={invalid ? "true" : undefined}
       className={cn(
         datePickerContainerVariants({ inputStyle, size }),
         isOpen &&

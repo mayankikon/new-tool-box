@@ -176,6 +176,7 @@ export function InventoryVehicleSearchField({
                   <button
                     type="button"
                     role="option"
+                    aria-selected={false}
                     className="w-full rounded-sm px-2 py-2 text-left text-sm text-foreground hover:bg-muted/80"
                     onMouseDown={(event) => {
                       event.preventDefault();

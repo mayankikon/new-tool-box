@@ -11,7 +11,9 @@ const tooltipContentVariants = cva(
     variants: {
       variant: {
         default: "bg-foreground text-background",
+        black: "bg-foreground text-background",
         card: "bg-card text-card-foreground shadow-[0_1px_1px_-0.5px_rgba(0,0,0,0.04),0_3px_3px_-1.5px_rgba(0,0,0,0.04),0_6px_6px_-3px_rgba(0,0,0,0.04),0_12px_12px_-6px_rgba(0,0,0,0.04)] ring-1 ring-border",
+        white: "bg-card text-card-foreground shadow-[0_1px_1px_-0.5px_rgba(0,0,0,0.04),0_3px_3px_-1.5px_rgba(0,0,0,0.04),0_6px_6px_-3px_rgba(0,0,0,0.04),0_12px_12px_-6px_rgba(0,0,0,0.04)] ring-1 ring-border",
       },
     },
     defaultVariants: {
@@ -74,7 +76,7 @@ function TooltipContent({
           <TooltipPrimitive.Arrow
             className={cn(
               "z-50 size-2.5 translate-y-[calc(-50%+1px)] rotate-45 rounded-[3px] data-[side=bottom]:top-1.5 data-[side=inline-end]:top-1/2! data-[side=inline-end]:-left-1 data-[side=inline-end]:-translate-y-1/2 data-[side=inline-start]:top-1/2! data-[side=inline-start]:-right-1 data-[side=inline-start]:-translate-y-1/2 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2",
-              variant === "card"
+              variant === "card" || variant === "white"
                 ? "bg-card fill-card"
                 : "bg-foreground fill-foreground"
             )}

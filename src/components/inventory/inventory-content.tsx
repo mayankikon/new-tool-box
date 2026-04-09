@@ -71,6 +71,7 @@ import {
 import { MapMarkerHoverFrame } from "@/components/ui/map-marker-hover-frame";
 import { KeysMapMarkerPin } from "@/components/ui/keys-map-marker-pin";
 import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
+import { InventoryVehicleHoverTooltip } from "@/components/ui/inventory-vehicle-hover-tooltip";
 import {
   DATA_TABLE_CELL_INNER_HOVER_CLASS,
   DATA_TABLE_HEADER_ROW_BACKGROUND_CLASS,
@@ -255,6 +256,7 @@ type InventoryVehicleMarkerEntry = {
   props: InventoryVehicleMapFeatureProperties;
   mode: "chip" | "pin";
   renderKey: string;
+  removeHoverListeners?: () => void;
 };
 
 type InventoryClusterMarkerEntry = {
@@ -277,6 +279,9 @@ let lastInventoryVehicleFeatureCollection: FeatureCollection<
 > | null = null;
 
 let inventoryVehicleMarkersReconcile: (() => void) | null = null;
+let inventoryVehicleHoverPopup: mapboxgl.Popup | null = null;
+let inventoryVehicleHoverPopupRoot: Root | null = null;
+let inventoryVehicleHoveredVin: string | null = null;
 
 const inventoryMapMarkerHighlightRef: { selectedVin: string | null } = {
   selectedVin: null,
@@ -302,6 +307,74 @@ export function getInventoryMapVehicleLngLatByVin(
   if (!found || found.geometry.type !== "Point") return null;
   const [lng, lat] = found.geometry.coordinates;
   return [lng, lat];
+}
+
+function removeInventoryVehicleHoverPopup() {
+  inventoryVehicleHoveredVin = null;
+  inventoryVehicleHoverPopupRoot?.unmount();
+  inventoryVehicleHoverPopupRoot = null;
+  inventoryVehicleHoverPopup?.remove();
+  inventoryVehicleHoverPopup = null;
+}
+
+function ensureInventoryVehicleHoverPopup(map: mapboxgl.Map): {
+  popup: mapboxgl.Popup;
+  root: Root;
+} {
+  if (inventoryVehicleHoverPopup && inventoryVehicleHoverPopupRoot) {
+    return {
+      popup: inventoryVehicleHoverPopup,
+      root: inventoryVehicleHoverPopupRoot,
+    };
+  }
+
+  const content = document.createElement("div");
+  content.className = "pointer-events-none";
+
+  const popup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false,
+    closeOnMove: false,
+    maxWidth: "none",
+    className: "inventory-vehicle-hover-popup inventory-vehicle-hover-popup--light",
+    anchor: "bottom",
+    offset: [0, -24],
+  });
+  popup.setDOMContent(content).addTo(map);
+
+  inventoryVehicleHoverPopup = popup;
+  inventoryVehicleHoverPopupRoot = createRoot(content);
+
+  return { popup, root: inventoryVehicleHoverPopupRoot };
+}
+
+function showInventoryVehicleHoverPopup(
+  map: mapboxgl.Map,
+  lngLat: [number, number],
+  props: InventoryVehicleMapFeatureProperties
+) {
+  const { popup, root } = ensureInventoryVehicleHoverPopup(map);
+  inventoryVehicleHoveredVin = props.vin;
+  root.render(
+    <InventoryVehicleHoverTooltip
+      title={props.title}
+      vin={props.vin}
+      stockNumber={props.stockNumber}
+      stockType={props.stockType}
+      price={props.price}
+      mileage={props.mileage}
+    />
+  );
+  popup.setLngLat(lngLat);
+}
+
+function hideInventoryVehicleHoverPopup(vin?: string) {
+  if (vin && inventoryVehicleHoveredVin && vin !== inventoryVehicleHoveredVin) {
+    return;
+  }
+  inventoryVehicleHoveredVin = null;
+  inventoryVehicleHoverPopupRoot?.render(<></>);
+  inventoryVehicleHoverPopup?.remove();
 }
 let inventoryVehicleClusterIndex: Supercluster<
   InventoryVehicleMapFeatureProperties,
@@ -496,11 +569,13 @@ function removeInventoryVehicleMapOverlays(map: mapboxgl.Map) {
     marker.remove();
   }
   inventoryClusterMarkerEntries.clear();
-  for (const { marker, root } of inventoryVehicleMarkerEntries.values()) {
-    root.unmount();
-    marker.remove();
+  for (const entry of inventoryVehicleMarkerEntries.values()) {
+    entry.removeHoverListeners?.();
+    entry.root.unmount();
+    entry.marker.remove();
   }
   inventoryVehicleMarkerEntries.clear();
+  removeInventoryVehicleHoverPopup();
   removeAllInventoryKeyMarkers();
   lastInventoryVehicleFeatureCollection = null;
   inventoryVehicleClusterIndex = null;
@@ -793,30 +868,22 @@ function reconcileInventoryVehicleClusterMarkers(map: mapboxgl.Map) {
 
 function reconcileInventoryVehicleHtmlMarkers(
   map: mapboxgl.Map,
-  appearance: InventoryMapAppearance,
   onVehicleSelect?: InventoryVehicleSelectHandler
 ) {
   const fc = lastInventoryVehicleFeatureCollection;
   const zoom = map.getZoom();
   if (!fc || zoom < INVENTORY_MAP_VEHICLE_PIN_ZOOM) {
-    for (const { marker, root } of inventoryVehicleMarkerEntries.values()) {
-      root.unmount();
-      marker.remove();
+    for (const entry of inventoryVehicleMarkerEntries.values()) {
+      entry.removeHoverListeners?.();
+      entry.root.unmount();
+      entry.marker.remove();
     }
     inventoryVehicleMarkerEntries.clear();
+    hideInventoryVehicleHoverPopup();
     return;
   }
   /** Always chip when HTML markers are shown (zoom ≥ pin threshold). A pin “tier” here caused image→pin→image during easeTo zoom ramps and fly arcs. */
   const markerMode = "chip" as const;
-
-  const titleColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#0a0a0a"
-    : "#fafafa";
-  const subColor = inventoryMapUsesLightBasemapUi(appearance)
-    ? "#404040"
-    : appearance === "satellite"
-      ? "#d4d4d8"
-      : "#a1a1aa";
 
   const bounds = map.getBounds();
   if (!bounds) {
@@ -852,6 +919,9 @@ function reconcileInventoryVehicleHtmlMarkers(
           : selectedVin != null
             ? "1"
             : "";
+      if (inventoryVehicleHoveredVin === props.vin) {
+        showInventoryVehicleHoverPopup(map, [lng, lat], props);
+      }
     } else {
       const { wrap: el, root } = mountInventoryVehicleMapMarker(
         props,
@@ -870,6 +940,31 @@ function reconcileInventoryVehicleHtmlMarkers(
             ? "1"
             : "";
 
+      const onMarkerEnter = () => {
+        const entry = inventoryVehicleMarkerEntries.get(props.vin);
+        if (!entry) return;
+        const lngLat = entry.marker.getLngLat();
+        showInventoryVehicleHoverPopup(
+          map,
+          [lngLat.lng, lngLat.lat],
+          entry.props
+        );
+      };
+      const onMarkerLeave = () => {
+        hideInventoryVehicleHoverPopup(props.vin);
+      };
+      const onMarkerClick = () => {
+        hideInventoryVehicleHoverPopup(props.vin);
+      };
+      el.addEventListener("mouseenter", onMarkerEnter);
+      el.addEventListener("mouseleave", onMarkerLeave);
+      el.addEventListener("click", onMarkerClick);
+      const removeHoverListeners = () => {
+        el.removeEventListener("mouseenter", onMarkerEnter);
+        el.removeEventListener("mouseleave", onMarkerLeave);
+        el.removeEventListener("click", onMarkerClick);
+      };
+
       inventoryVehicleMarkerEntries.set(props.vin, {
         vin: props.vin,
         marker,
@@ -877,6 +972,7 @@ function reconcileInventoryVehicleHtmlMarkers(
         props,
         mode: markerMode,
         renderKey: nextRenderKey,
+        removeHoverListeners,
       });
     }
     count += 1;
@@ -884,6 +980,8 @@ function reconcileInventoryVehicleHtmlMarkers(
 
   for (const [vin, entry] of inventoryVehicleMarkerEntries.entries()) {
     if (!nextVisibleVins.has(vin)) {
+      hideInventoryVehicleHoverPopup(vin);
+      entry.removeHoverListeners?.();
       entry.root.unmount();
       entry.marker.remove();
       inventoryVehicleMarkerEntries.delete(vin);
@@ -901,7 +999,7 @@ function addInventoryVehicleMapOverlays(
     lastInventoryVehicleFeatureCollection = vehicleFc;
     const reconcile = () => {
       reconcileInventoryVehicleClusterMarkers(map);
-      reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
+      reconcileInventoryVehicleHtmlMarkers(map, onVehicleSelect);
       reconcileInventoryKeyMarkers(map);
     };
     inventoryVehicleMarkersReconcile = reconcile;
@@ -1037,7 +1135,7 @@ function addInventoryVehicleMapOverlays(
 
   const reconcile = () => {
     reconcileInventoryVehicleClusterMarkers(map);
-    reconcileInventoryVehicleHtmlMarkers(map, appearance, onVehicleSelect);
+    reconcileInventoryVehicleHtmlMarkers(map, onVehicleSelect);
     reconcileInventoryKeyMarkers(map);
   };
   inventoryVehicleMarkersReconcile = reconcile;
@@ -1063,19 +1161,40 @@ function addInventoryVehicleMapOverlays(
     const feat = e.features?.[0];
     if (!feat || feat.geometry.type !== "Point") return;
     const props = feat.properties as unknown as InventoryVehicleMapFeatureProperties;
+    hideInventoryVehicleHoverPopup(props.vin);
     onVehicleSelect?.(props.vin);
   };
 
   const onClusterPointerEnter = () => {
+    hideInventoryVehicleHoverPopup();
     map.getCanvas().style.cursor = "pointer";
   };
   const onClusterPointerLeave = () => {
     map.getCanvas().style.cursor = "";
   };
-  const onUnclusteredPointerEnter = () => {
+  const onUnclusteredPointerEnter = (e: mapboxgl.MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = "pointer";
+    const feat = e.features?.[0];
+    if (!feat || feat.geometry.type !== "Point") return;
+    const props = feat.properties as unknown as InventoryVehicleMapFeatureProperties;
+    showInventoryVehicleHoverPopup(
+      map,
+      feat.geometry.coordinates as [number, number],
+      props
+    );
+  };
+  const onUnclusteredPointerMove = (e: mapboxgl.MapLayerMouseEvent) => {
+    const feat = e.features?.[0];
+    if (!feat || feat.geometry.type !== "Point") return;
+    const props = feat.properties as unknown as InventoryVehicleMapFeatureProperties;
+    showInventoryVehicleHoverPopup(
+      map,
+      feat.geometry.coordinates as [number, number],
+      props
+    );
   };
   const onUnclusteredPointerLeave = () => {
+    hideInventoryVehicleHoverPopup();
     map.getCanvas().style.cursor = "";
   };
 
@@ -1084,6 +1203,7 @@ function addInventoryVehicleMapOverlays(
   map.on("mouseenter", INV_LAYER_CLUSTERS, onClusterPointerEnter);
   map.on("mouseleave", INV_LAYER_CLUSTERS, onClusterPointerLeave);
   map.on("mouseenter", INV_LAYER_UNCLUSTERED, onUnclusteredPointerEnter);
+  map.on("mousemove", INV_LAYER_UNCLUSTERED, onUnclusteredPointerMove);
   map.on("mouseleave", INV_LAYER_UNCLUSTERED, onUnclusteredPointerLeave);
 
   inventoryVehicleMapInteractionCleanup = () => {
@@ -1095,7 +1215,9 @@ function addInventoryVehicleMapOverlays(
     map.off("mouseenter", INV_LAYER_CLUSTERS, onClusterPointerEnter);
     map.off("mouseleave", INV_LAYER_CLUSTERS, onClusterPointerLeave);
     map.off("mouseenter", INV_LAYER_UNCLUSTERED, onUnclusteredPointerEnter);
+    map.off("mousemove", INV_LAYER_UNCLUSTERED, onUnclusteredPointerMove);
     map.off("mouseleave", INV_LAYER_UNCLUSTERED, onUnclusteredPointerLeave);
+    hideInventoryVehicleHoverPopup();
   };
 
   reconcile();

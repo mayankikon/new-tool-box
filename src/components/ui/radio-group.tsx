@@ -21,7 +21,7 @@ function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
       data-slot="radio-group-item"
       className={cn(
         "group/radio-group-item peer relative inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none",
-        "focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -29,6 +29,7 @@ function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
       <span
         className={cn(
           "relative flex aspect-square size-4 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-input transition-colors outline-none",
+          "group-focus-visible/radio-group-item:ring-4 group-focus-visible/radio-group-item:ring-ring/50 group-focus-visible/radio-group-item:ring-offset-1 group-focus-visible/radio-group-item:ring-offset-background",
           "group-hover/radio-group-item:border-input-hover group-hover/radio-group-item:bg-accent/50",
           "group-focus-visible/radio-group-item:border-ring",
           "group-disabled/radio-group-item:cursor-not-allowed group-disabled/radio-group-item:opacity-50 group-disabled/radio-group-item:hover:border-input group-disabled/radio-group-item:hover:bg-transparent",

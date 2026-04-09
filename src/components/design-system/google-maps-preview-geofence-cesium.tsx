@@ -13,7 +13,7 @@ import {
 } from "@cesium/engine";
 import type { Viewer } from "@cesium/widgets";
 import type { RefObject } from "react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { DesignSystemMapsGeofenceVertex } from "@/lib/design-system/design-system-maps-geofence-storage";
 
@@ -23,36 +23,31 @@ const ENTITY_DRAFT_FILL_ID = "design-system-geofence-draft-fill";
 const ENTITY_VTX_PREFIX = "design-system-geofence-draft-vtx-";
 const MAX_VERTEX_ENTITIES = 64;
 
-/** Extra meters above the highest vertex so roofs / mesh near the top pick stay inside the volume. */
-const GEOFENCE_EXTRUSION_CLEARANCE_ABOVE_MAX_M = 1;
+const SHADE_HSL_BY_NAME = {
+  blue: { h: 214 / 360, s: 0.82, l: 0.6 },
+  green: { h: 145 / 360, s: 0.65, l: 0.52 },
+  yellow: { h: 52 / 360, s: 0.92, l: 0.58 },
+  cyan: { h: 188 / 360, s: 0.78, l: 0.56 },
+  orange: { h: 28 / 360, s: 0.9, l: 0.58 },
+  purple: { h: 270 / 360, s: 0.72, l: 0.6 },
+  red: { h: 2 / 360, s: 0.82, l: 0.58 },
+} as const;
 
 function vertexHeightM(vertex: DesignSystemMapsGeofenceVertex): number {
   const h = vertex[2];
   return h != null && Number.isFinite(h) ? h : 0;
 }
 
-/**
- * Vertical extent for an extruded prism: flat footprint at {@link bottomEllipsoidM},
- * extruded to {@link topEllipsoidM} (covers all picked heights plus clearance above the max).
- */
-function computeExtrusionEllipsoidBoundsM(heightsM: number[]): {
-  bottomEllipsoidM: number;
-  topEllipsoidM: number;
-} {
+function computeExtrusionBaseEllipsoidM(heightsM: number[]): number {
   if (heightsM.length === 0) {
-    return { bottomEllipsoidM: 0, topEllipsoidM: GEOFENCE_EXTRUSION_CLEARANCE_ABOVE_MAX_M };
+    return 0;
   }
   let minH = heightsM[0]!;
-  let maxH = heightsM[0]!;
   for (let i = 1; i < heightsM.length; i += 1) {
     const h = heightsM[i]!;
     if (h < minH) minH = h;
-    if (h > maxH) maxH = h;
   }
-  return {
-    bottomEllipsoidM: minH,
-    topEllipsoidM: maxH + GEOFENCE_EXTRUSION_CLEARANCE_ABOVE_MAX_M,
-  };
+  return minH;
 }
 
 function vertexToCartesian(vertex: DesignSystemMapsGeofenceVertex): Cartesian3 {
@@ -117,6 +112,7 @@ export function GoogleMapsGeofenceCesiumSync({
   savedRing,
   draftPoints,
   isDrawing,
+  geofenceTuning,
   onAddPoint,
 }: {
   viewerRef: RefObject<Viewer | null>;
@@ -124,25 +120,22 @@ export function GoogleMapsGeofenceCesiumSync({
   savedRing: DesignSystemMapsGeofenceVertex[] | null;
   draftPoints: readonly DesignSystemMapsGeofenceVertex[];
   isDrawing: boolean;
+  geofenceTuning: {
+    extrusion: number;
+    strokeShade: "blue" | "green" | "yellow" | "cyan" | "orange" | "purple" | "red";
+    opacity: number;
+  };
   onAddPoint: (lng: number, lat: number, heightM: number) => void;
 }) {
   const scratchCartographic = useRef(new Cartographic());
-  const draftPointsRef = useRef(draftPoints);
   const cursorRef = useRef<{ lng: number; lat: number; heightM: number } | null>(null);
-  const onAddPointRef = useRef(onAddPoint);
-  const isDrawingRef = useRef(isDrawing);
-
-  draftPointsRef.current = draftPoints;
-  onAddPointRef.current = onAddPoint;
-  isDrawingRef.current = isDrawing;
-
-  const rebuildDraftOverlay = (viewer: Viewer) => {
-    if (!isDrawingRef.current) {
+  const rebuildDraftOverlay = useCallback((viewer: Viewer) => {
+    if (!isDrawing) {
       return;
     }
     removeDraftOverlayEntities(viewer);
 
-    const draft = draftPointsRef.current;
+    const draft = draftPoints;
     const cursor = cursorRef.current;
 
     draft.forEach((vertex, index) => {
@@ -187,23 +180,44 @@ export function GoogleMapsGeofenceCesiumSync({
     }
 
     if (footprintLonLat != null && extrusionHeightsM != null && footprintLonLat.length >= 3) {
-      const { bottomEllipsoidM, topEllipsoidM } = computeExtrusionEllipsoidBoundsM(extrusionHeightsM);
+      const bottomEllipsoidM = computeExtrusionBaseEllipsoidM(extrusionHeightsM);
+      const extrusionTopM = bottomEllipsoidM + geofenceTuning.extrusion;
       const footprint = footprintLonLat.map(({ lng, lat }) => Cartesian3.fromDegrees(lng, lat));
+      const shadeHsl = SHADE_HSL_BY_NAME[geofenceTuning.strokeShade];
+      const strokeAlpha = CesiumMath.clamp(geofenceTuning.opacity / 10, 0, 1);
+      const edgeColor = Color.fromHsl(
+        shadeHsl.h,
+        CesiumMath.clamp(shadeHsl.s * 0.82, 0, 1),
+        CesiumMath.clamp(0.4, 0, 1),
+        strokeAlpha,
+      );
+      const fillColor = Color.fromHsl(
+        shadeHsl.h,
+        CesiumMath.clamp(shadeHsl.s * 0.72, 0, 1),
+        shadeHsl.l,
+        CesiumMath.clamp(0.12 + strokeAlpha * 0.35, 0.08, 0.5),
+      );
       viewer.entities.add({
         id: ENTITY_DRAFT_FILL_ID,
         polygon: {
           hierarchy: new PolygonHierarchy(footprint),
           height: bottomEllipsoidM,
-          extrudedHeight: topEllipsoidM,
-          material: Color.fromBytes(59, 130, 246, 155),
+          extrudedHeight: extrusionTopM,
+          material: fillColor,
           outline: true,
-          outlineColor: Color.fromBytes(37, 99, 235, 200),
-          outlineWidth: 1,
+          outlineColor: edgeColor,
+          outlineWidth: 2,
           perPositionHeight: false,
         },
       });
     }
-  };
+  }, [
+    draftPoints,
+    geofenceTuning.extrusion,
+    geofenceTuning.opacity,
+    geofenceTuning.strokeShade,
+    isDrawing,
+  ]);
 
   useEffect(() => {
     if (!active) return;
@@ -214,20 +228,33 @@ export function GoogleMapsGeofenceCesiumSync({
     if (existing) {
       viewer.entities.remove(existing);
     }
-
     if (savedRing != null && savedRing.length >= 3) {
-      const heightsM = savedRing.map(vertexHeightM);
-      const { bottomEllipsoidM, topEllipsoidM } = computeExtrusionEllipsoidBoundsM(heightsM);
+      const bottomEllipsoidM = computeExtrusionBaseEllipsoidM(savedRing.map(vertexHeightM));
+      const extrusionTopM = bottomEllipsoidM + geofenceTuning.extrusion;
       const footprint = savedRing.map(([lng, lat]) => Cartesian3.fromDegrees(lng, lat));
+      const shadeHsl = SHADE_HSL_BY_NAME[geofenceTuning.strokeShade];
+      const strokeAlpha = CesiumMath.clamp(geofenceTuning.opacity / 10, 0, 1);
+      const edgeColor = Color.fromHsl(
+        shadeHsl.h,
+        CesiumMath.clamp(shadeHsl.s * 0.82, 0, 1),
+        CesiumMath.clamp(0.4, 0, 1),
+        strokeAlpha,
+      );
+      const fillColor = Color.fromHsl(
+        shadeHsl.h,
+        CesiumMath.clamp(shadeHsl.s * 0.72, 0, 1),
+        shadeHsl.l,
+        CesiumMath.clamp(0.12 + strokeAlpha * 0.35, 0.08, 0.5),
+      );
       viewer.entities.add({
         id: ENTITY_FILL_ID,
         polygon: {
           hierarchy: new PolygonHierarchy(footprint),
           height: bottomEllipsoidM,
-          extrudedHeight: topEllipsoidM,
-          material: Color.fromBytes(59, 130, 246, 195),
+          extrudedHeight: extrusionTopM,
+          material: fillColor,
           outline: true,
-          outlineColor: Color.fromBytes(37, 99, 235, 230),
+          outlineColor: edgeColor,
           outlineWidth: 2,
           perPositionHeight: false,
         },
@@ -235,13 +262,18 @@ export function GoogleMapsGeofenceCesiumSync({
     }
 
     return () => {
-      const v = viewerRef.current;
-      if (v != null && !v.isDestroyed()) {
-        const e = v.entities.getById(ENTITY_FILL_ID);
-        if (e) v.entities.remove(e);
-      }
+      if (viewer.isDestroyed()) return;
+      const e = viewer.entities.getById(ENTITY_FILL_ID);
+      if (e) viewer.entities.remove(e);
     };
-  }, [active, viewerRef, savedRing]);
+  }, [
+    active,
+    geofenceTuning.extrusion,
+    geofenceTuning.opacity,
+    geofenceTuning.strokeShade,
+    viewerRef,
+    savedRing,
+  ]);
 
   useEffect(() => {
     if (!active || !isDrawing) {
@@ -257,7 +289,7 @@ export function GoogleMapsGeofenceCesiumSync({
     if (viewer == null || viewer.isDestroyed()) return;
 
     rebuildDraftOverlay(viewer);
-  }, [active, isDrawing, draftPoints, viewerRef]);
+  }, [active, isDrawing, rebuildDraftOverlay, viewerRef]);
 
   useEffect(() => {
     if (!active || !isDrawing) {
@@ -287,7 +319,7 @@ export function GoogleMapsGeofenceCesiumSync({
     const onClick = (click: { position: import("@cesium/engine").Cartesian2 }) => {
       const picked = pickPositionOnScene(viewer, click.position, scratchCartographic.current);
       if (!picked) return;
-      onAddPointRef.current(picked.lng, picked.lat, picked.heightM);
+      onAddPoint(picked.lng, picked.lat, picked.heightM);
       cursorRef.current = picked;
     };
 
@@ -298,7 +330,7 @@ export function GoogleMapsGeofenceCesiumSync({
       handler.destroy();
       canvas.style.cursor = priorCursor;
     };
-  }, [active, isDrawing, viewerRef]);
+  }, [active, isDrawing, onAddPoint, rebuildDraftOverlay, viewerRef]);
 
   return null;
 }

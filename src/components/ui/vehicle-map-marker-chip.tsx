@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { MapMarkerHoverFrame } from "@/components/ui/map-marker-hover-frame";
 import {
@@ -230,11 +231,12 @@ export function VehicleMapMarkerChip({
   const mainSrc = chip ? encodePublicAssetPath(chip.publicPath) : "";
 
   const image = mainSrc ? (
-    <img
+    <Image
       src={mainSrc}
       width={74}
       height={60}
       alt=""
+      unoptimized
       className={cn(
         "h-[60px] w-[74px] shrink-0 object-contain drop-shadow-sm",
         className

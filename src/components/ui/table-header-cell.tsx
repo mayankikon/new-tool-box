@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -17,12 +18,13 @@ const TABLE_SORT_ICON_SRC: Record<TableHeaderSortState, string> = {
 
 function TableSortIndicatorIcon({ state }: { state: TableHeaderSortState }) {
   return (
-    <img
+    <Image
       key={state}
       src={TABLE_SORT_ICON_SRC[state]}
       alt=""
       width={16}
       height={16}
+      unoptimized
       className="size-4 shrink-0"
       aria-hidden
     />

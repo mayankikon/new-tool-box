@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 
 import { DashboardLedCapsuleWebgl } from "@/components/ui/dashboard-led-capsule-webgl";
 import type { TelemetryDeckLedTone } from "@/components/ui/telemetry-led-tones";
@@ -150,7 +151,6 @@ export function FileCabinetTabRow({
   onValueChange,
   labels,
   surface,
-  underGlowPx: _underGlowPx,
   accent,
   tabTopRadiusPx,
   showLeftLamp = true,
@@ -173,7 +173,8 @@ export function FileCabinetTabRow({
    * Pointer-activated tab changes run full sink-rise choreography; Enter/Space on a focused tab
    * snap to final state (Emil: avoid animating keyboard-initiated actions).
    */
-  const pointerDrivenTabActivationRef = React.useRef(true);
+  const [pointerDrivenTabActivation, setPointerDrivenTabActivation] =
+    React.useState(true);
 
   const folderSurfaceTransition = React.useMemo(
     () =>
@@ -228,7 +229,7 @@ export function FileCabinetTabRow({
     if (reduceMotion) {
       return { duration: 0 };
     }
-    if (isSinkRise && !pointerDrivenTabActivationRef.current) {
+    if (isSinkRise && !pointerDrivenTabActivation) {
       return { duration: 0 };
     }
     if (isSinkRise) {
@@ -245,17 +246,17 @@ export function FileCabinetTabRow({
       duration: 0.09,
       ease: EASE_OUT_SNAPPY,
     };
-  }, [isSinkRise, reduceMotion, value]);
+  }, [isSinkRise, pointerDrivenTabActivation, reduceMotion]);
 
   const presencePillExitTransition = React.useMemo(() => {
     if (reduceMotion) {
       return { duration: 0 };
     }
-    if (isSinkRise && !pointerDrivenTabActivationRef.current) {
+    if (isSinkRise && !pointerDrivenTabActivation) {
       return { duration: 0 };
     }
     return { type: "tween" as const, duration: 0.055, ease: EASE_OUT_SNAPPY };
-  }, [isSinkRise, reduceMotion, value]);
+  }, [isSinkRise, pointerDrivenTabActivation, reduceMotion]);
 
   const activeTabCallbackRef = React.useCallback(
     (element: HTMLButtonElement | null) => {
@@ -283,7 +284,7 @@ export function FileCabinetTabRow({
 
   /** Full sink-rise choreography (folder + label + lamp crossfade); false when reduced-motion or keyboard activation. */
   const sinkRisePointerMotion =
-    isSinkRise && !reduceMotion && pointerDrivenTabActivationRef.current;
+    isSinkRise && !reduceMotion && pointerDrivenTabActivation;
 
   const inactiveTabLabelOffsetPxStatic =
     tabMotionVariant === "crossfade"
@@ -310,11 +311,11 @@ export function FileCabinetTabRow({
             role="tab"
             aria-selected={active}
             onPointerDown={() => {
-              pointerDrivenTabActivationRef.current = true;
+              setPointerDrivenTabActivation(true);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                pointerDrivenTabActivationRef.current = false;
+                setPointerDrivenTabActivation(false);
               }
             }}
             onClick={() => onValueChange(v)}
@@ -465,11 +466,12 @@ export function FileCabinetTabRow({
               >
                 {showLeftLamp ? (
                   <span className="relative size-2.5 shrink-0">
-                    <img
+                    <Image
                       src={FILE_CABINET_TAB_LAMP_SRC.default}
                       alt=""
                       width={10}
                       height={10}
+                      unoptimized
                       className={cn(
                         "pointer-events-none absolute inset-0 size-2.5 transition-opacity ease-out motion-reduce:transition-none",
                         active ? "opacity-0" : "opacity-100",
@@ -479,11 +481,12 @@ export function FileCabinetTabRow({
                       }}
                       aria-hidden
                     />
-                    <img
+                    <Image
                       src={FILE_CABINET_TAB_LAMP_SRC.active}
                       alt=""
                       width={10}
                       height={10}
+                      unoptimized
                       className={cn(
                         "pointer-events-none absolute inset-0 size-2.5 transition-opacity ease-out motion-reduce:transition-none",
                         active ? "opacity-100" : "opacity-0",
@@ -510,11 +513,12 @@ export function FileCabinetTabRow({
                 }}
               >
                 {showLeftLamp ? (
-                  <img
+                  <Image
                     src={active ? FILE_CABINET_TAB_LAMP_SRC.active : FILE_CABINET_TAB_LAMP_SRC.default}
                     alt=""
                     width={10}
                     height={10}
+                    unoptimized
                     className="size-2.5 shrink-0 transition-opacity duration-150 ease-out"
                     aria-hidden
                   />

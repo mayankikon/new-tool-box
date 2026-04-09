@@ -9,15 +9,6 @@ import { SectionTitle } from "../atoms/SectionTitle";
 
 const COPY_FEEDBACK_MS = 3000;
 
-/** Light fills need a hairline edge so they read on the doc background (e.g. white, 50). */
-function swatchSurfaceClass(hex: string): string {
-  const normalized = hex.trim().toLowerCase();
-  if (normalized === "#ffffff" || normalized === "#fff") {
-    return "ring-1 ring-inset ring-border";
-  }
-  return "ring-1 ring-inset ring-black/[0.06] dark:ring-white/[0.08]";
-}
-
 function PaletteScaleRamp({
   paletteTitle,
   colors,
@@ -37,14 +28,11 @@ function PaletteScaleRamp({
       <p className="ds-doc-font text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Full scale preview
       </p>
-      <div className="flex gap-px overflow-hidden rounded-lg border border-border bg-border p-px shadow-sm">
+      <div className="flex overflow-hidden rounded-lg border border-border divide-x divide-border">
         {entries.map(([shade, hex]) => (
           <div
             key={String(shade)}
-            className={cn(
-              "relative min-h-[3.25rem] min-w-0 flex-1 first:rounded-l-[calc(var(--radius-lg)-2px)] last:rounded-r-[calc(var(--radius-lg)-2px)]",
-              swatchSurfaceClass(hex)
-            )}
+            className="relative min-h-[3.25rem] min-w-0 flex-1 first:rounded-l-[calc(var(--radius-lg)-2px)] last:rounded-r-[calc(var(--radius-lg)-2px)]"
             style={{ backgroundColor: hex }}
             title={`${slug}-${shade} · ${hex}`}
           >
@@ -102,7 +90,7 @@ function PaletteColorSwatch({
       )}
     >
       <div
-        className={cn("h-32 w-full shrink-0", swatchSurfaceClass(hex))}
+        className="h-32 w-full shrink-0"
         style={{ backgroundColor: hex }}
         aria-hidden
       />

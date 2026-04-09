@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, UserPlus } from "lucide-react";
 
@@ -165,12 +165,6 @@ export function RegisterCustomerPage({ onCancel }: RegisterCustomerPageProps) {
   const effectiveDeviceSerial = showMockDeviceSerial
     ? deviceSerial || "349867431"
     : deviceSerial;
-
-  useEffect(() => {
-    if (vin.trim().length !== 17) {
-      setDeviceSerial("");
-    }
-  }, [vin]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

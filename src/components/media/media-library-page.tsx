@@ -52,7 +52,9 @@ export function MediaLibraryPage({
 }) {
   const [tab, setTab] = useState<(typeof FILTER_TABS)[number]>("all");
   const [search, setSearch] = useState("");
-  const [assets, setAssets] = useState<MediaAsset[]>([]);
+  const [assets, setAssets] = useState<MediaAsset[]>(() =>
+    listMediaAssets(),
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
@@ -63,10 +65,6 @@ export function MediaLibraryPage({
       }),
     );
   }, [tab, search]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   useEffect(() => {
     const onChange = () => refresh();

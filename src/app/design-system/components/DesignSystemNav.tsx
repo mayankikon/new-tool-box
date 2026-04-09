@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, Palette, Search, X } from "lucide-react";
 
@@ -37,6 +38,7 @@ function buildAllNavEntries(): NavEntry[] {
 }
 
 const ALL_NAV_ENTRIES = buildAllNavEntries();
+const NAV_SCROLL_STORAGE_KEY = "design-system-nav-scroll-top";
 const NAV_PATTERN_INTENSITY = 0.8;
 const NAV_LINE_FIELD_PATTERN = {
   ...appLineFieldPattern,
@@ -71,6 +73,7 @@ function NavRow({ href, label, isActive }: { href: string; label: string; isActi
   return (
     <Link
       href={href}
+      scroll={false}
       aria-current={isActive ? "page" : undefined}
       className={cn(
         "flex w-full items-center gap-[var(--spacing-6)] rounded-[var(--radius-sm)] p-[var(--spacing-8)] h-9 transition-colors",
@@ -95,6 +98,20 @@ function NavRow({ href, label, isActive }: { href: string; label: string; isActi
 export function DesignSystemNav() {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const savedTop = window.sessionStorage.getItem(NAV_SCROLL_STORAGE_KEY);
+    if (!savedTop) return;
+
+    const nextTop = Number.parseFloat(savedTop);
+    if (Number.isFinite(nextTop) && nextTop >= 0) {
+      container.scrollTop = nextTop;
+    }
+  }, [pathname]);
 
   const filteredEntries = useMemo(() => filterNavEntries(searchQuery), [searchQuery]);
 
@@ -124,9 +141,12 @@ export function DesignSystemNav() {
           href="/design-system"
           className="group flex items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <img
+          <Image
             src="/media/logos/logo.png"
             alt="Shift Design System logo"
+            width={36}
+            height={36}
+            unoptimized
             className="size-9 shrink-0 object-contain"
           />
           <div className="flex min-w-0 flex-col gap-1">
@@ -173,7 +193,16 @@ export function DesignSystemNav() {
         </div>
       </div>
 
-      <div className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-4 pt-2">
+      <div
+        ref={scrollContainerRef}
+        className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-4 pt-2"
+        onScroll={(event) => {
+          window.sessionStorage.setItem(
+            NAV_SCROLL_STORAGE_KEY,
+            String(event.currentTarget.scrollTop),
+          );
+        }}
+      >
         {(["foundations", "components", "patterns"] as const).map((group) => {
           const items = entriesByGroup[group];
           if (items.length === 0) return null;

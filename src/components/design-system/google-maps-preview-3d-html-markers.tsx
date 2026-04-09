@@ -9,7 +9,7 @@ import {
 } from "@cesium/engine";
 import type { Viewer } from "@cesium/widgets";
 import type { RefObject } from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /** Nudge sampled mesh height slightly toward the ground to reduce “hovering” when zooming (pin art + LOD bias). */
 const SAMPLED_SURFACE_OFFSET_M = -2.75;
@@ -64,6 +64,15 @@ interface GoogleMapsPreview3dHtmlMarkersProps {
   geofenceCentroid?: { lng: number; lat: number } | null;
   /** Ellipsoid height for the dealership icon (defaults to average marker height). */
   dealershipHeightM?: number;
+  markerTuning?: {
+    vehicleScale: number;
+    keysScale: number;
+    hoverScale: number;
+    hoverOverlayIntensity: number;
+    hoverLiftPx: number;
+    hoverShadowIntensity: number;
+    shadowIntensity: number;
+  };
 }
 
 const scratchAdjustCartographic = new Cartographic();
@@ -113,10 +122,13 @@ export function GoogleMapsPreview3dHtmlMarkers({
   surfaceHeightM,
   geofenceCentroid: centroid,
   dealershipHeightM,
+  markerTuning,
 }: GoogleMapsPreview3dHtmlMarkersProps) {
   const markerElementsRef = useRef<Record<string, HTMLDivElement | null>>({});
   const cartesianByIdRef = useRef<Record<string, Cartesian3>>({});
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
+  const lastScreenPosByIdRef = useRef<Record<string, { x: number; y: number }>>({});
   /** One scratch Cartesian2 per marker id — avoids reusing a single result buffer across calls. */
   const winByIdRef = useRef<Record<string, Cartesian2>>({});
   const eyeAtLastSampleMRef = useRef<number | null>(null);
@@ -292,12 +304,15 @@ export function GoogleMapsPreview3dHtmlMarkers({
   }, [clusters, dealershipItem, markers, dealershipHeightM]);
 
   /** Items currently rendered in the overlay — individual markers, clusters, or single dealership icon. */
-  const renderedItems: { id: string }[] =
-    tier === "dealership" && dealershipItem
-      ? [dealershipItem]
-      : tier === "cluster" && clusters
-        ? clusters
-        : (markers as unknown as { id: string }[]);
+  const renderedItems = useMemo(
+    (): { id: string }[] =>
+      tier === "dealership" && dealershipItem
+        ? [dealershipItem]
+        : tier === "cluster" && clusters
+          ? clusters
+          : (markers as unknown as { id: string }[]),
+    [clusters, dealershipItem, markers, tier],
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -335,8 +350,20 @@ export function GoogleMapsPreview3dHtmlMarkers({
 
         const x = cr.left - or.left + win.x;
         const y = cr.top - or.top + win.y;
+        const xRounded = Math.round(x);
+        const yRounded = Math.round(y);
         el.style.visibility = "visible";
-        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
+        const last = lastScreenPosByIdRef.current[item.id];
+        if (
+          last &&
+          last.x === xRounded &&
+          last.y === yRounded &&
+          el.style.transform.length > 0
+        ) {
+          continue;
+        }
+        lastScreenPosByIdRef.current[item.id] = { x: xRounded, y: yRounded };
+        el.style.transform = `translate(${xRounded}px, ${yRounded}px) translate(-50%, -100%)`;
       }
     };
 
@@ -349,6 +376,13 @@ export function GoogleMapsPreview3dHtmlMarkers({
       }
     };
   }, [visible, viewerRef, markers, tier, clusters, renderedItems]);
+
+  useEffect(() => {
+    if (!visible) {
+      setHoveredMarkerId(null);
+      lastScreenPosByIdRef.current = {};
+    }
+  }, [visible]);
 
   if (!visible) {
     return null;
@@ -364,9 +398,17 @@ export function GoogleMapsPreview3dHtmlMarkers({
             if (el) el.style.visibility = "hidden";
           }}
           className={cn(
-            "pointer-events-auto absolute left-0 top-0 origin-bottom",
+            "pointer-events-auto",
+            "absolute left-0 top-0 origin-bottom",
             "will-change-transform",
           )}
+          style={{ zIndex: hoveredMarkerId === dealershipItem.id ? 140 : 20 }}
+          onMouseEnter={() => setHoveredMarkerId(dealershipItem.id)}
+          onMouseLeave={() =>
+            setHoveredMarkerId((current) =>
+              current === dealershipItem.id ? null : current
+            )
+          }
         >
           <VehicleMapClusterMarker
             variant="group-active"
@@ -387,9 +429,15 @@ export function GoogleMapsPreview3dHtmlMarkers({
             if (el) el.style.visibility = "hidden";
           }}
           className={cn(
-            "pointer-events-auto absolute left-0 top-0 origin-bottom",
+            "pointer-events-auto",
+            "absolute left-0 top-0 origin-bottom",
             "will-change-transform",
           )}
+          style={{ zIndex: hoveredMarkerId === c.id ? 130 : 20 }}
+          onMouseEnter={() => setHoveredMarkerId(c.id)}
+          onMouseLeave={() =>
+            setHoveredMarkerId((current) => (current === c.id ? null : current))
+          }
         >
           <VehicleMapClusterMarker
             variant="number-default"
@@ -409,21 +457,48 @@ export function GoogleMapsPreview3dHtmlMarkers({
           if (el) el.style.visibility = "hidden";
         }}
         className={cn(
-          "pointer-events-auto absolute left-0 top-0 origin-bottom",
+          "pointer-events-auto",
+          "absolute left-0 top-0 origin-bottom",
           "will-change-transform",
         )}
+        style={{ zIndex: hoveredMarkerId === m.id ? 160 : 30 }}
+        onMouseEnter={() => setHoveredMarkerId(m.id)}
+        onMouseLeave={() =>
+          setHoveredMarkerId((current) => (current === m.id ? null : current))
+        }
       >
         {tier === "chip" ? (
-          <VehicleMapMarkerChip
-            variantIndex={m.ageTier ?? 0}
-            imageSrc={m.imageSrc}
-            title={`Vehicle — ${m.id}`}
-            hoverOverlayColor={VEHICLE_MARKER_CHIP_STROKE_HEX[m.ageTier ?? 0]}
-          />
+          <div style={{ transform: "scale(0.85)", transformOrigin: "50% 100%" }}>
+            <VehicleMapMarkerChip
+              variantIndex={m.ageTier ?? 0}
+              imageSrc={m.imageSrc}
+              title={`Vehicle — ${m.id}`}
+              hoverOverlayColor={VEHICLE_MARKER_CHIP_STROKE_HEX[m.ageTier ?? 0]}
+            />
+          </div>
         ) : m.variant === "keys" ? (
-          <KeysMapMarkerPin hoverable title={`Keys — ${m.id}`} />
+          <KeysMapMarkerPin
+            hoverable
+            title={`Keys — ${m.id}`}
+            sizeScale={markerTuning?.keysScale ?? 1}
+            hoverScale={markerTuning?.hoverScale ?? 1.05}
+            hoverOverlayIntensity={markerTuning?.hoverOverlayIntensity ?? 5}
+            hoverLiftPx={markerTuning?.hoverLiftPx ?? 0}
+            hoverShadowIntensity={markerTuning?.hoverShadowIntensity ?? 3}
+            shadowIntensity={markerTuning?.shadowIntensity ?? 0}
+          />
         ) : (
-          <VehicleMapMarkerPin tone={m.variant} hoverable title={`Vehicle — ${m.id}`} />
+          <VehicleMapMarkerPin
+            tone={m.variant}
+            hoverable
+            title={`Vehicle — ${m.id}`}
+            sizeScale={markerTuning?.vehicleScale ?? 1}
+            hoverScale={markerTuning?.hoverScale ?? 1.05}
+            hoverOverlayIntensity={markerTuning?.hoverOverlayIntensity ?? 5}
+            hoverLiftPx={markerTuning?.hoverLiftPx ?? 0}
+            hoverShadowIntensity={markerTuning?.hoverShadowIntensity ?? 3}
+            shadowIntensity={markerTuning?.shadowIntensity ?? 0}
+          />
         )}
       </div>
     ));

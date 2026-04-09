@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo } from "react";
 import { Plus, Trash2, Sparkles, Users, ChevronDown, X as XIcon } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -347,11 +348,12 @@ export function StepAudience({ formData, onUpdate }: StepAudienceProps) {
                         )}
                       >
                         {vm.imageUrl ? (
-                          <img
+                          <Image
                             src={vm.imageUrl}
                             alt={vm.model}
                             width={160}
                             height={80}
+                            unoptimized
                             className="h-16 w-full rounded object-contain"
                           />
                         ) : (
@@ -370,11 +372,12 @@ export function StepAudience({ formData, onUpdate }: StepAudienceProps) {
               {selectedModelData?.imageUrl &&
                 modelPickerOpenFor !== segment.id && (
                   <div className="flex items-center gap-4 border-t bg-muted/30 px-4 py-3">
-                    <img
+                    <Image
                       src={selectedModelData.imageUrl}
                       alt={selectedModelData.model}
                       width={240}
                       height={120}
+                      unoptimized
                       className="h-20 w-auto rounded-sm object-contain"
                     />
                     <span className="text-sm font-medium text-muted-foreground">

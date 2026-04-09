@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import {
   Bell,
   Car,
-  CheckCircle2,
   Globe,
   Hash,
   Mail,
@@ -16,10 +16,6 @@ import {
   Sparkles,
   Upload,
 } from "lucide-react";
-
-import { InteractiveTitleBarShowcase } from "@/app/design-system/components/organisms/interactive-title-bar-showcase";
-import { PageLayoutChromeShowcase } from "@/app/design-playground/showcases/page-layout-chrome-showcase";
-import { FileCabinetTabRow } from "@/app/design-playground/components/file-cabinet-tab-row";
 import { CAMPAIGN_RECOMMENDATIONS } from "@/lib/campaigns/mock-data";
 import { inventoryDashboardData } from "@/lib/inventory/dashboard-data";
 import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
@@ -95,28 +91,15 @@ import {
 } from "@/components/ui/input";
 import { InputCaption } from "@/components/ui/input-caption";
 import { MapViewTooltip } from "@/components/ui/map-view-tooltip";
-import { Paginator } from "@/components/ui/paginator";
-import { ProgressBar } from "@/components/ui/progress";
+import { InventoryVehicleHoverTooltip } from "@/components/ui/inventory-vehicle-hover-tooltip";
 import { RadioCardGroup, RadioCardOption } from "@/components/ui/radio-card";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { PortfolioRadioButton } from "@/components/ui/portfolio-radio";
 import { RadioList, RadioListItem } from "@/components/ui/radio-list";
 import { Sidebar } from "@/components/ui/sidebar";
 import { Slider, RangeSlider } from "@/components/ui/slider";
-import { StepperHorizontal } from "@/components/ui/stepper-horizontal";
-import { StepperVertical } from "@/components/ui/stepper-vertical";
-import { ToggleSwitch, type ToggleSwitchOption } from "@/components/ui/toggle-switch";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VehicleListItem } from "@/components/ui/vehicle-list-item";
 import { VehicleListPanel } from "@/components/ui/vehicle-list-panel";
-import { VehicleMapClusterMarker } from "@/components/ui/vehicle-map-cluster-marker";
-import { VehicleMapMarkerChip } from "@/components/ui/vehicle-map-marker-chip";
-import { KeysMapMarkerPin } from "@/components/ui/keys-map-marker-pin";
-import { VehicleMapMarkerPin } from "@/components/ui/vehicle-map-marker-pin";
-import {
-  CUSTOMER_DECK_TAB_LABELS,
-} from "@/components/customers/customers-table-model";
-import { FILE_CABINET_BILLING_TABLE_DEFAULTS } from "@/lib/file-cabinet-billing-table-defaults";
 
 import { SectionTitle } from "./components/atoms/SectionTitle";
 import { ShowcaseCard } from "./components/atoms/ShowcaseCard";
@@ -124,28 +107,106 @@ import { AlertDialogShowcaseSection } from "./components/organisms/AlertDialogSh
 import { BatteryThresholdShowcaseSection } from "./components/organisms/BatteryThresholdShowcaseSection";
 import { BadgeShowcaseSection } from "./components/organisms/BadgeShowcaseSection";
 import { ButtonShowcaseSection } from "./components/organisms/ButtonShowcaseSection";
+import { MapMarkersShowcaseSection } from "./components/organisms/MapMarkersShowcaseSection";
+import { PaginatorShowcaseSection } from "./components/organisms/PaginatorShowcaseSection";
+import { ProgressBarShowcaseSection } from "./components/organisms/ProgressBarShowcaseSection";
+import { StepperShowcaseSection } from "./components/organisms/StepperShowcaseSection";
+import { TooltipShowcaseSection } from "./components/organisms/TooltipShowcaseSection";
 import { ColorsSection } from "./components/organisms/ColorsSection";
-import { MapsSection } from "./components/organisms/MapsSection";
 import { ImagerySection } from "./components/organisms/ImagerySection";
 import { ShadowsElevationsSection } from "./components/organisms/ShadowsElevationsSection";
 import { SpacingSection } from "./components/organisms/SpacingSection";
+import { TabsShowcaseSection } from "./components/organisms/TabsShowcaseSection";
+import { ToggleSwitchShowcaseSection } from "./components/organisms/ToggleSwitchShowcaseSection";
 import { TypographySection } from "./components/organisms/TypographySection";
 import { DesignSystemPlaceholderSection } from "./components/organisms/DesignSystemPlaceholderSection";
-import {
-  DesignSystemTableViewPattern,
-  DesignSystemTableViewPatternNoTabs,
-} from "./components/patterns/table-view-pattern";
-import { VehicleDetailsPagePattern } from "./components/patterns/vehicle-details-page-pattern";
-import { UserPersonasSection } from "./components/organisms/UserPersonasSection";
+import { MapsSection } from "./components/organisms/MapsSection";
 import { designSystemNavConfig } from "./design-system-nav-config";
 import { type DesignSystemGroup } from "./design-system-routes";
 
-const SAMPLE_STEPS = [
-  { label: "Audience", caption: "Pick segment" },
-  { label: "Message", caption: "Compose content" },
-  { label: "Schedule", caption: "Set timing" },
-  { label: "Launch", caption: "Go live" },
-];
+const InteractiveTitleBarShowcase = dynamic(
+  () =>
+    import(
+      "@/app/design-system/components/organisms/interactive-title-bar-showcase"
+    ).then((mod) => mod.InteractiveTitleBarShowcase),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading title bar showcase...
+      </div>
+    ),
+  },
+);
+
+const PageLayoutChromeShowcase = dynamic(
+  () =>
+    import("@/app/design-playground/showcases/page-layout-chrome-showcase").then(
+      (mod) => mod.PageLayoutChromeShowcase,
+    ),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading page layout showcase...
+      </div>
+    ),
+  },
+);
+
+const DesignSystemTableViewPattern = dynamic(
+  () =>
+    import("./components/patterns/table-view-pattern").then(
+      (mod) => mod.DesignSystemTableViewPattern,
+    ),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading table pattern...
+      </div>
+    ),
+  },
+);
+
+const DesignSystemTableViewPatternNoTabs = dynamic(
+  () =>
+    import("./components/patterns/table-view-pattern").then(
+      (mod) => mod.DesignSystemTableViewPatternNoTabs,
+    ),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading table pattern...
+      </div>
+    ),
+  },
+);
+
+const VehicleDetailsPagePattern = dynamic(
+  () =>
+    import("./components/patterns/vehicle-details-page-pattern").then(
+      (mod) => mod.VehicleDetailsPagePattern,
+    ),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading vehicle details pattern...
+      </div>
+    ),
+  },
+);
+
+const UserPersonasSection = dynamic(
+  () =>
+    import("./components/organisms/UserPersonasSection").then(
+      (mod) => mod.UserPersonasSection,
+    ),
+  {
+    loading: () => (
+      <div className="rounded-[8px] border border-border bg-muted/10 p-4 text-sm text-muted-foreground">
+        Loading user personas...
+      </div>
+    ),
+  },
+);
 
 const SAMPLE_VEHICLES = [
   {
@@ -167,86 +228,6 @@ const SAMPLE_VEHICLES = [
     statusIcons: { location: "inactive" as const, keyPaired: "active" as const, battery: "active" as const },
   },
 ];
-
-const {
-  underGlowPx: fileCabinetUnderGlowPx,
-  tabAccent: fileCabinetTabAccent,
-  tabTopRadiusPx: fileCabinetTabTopRadiusPx,
-} = FILE_CABINET_BILLING_TABLE_DEFAULTS;
-
-function InteractiveToggleSwitchShowcase() {
-  const [size, setSize] = React.useState<"sm" | "default" | "lg">("default");
-  const [mode, setMode] = React.useState<"label" | "icon">("label");
-  const [value, setValue] = React.useState("map");
-
-  const options: [ToggleSwitchOption, ToggleSwitchOption] =
-    mode === "icon"
-      ? [
-          { value: "map", icon: <Info className="size-4" /> },
-          { value: "table", icon: <CheckCircle2 className="size-4" /> },
-        ]
-      : [
-          { value: "map", label: "Map" },
-          { value: "table", label: "Table" },
-        ];
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {(["sm", "default", "lg"] as const).map((nextSize) => (
-          <Button key={nextSize} size="2xs" variant={size === nextSize ? "default" : "outline"} onClick={() => setSize(nextSize)}>
-            {nextSize}
-          </Button>
-        ))}
-        {(["label", "icon"] as const).map((nextMode) => (
-          <Button key={nextMode} size="2xs" variant={mode === nextMode ? "default" : "outline"} onClick={() => setMode(nextMode)}>
-            {nextMode}
-          </Button>
-        ))}
-      </div>
-      <div className="rounded-md border border-border bg-muted/20 p-4">
-        <ToggleSwitch
-          value={value}
-          onValueChange={setValue}
-          size={size}
-          options={options}
-          aria-label="Interactive toggle switch"
-        />
-      </div>
-    </div>
-  );
-}
-
-function InteractiveTabsShowcase() {
-  const [activeTab, setActiveTab] = React.useState("drive");
-
-  return (
-    <div className="space-y-4">
-      <div className="rounded-sm border border-border bg-muted/20 p-5">
-        <FileCabinetTabRow
-          value={activeTab}
-          onValueChange={setActiveTab}
-          labels={CUSTOMER_DECK_TAB_LABELS}
-          surface="light"
-          underGlowPx={fileCabinetUnderGlowPx}
-          accent={fileCabinetTabAccent}
-          tabTopRadiusPx={fileCabinetTabTopRadiusPx}
-          showLeftLamp={false}
-          noLeftLampBelowStyle="preset-led"
-          tabMotionVariant="sink-rise"
-        />
-        <div className="mt-4 rounded-sm border border-border bg-background px-4 py-5 text-sm text-muted-foreground">
-          Reuses the file-cabinet tab treatment from the table-with-tabs component. Active tab:
-          {" "}
-          <span className="font-medium text-foreground">
-            {CUSTOMER_DECK_TAB_LABELS[activeTab] ?? activeTab}
-          </span>
-          .
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const BREADCRUMB_DEPTH_EXAMPLES: Record<
   1 | 2 | 3 | 4 | 5,
@@ -302,65 +283,6 @@ function InteractiveBreadcrumbsShowcase() {
       </div>
       <TitleBar breadcrumbs={BREADCRUMB_DEPTH_EXAMPLES[segmentCount]} title="" />
     </>
-  );
-}
-
-function InteractiveProgressBarShowcase() {
-  const [variant, setVariant] = React.useState<"linear" | "dashed">("linear");
-  const [value, setValue] = React.useState(60);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {(["linear", "dashed"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="2xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
-            {nextVariant}
-          </Button>
-        ))}
-        {[60, 40, 30, 20, 10].map((nextValue) => (
-          <Button key={nextValue} size="2xs" variant={value === nextValue ? "default" : "outline"} onClick={() => setValue(nextValue)}>
-            {nextValue}%
-          </Button>
-        ))}
-      </div>
-      <ProgressBar
-        variant={variant}
-        label="Campaign upload"
-        value={value}
-        caption={`${value}% complete`}
-      />
-    </div>
-  );
-}
-
-function InteractivePaginatorShowcase() {
-  const [variant, setVariant] = React.useState<"simple" | "inline" | "numbered" | "dots">("simple");
-  const [currentPage, setCurrentPage] = React.useState(2);
-  const totalPages = 12;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {(["simple", "inline", "numbered", "dots"] as const).map((nextVariant) => (
-          <Button key={nextVariant} size="2xs" variant={variant === nextVariant ? "default" : "outline"} onClick={() => setVariant(nextVariant)}>
-            {nextVariant}
-          </Button>
-        ))}
-        {[1, 2, 3, 4, 5].map((page) => (
-          <Button key={page} size="2xs" variant={currentPage === page ? "default" : "outline"} onClick={() => setCurrentPage(page)}>
-            p{page}
-          </Button>
-        ))}
-      </div>
-      <Paginator
-        variant={variant}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={240}
-        pageSize={20}
-        onPageChange={setCurrentPage}
-      />
-    </div>
   );
 }
 
@@ -703,14 +625,12 @@ function renderComponentShowcase(slug: string, label: string) {
                 value="template-a"
                 title="Retention template"
                 description="Balanced promotion and reminder timing."
-                subDetail="Expected lift: +12%"
                 trailing={<Badge variant="soft" tone="green">Default</Badge>}
               />
               <RadioCardOption
                 value="template-b"
                 title="Win-back template"
                 description="Aggressive offer cadence for inactive users."
-                subDetail="Expected lift: +18%"
                 trailing={<Badge variant="soft" tone="blue">Alt</Badge>}
               />
             </RadioCardGroup>
@@ -718,13 +638,13 @@ function renderComponentShowcase(slug: string, label: string) {
         </ShowcaseCard>,
       );
     case "toggle-switch":
-      return wrapSection(
-        sectionId,
-        label,
-        "Two-state segmented toggle with live size and content-mode controls.",
-        <ShowcaseCard>
-          <InteractiveToggleSwitchShowcase />
-        </ShowcaseCard>,
+      return (
+        <ToggleSwitchShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "automotive-system-toggle":
       return wrapSection(
@@ -757,13 +677,13 @@ function renderComponentShowcase(slug: string, label: string) {
         </div>,
       );
     case "tabs":
-      return wrapSection(
-        sectionId,
-        label,
-        "File-cabinet tabs used by the table-with-tabs surface.",
-        <ShowcaseCard className="space-y-8">
-          <InteractiveTabsShowcase />
-        </ShowcaseCard>,
+      return (
+        <TabsShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "table":
       return wrapSection(
@@ -784,46 +704,13 @@ function renderComponentShowcase(slug: string, label: string) {
         </ShowcaseCard>,
       );
     case "tooltip":
-      return wrapSection(
-        sectionId,
-        label,
-        "Tooltip placements for all four sides, plus the card variant.",
-        <ShowcaseCard>
-          <TooltipProvider>
-            <div className="flex flex-wrap items-center gap-4">
-              <Tooltip>
-                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
-                  Top
-                </TooltipTrigger>
-                <TooltipContent side="top">Quick tooltip copy</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
-                  Right
-                </TooltipTrigger>
-                <TooltipContent side="right">Quick tooltip copy</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
-                  Bottom
-                </TooltipTrigger>
-                <TooltipContent side="bottom">Quick tooltip copy</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger render={<Button variant="outline" size="sm" />}>
-                  Left
-                </TooltipTrigger>
-                <TooltipContent side="left">Quick tooltip copy</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger render={<Button variant="secondary" size="sm" />}>
-                  Card tooltip
-                </TooltipTrigger>
-                <TooltipContent side="top" variant="card">Use card tooltips for longer explanatory text.</TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
-        </ShowcaseCard>,
+      return (
+        <TooltipShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "map-view-tooltip":
       return wrapSection(
@@ -837,14 +724,40 @@ function renderComponentShowcase(slug: string, label: string) {
           </div>
         </ShowcaseCard>,
       );
-    case "progress-bar":
+    case "inventory-vehicle-hover-tooltip":
       return wrapSection(
         sectionId,
         label,
-        "Linear and dashed progress indicators with selectable values.",
-        <ShowcaseCard className="space-y-5">
-          <InteractiveProgressBarShowcase />
+        "Hover tooltip shown above map vehicle markers with live inventory metadata.",
+        <ShowcaseCard className="bg-[#f4f4f5]">
+          <div className="flex flex-wrap gap-6">
+            <InventoryVehicleHoverTooltip
+              title="2022 Lexus ES 350"
+              vin="WBA53AK02R7N11605"
+              stockNumber="7N11605"
+              stockType="Certified"
+              price="$37,989"
+              mileage="24,421 miles"
+            />
+            <InventoryVehicleHoverTooltip
+              title="2026 Chevrolet Tahoe LT"
+              vin="1GNS6NKD8TR275692"
+              stockNumber="275692"
+              stockType="New"
+              price="$61,950"
+              mileage="8,440 miles"
+            />
+          </div>
         </ShowcaseCard>,
+      );
+    case "progress-bar":
+      return (
+        <ProgressBarShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "slider":
       return wrapSection(
@@ -925,46 +838,31 @@ function renderComponentShowcase(slug: string, label: string) {
         </div>,
       );
     case "map-markers":
-      return wrapSection(
-        sectionId,
-        label,
-        "Pin, chip, and cluster markers for inventory map overlays.",
-        <ShowcaseCard>
-          <div className="flex flex-wrap items-center gap-8">
-            <VehicleMapMarkerPin tone="teal" hoverable />
-            <KeysMapMarkerPin hoverable />
-            <VehicleMapMarkerChip variantIndex={0} hoverOverlayColor="#1A9375" />
-            <VehicleMapClusterMarker countLabel="142" hoverable />
-            <VehicleMapClusterMarker variant="group-active" countLabel="32" hoverable />
-          </div>
-        </ShowcaseCard>,
+      return (
+        <MapMarkersShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "stepper":
-      return wrapSection(
-        sectionId,
-        label,
-        "Horizontal and vertical progress stepper components.",
-        <ShowcaseCard className="space-y-8">
-          <StepperHorizontal steps={SAMPLE_STEPS} currentStep={1} align="left" />
-          <div className="max-w-md">
-            <StepperVertical
-              steps={SAMPLE_STEPS.map((step) => ({
-                ...step,
-                supportText: step.caption,
-              }))}
-              currentStep={2}
-            />
-          </div>
-        </ShowcaseCard>,
+      return (
+        <StepperShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "paginator":
-      return wrapSection(
-        sectionId,
-        label,
-        "Simple, inline, numbered and dots pagination with live page controls.",
-        <ShowcaseCard className="space-y-6">
-          <InteractivePaginatorShowcase />
-        </ShowcaseCard>,
+      return (
+        <PaginatorShowcaseSection
+          key={slug}
+          overline="Components"
+          title={label}
+          description={getDesignSystemDescription("components", slug)}
+        />
       );
     case "inline-tips":
       return wrapSection(
@@ -1362,6 +1260,8 @@ const entryDescriptions: Record<string, string> = {
   "components:table-with-tabs": "Table with Tabs combines segmented table views with shared structure and controls.",
   "components:tooltip": "Tooltips reveal concise supporting information without leaving the current context.",
   "components:map-view-tooltip": "Map View Tooltip previews rich map metadata directly at point-of-interest interactions.",
+  "components:inventory-vehicle-hover-tooltip":
+    "Inventory Vehicle Hover Tooltip shows map-marker hover details with VIN, stock metadata, and pricing context.",
   "components:progress-bar": "Progress Bars communicate completion state and remaining work over time.",
   "components:slider": "Sliders let users select values or ranges through direct manipulation.",
   "components:battery-threshold": "Battery Threshold controls configure and visualize threshold-based battery behavior.",

@@ -48,13 +48,20 @@ export function SendVehicleBrochureDialog({
   const [includePricingDetails, setIncludePricingDetails] = useState(true);
   const [includeCarfaxReport, setIncludeCarfaxReport] = useState(true);
 
-  useEffect(() => {
-    if (!open) return;
+  function resetFormState() {
     setCustomerName("");
     setCustomerEmail("");
     setCustomerPhone("");
     setIncludePricingDetails(true);
     setIncludeCarfaxReport(true);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const frame = requestAnimationFrame(() => {
+      resetFormState();
+    });
+    return () => cancelAnimationFrame(frame);
   }, [open]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

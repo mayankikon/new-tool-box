@@ -64,7 +64,6 @@ export function ConnectAppPhonePreview({
   config,
   profile,
   palette,
-  fontPreset: _fontPreset,
   promotionOffers,
   galleryUrls,
 }: {
@@ -83,13 +82,15 @@ export function ConnectAppPhonePreview({
   const [firstCouponHeightPx, setFirstCouponHeightPx] = useState(0);
   const [secondCouponNaturalHeightPx, setSecondCouponNaturalHeightPx] =
     useState(0);
+  const clampedGallerySlideIndex =
+    galleryUrls.length === 0
+      ? 0
+      : Math.min(gallerySlideIndex, galleryUrls.length - 1);
 
   useLayoutEffect(() => {
     const firstEl = firstCouponMeasureRef.current;
     const secondEl = secondCouponMeasureRef.current;
     if (promotionOffers.length < 2) {
-      setFirstCouponHeightPx(0);
-      setSecondCouponNaturalHeightPx(0);
       return;
     }
 
@@ -123,14 +124,7 @@ export function ConnectAppPhonePreview({
     if (el) {
       el.scrollLeft = 0;
     }
-    setGallerySlideIndex(0);
   }, [galleryUrls]);
-
-  useEffect(() => {
-    setGallerySlideIndex((i) =>
-      galleryUrls.length === 0 ? 0 : Math.min(i, galleryUrls.length - 1),
-    );
-  }, [galleryUrls.length]);
 
   useEffect(() => {
     if (galleryUrls.length <= 1) return;
@@ -448,7 +442,7 @@ export function ConnectAppPhonePreview({
                             aria-label={`Community image ${i + 1}`}
                             className={cn(
                               "size-1.5 rounded-full transition-colors",
-                              i === gallerySlideIndex
+                              i === clampedGallerySlideIndex
                                 ? "bg-foreground"
                                 : "bg-foreground/20",
                             )}

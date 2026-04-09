@@ -69,40 +69,17 @@
 
 .mapboxgl-popup.inventory-vehicle-hover-popup .mapboxgl-popup-content {
   font-family: var(--font-saira), var(--font-headline), sans-serif;
-  background: #0a0a0a !important;
-  color: #fafafa !important;
-  border-radius: 6px;
+  background: transparent !important;
+  color: inherit !important;
+  border-radius: 0;
   padding: 0;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+  box-shadow: none !important;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
 }
 .mapboxgl-popup.inventory-vehicle-hover-popup .mapboxgl-popup-tip {
-  border-top-color: #0a0a0a !important;
-  margin-top: -1px;
-  margin-bottom: -1px;
+  display: none;
   pointer-events: none;
-}
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light .mapboxgl-popup-content {
-  background: #ffffff !important;
-  color: #0a0a0a !important;
-  box-shadow: 0 12px 28px rgba(15, 23, 32, 0.18);
-}
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
-  border-bottom-color: #ffffff !important;
-}
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
-  border-top-color: #ffffff !important;
-}
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
-  border-right-color: #ffffff !important;
-}
-.mapboxgl-popup.inventory-vehicle-hover-popup.inventory-vehicle-hover-popup--light.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
-  border-left-color: #ffffff !important;
 }
 
 @theme inline {
