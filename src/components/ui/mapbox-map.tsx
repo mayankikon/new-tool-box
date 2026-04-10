@@ -175,10 +175,6 @@ export function MapboxMap({
 
     const requestedStyle = style;
 
-    onBeforeStyleChangeRef.current?.(map);
-
-    map.setStyle(requestedStyle);
-
     const onStyleLoad = () => {
       if (stylePropRef.current !== requestedStyle) return;
       if (lastAppliedStyleRef.current === requestedStyle) return;
@@ -193,7 +189,28 @@ export function MapboxMap({
       });
     };
 
-    map.once("style.load", onStyleLoad);
+    /**
+     * Defer `onBeforeStyleChange` + `setStyle` to the next macrotask so teardown
+     * (e.g. `createRoot` unmount on Mapbox HTML markers) never runs synchronously
+     * inside this effect — React 19 rejects sync `root.unmount()` while a render
+     * is still in progress from the same update chain.
+     */
+    const timeoutId = window.setTimeout(() => {
+      const currentMap = mapRef.current;
+      if (!currentMap || currentMap !== map) return;
+      if (stylePropRef.current !== requestedStyle) return;
+      try {
+        onBeforeStyleChangeRef.current?.(map);
+        map.setStyle(requestedStyle);
+        map.once("style.load", onStyleLoad);
+      } catch {
+        /* map may be tearing down */
+      }
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [style, isLoaded]);
 
   const handleZoomIn = useCallback(() => {

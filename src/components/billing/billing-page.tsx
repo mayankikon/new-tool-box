@@ -8,10 +8,6 @@ import { useTheme } from "@/components/theme/app-theme-provider";
 import type { DashPreviewSurface } from "@/app/design-playground/components/dash-preview-canvas";
 import { FileCabinetTableChrome } from "@/app/design-playground/components/file-cabinet-table-chrome";
 import { TitleBar } from "@/components/app/title-bar";
-import {
-  InventoryKpiCard,
-  inventoryDashboardShowcaseWidgetSettings,
-} from "@/components/inventory/inventory-dashboard-widgets";
 import { Button } from "@/components/ui/button";
 import { Input, InputContainer, InputIcon } from "@/components/ui/input";
 import { MonthSelectButton } from "@/components/ui/month-select-button";
@@ -33,7 +29,6 @@ import {
   DATA_TABLE_ROW_GROUP_CLASS,
   DATA_TABLE_ROW_HOVER_BACKGROUND_CLASS,
 } from "@/lib/data-table-row-hover";
-import { DASHBOARD_CHROME_SURFACE_CLASS } from "@/lib/ui/dashboard-chrome-surface";
 import { cn } from "@/lib/utils";
 
 const {
@@ -742,21 +737,12 @@ export function BillingPage({
 
   const monthSummary = useMemo(() => {
     const totalRevenue = monthRecords.reduce((sum, record) => sum + record.price, 0);
-    const serviceMix =
-      serviceTab === "all"
-        ? "All service terms"
-        : `${BILLING_SERVICE_TAB_LABELS[serviceTab]} contracts`;
 
     return {
       revenue: currencyFormatter.format(totalRevenue),
       devicesSold: String(monthRecords.length),
-      revenueCaption: `${serviceMix} in ${BILLING_MONTHS.find((month) => month.value === selectedMonth)?.label ?? selectedMonth}`,
-      devicesSoldCaption:
-        serviceTab === "all"
-          ? "Devices sold across all service types"
-          : `Devices sold for ${BILLING_SERVICE_TAB_LABELS[serviceTab]}`,
     };
-  }, [monthRecords, selectedMonth, serviceTab]);
+  }, [monthRecords]);
 
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
@@ -807,27 +793,35 @@ export function BillingPage({
         />
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-hidden px-8 pb-8 pt-6">
-        <div className="grid shrink-0 gap-4 md:max-w-[50%] md:grid-cols-2 xl:max-w-[720px]">
-          <InventoryKpiCard
-            metric={{
-              label: "Revenue",
-              value: monthSummary.revenue,
-              caption: monthSummary.revenueCaption,
-              icon: "vehicle-inventory",
-            }}
-            settings={inventoryDashboardShowcaseWidgetSettings}
-            className={DASHBOARD_CHROME_SURFACE_CLASS}
-          />
-          <InventoryKpiCard
-            metric={{
-              label: "Devices Sold",
-              value: monthSummary.devicesSold,
-              caption: monthSummary.devicesSoldCaption,
-              icon: "devices-sold",
-            }}
-            settings={inventoryDashboardShowcaseWidgetSettings}
-            className={DASHBOARD_CHROME_SURFACE_CLASS}
-          />
+        <div className="grid shrink-0 gap-8 md:max-w-[50%] md:grid-cols-2 xl:max-w-[720px]">
+          <div className="flex flex-col gap-1">
+            <span
+              className="text-sm font-medium text-[var(--theme-text-secondary)]"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Revenue
+            </span>
+            <span
+              className="text-2xl font-medium tracking-tighter text-foreground"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              {monthSummary.revenue}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span
+              className="text-sm font-medium text-[var(--theme-text-secondary)]"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Devices Sold
+            </span>
+            <span
+              className="text-2xl font-medium tracking-tighter text-foreground"
+              style={{ fontFamily: "var(--font-headline)" }}
+            >
+              {monthSummary.devicesSold}
+            </span>
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-2.5">

@@ -35,8 +35,7 @@ import {
 import type { InventoryVehicleRecord } from "@/lib/inventory/vehicle-list-data";
 import { cn } from "@/lib/utils";
 
-const CARFAX_LOGO_IMAGE =
-  "https://www.figma.com/api/mcp/asset/25c012b7-0a23-407a-a697-2e9ee373339a";
+const CARFAX_LOGO_IMAGE = "/media/logos/carfax.png";
 
 const locationRows = [
   {
@@ -415,6 +414,7 @@ export function InventoryVehicleDetailPanel({
           <Tabs
             value={detailDeckTab}
             onValueChange={setDetailDeckTab}
+            className="mt-2"
           >
             <div className="flex justify-center px-4">
               <TabsList variant="filter">
@@ -545,10 +545,9 @@ export function InventoryVehicleDetailPanel({
                         <Image
                           src={CARFAX_LOGO_IMAGE}
                           alt="CARFAX"
-                          width={125}
-                          height={23}
-                          unoptimized
-                          className="h-auto w-[7.8125rem]"
+                          width={160}
+                          height={40}
+                          className="h-auto max-h-7 w-auto max-w-[7.8125rem] object-contain object-left"
                         />
                         <span className="text-sm font-medium underline underline-offset-2">
                           See full report

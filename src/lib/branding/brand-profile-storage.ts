@@ -118,7 +118,7 @@ function readLegacyBranding(): LegacyDealershipBranding | null {
   return null;
 }
 
-function staticServerProfile(): DealerBrandProfile {
+export function staticServerProfile(): DealerBrandProfile {
   const toyota =
     VEHICLE_MODELS_BY_MAKE.Toyota?.find((m) => m.imageUrl?.trim()) ??
     VEHICLE_MODELS_BY_MAKE.BMW?.find((m) => m.imageUrl?.trim());

@@ -14,6 +14,7 @@ import {
   loadBrandProfile,
   resolveBrandPalette,
   saveBrandProfile,
+  staticServerProfile,
   updateBrandProfile,
 } from "@/lib/branding/brand-profile-storage";
 import type {
@@ -34,8 +35,8 @@ const BrandProfileContext = createContext<BrandProfileContextValue | null>(
 );
 
 export function BrandProfileProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfileState] = useState<DealerBrandProfile>(() =>
-    loadBrandProfile(),
+  const [profile, setProfileState] = useState<DealerBrandProfile>(
+    staticServerProfile,
   );
 
   const refresh = useCallback(() => {
@@ -43,6 +44,8 @@ export function BrandProfileProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    setProfileState(loadBrandProfile());
+
     const onChange = () => refresh();
     window.addEventListener(BRAND_PROFILE_CHANGED_EVENT, onChange);
     window.addEventListener("storage", onChange);
