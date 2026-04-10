@@ -7,6 +7,8 @@ This document describes how the inventory lot map switches between **cluster mar
 | Concern | Location |
 | -------- | -------- |
 | Zoom thresholds, clustering, reconcile on `zoom` / `moveend` | `src/components/inventory/inventory-content.tsx` |
+| Custom zoom UI: Plus/Minus zoom, dwell “Show slider”, magnetic checkpoint track | `src/components/inventory/inventory-map-zoom-controls.tsx` + `replaceDefaultZoomControls` on `MapboxMap` |
+| Checkpoint math (vehicle marker zoom, vehicle image zoom) + snap helpers | `src/lib/inventory/inventory-map-zoom-checkpoints.ts` |
 | `INVENTORY_MAP_VEHICLE_IMAGE_ZOOM` (selection fly target) | `src/lib/inventory/inventory-map-vehicle-features.ts` |
 | GeoJSON features (`ageTier`, `imageSrc`, etc.) | `buildInventoryVehicleFeatureCollection` in `src/lib/inventory/inventory-map-vehicle-features.ts` |
 | Cluster UI (dealership icon vs number) | `VehicleMapClusterMarker` in `src/components/ui/vehicle-map-cluster-marker.tsx` |
@@ -33,6 +35,15 @@ From `inventory-map-vehicle-features.ts`:
 | -------- | ----- | ---- |
 | `INVENTORY_MAP_VEHICLE_IMAGE_ZOOM` | `18.5` | **Selection fly**: `easeTo` uses `max(currentZoom, 18.5)` so the camera stays high enough for photo chips after picking a vehicle from the list (avoids animation dipping below the tier where chips read well). |
 
+From `inventory-map-zoom-checkpoints.ts` (slider checkpoints):
+
+| Constant | Value | Role |
+| -------- | ----- | ---- |
+| `INVENTORY_MAP_SLIDER_ZOOM_MIN` / `INVENTORY_MAP_SLIDER_ZOOM_MAX` | `15` / `19.5` | **Linear** slider mapping: handle position is \((zoom - min) / (max - min)\). The span is chosen **narrower** than e.g. 14–20 so the **vehicle marker** and **vehicle image** checkpoints have comfortable vertical separation on the track; zoom still clamps at the ends. |
+| `INVENTORY_MAP_ZOOM_CHECKPOINT_MARKER` | `17.3` | **Checkpoint — vehicle markers**: `easeTo` this zoom so tier-colored **circle** markers read well (below `INVENTORY_MAP_VEHICLE_PIN_ZOOM` / HTML chips). |
+
+**Checkpoint slider UX:** After hovering the collapsed zoom buttons for ~1s, a tooltip offers **Show slider**. The zoom control column keeps a **fixed width** matching **`MapControlButton`** (`40px` / `w-10`); the tooltip and an invisible hover bridge are **positioned to the left** (not in document flow) so compass / basemap / 3D controls **do not shift** when the tooltip appears. Toggling expanded mode uses a **layout** transition on the zoom block only (collapsed Plus/Minus ↔ expanded track). In **expanded** mode, zoom **+ / −** are **borderless icon-only** controls (no second `MapControlButton` box) so they sit inside the single panel ring; **collapsed** mode still uses **`MapControlButton`** like the rest of the map chrome. Expanded mode uses a vertical track with **two** rings at normalized positions for **vehicle circle markers** (`INVENTORY_MAP_ZOOM_CHECKPOINT_MARKER`) and **vehicle photo chips** (`INVENTORY_MAP_VEHICLE_IMAGE_ZOOM`). The side **icon chip** for each ring appears only while **hovering** that ring (not when it is merely active). Both chips share the **same fixed width** (`w-20` / 80px). Artwork: **`public/media/map-markers/icon.svg`** (vehicle markers) and **`public/media/map-markers/image.png`** (vehicle images); the PNG uses **`next/image`** with **`unoptimized`** so a high-resolution `image.png` stays sharp when scaled into the chip. Rings use **primary** stroke and **`scale(1.5)`** on hover (skipped when reduced motion is preferred). Behind the sharp rings, an optional **SVG goo (metaball) filter** blends **primary-filled** disks for the thumb and the active/snapped checkpoint so they read as **merging bubbles** as the camera eases; the **sharp thumb** (`z-index` above the rings) stays on top. Clicking a checkpoint also runs a short **scale pulse** on the thumb. Reduced motion disables the goo + pulse. The tapered stroke and rings share one **centered** axis (`w-6` track, symmetric trapezoid clip). **Hide slider** collapses back to Plus/Minus without moving the camera.
+
 ## End-to-end behavior (what the user sees)
 
 1. **Far / mid zoom — clustered HTML markers** (`zoom ≤ 17.49`, clusters present)  
@@ -47,9 +58,9 @@ From `inventory-map-vehicle-features.ts`:
 
 3. **Close zoom — HTML vehicle markers** (`zoom ≥ 17.5`)  
    - `reconcileInventoryVehicleHtmlMarkers` mounts `mapboxgl.Marker` instances with React roots.  
-   - **Mode is fixed to `chip`** (not `pin`): a comment in code notes that alternating pin/chip during `easeTo` / fly arcs caused flicker (image ↔ pin ↔ image), so inventory always renders **`VehicleMapMarkerChip`** at this tier.  
+   - **Mode by zoom:** `17.5 ≤ zoom < 18.5` → **`VehicleMapMarkerPin`** (teal / gold / red shields from `ageTier`); `zoom ≥ 18.5` (`INVENTORY_MAP_VEHICLE_IMAGE_ZOOM`) → **`VehicleMapMarkerChip`** with vehicle photo when available. List/selection fly uses **`easeTo`** (not `flyTo`) so the camera does not dip through zoom bands mid-animation and thrash pin↔chip.  
    - **`VehicleMapMarkerChip`**: if `imageSrc` is set, renders vector frame + **clipped vehicle photo** with **stroke color** from `VEHICLE_MARKER_CHIP_STROKE_HEX` / `variantIndex` (mapped from `ageTier`). Without a photo URL, it falls back to static **raster/SVG chip** exports from `vehicleMarkerChipAssets`.  
-   - The separate **`VehicleMapMarkerPin`** component (shield PNGs under `public/media/map-markers/`) is the design-system **shield** marker; it is **not** the active path on the inventory map today, but it is the asset set to use if you intentionally add a shield-only tier.
+   - **`VehicleMapMarkerPin`**: shield SVGs under `public/media/map-markers/map-marker-vehicle-*.svg` — the mid-zoom tier before photo chips.
 
 4. **Cluster click → camera**  
    - `expandInventoryCluster` calls `getClusterExpansionZoom` and `easeTo` with a zoom bounded by the discovery constants above and capped below the next tier (`INVENTORY_MAP_VEHICLE_IMAGE_ZOOM` appears in the expansion path for the number variant via the imported constant in `expandInventoryCluster`).
@@ -73,5 +84,5 @@ Paths under `public/` should be passed through `encodePublicAssetPath` when URLs
 
 1. Copy or extract the **threshold constants** and the **three reconcile paths**: cluster HTML (`Supercluster` + `VehicleMapClusterMarker`), Mapbox circle layer for unclustered tier dots, HTML markers (`VehicleMapMarkerChip` or your variant).  
 2. Keep **one GeoJSON source** with `cluster: true` and matching **Supercluster** options if you need HTML clusters that align with Mapbox clustering.  
-3. Prefer a **single HTML marker mode** per zoom band to avoid flicker during camera animation (inventory chose chip-only ≥ vehicle pin zoom).  
+3. Prefer **stable zoom bands** for HTML marker mode (inventory: shield pins, then photo chips) and **easeTo** (not `flyTo`) for programmatic moves so the camera does not dip through bands mid-animation.  
 4. Wire **selection fly** to `INVENTORY_MAP_VEHICLE_IMAGE_ZOOM` (or your product’s equivalent) if you need guaranteed photo legibility after programmatic navigation.

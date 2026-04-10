@@ -36,7 +36,7 @@ These are the canonical spacing values for the app shell. Every page and content
 
 1. **Below the avatar bar**: The inner `<div>` inside `<main>` that wraps the page `<TitleBar />` should use `pt-6` (24 px) top padding so there is consistent space between the avatar bar and the title bar (see `src/app/page.tsx`).
 
-   **Main column line field:** `AppMainLineFieldPattern` paints behind **all** routes in `<main>` (see `page.tsx`). Pages use the normal **`pt-6`** wrapper before `TitleBar` (same as Staff / Customers); the pattern shows through the padding.
+   **Main column background:** The shell uses a flat **`neutral-50`** fill (via `AppGroovedMainColumn`); no line-field overlay on the page. The **left sidebar** uses **`SidebarLineFieldPattern`** (horizontal line field only on the nav). Pages use the normal **`pt-6`** wrapper before `TitleBar` (same as Staff / Customers).
 
 2. **From the sidebar (left padding)**: All content inside the main column uses `px-8` (32 px) horizontal padding. This applies to `<AvatarBar>`, the page-level `<TitleBar>`, and `<main>` content containers.
 

@@ -20,9 +20,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { SidebarLineFieldPattern } from "@/components/chrome/sidebar-line-field-pattern";
 import { BoundaryIcon } from "@/components/icons/boundary-icon";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { getDefaultHrefForProduct } from "@/lib/app-nav/workspace-routes";
 import { cn } from "@/lib/utils";
+
+const SIDEBAR_LOGO_HOME_HREF = getDefaultHrefForProduct("inventory");
 
 /* Sidebar uses design tokens: --sidebar, --sidebar-foreground, --sidebar-accent,
    --sidebar-border, --spacing-*, --radius-sm, --text-sm, --leading-5, theme text/background. */
@@ -98,7 +102,7 @@ function ToolboxLogoMark({ className }: { className?: string }) {
       viewBox="0 0 225 84"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Toolbox"
+      aria-hidden
     >
       <path d="M82.543 2C81.0239 2 79.7924 3.23036 79.7924 4.74809V15.1298H84.071V6.27481H140.915V15.1298H145.194V4.74809C145.194 3.23036 143.962 2 142.443 2H82.543Z" fill="currentColor"/>
       <path d="M33.0701 33.0888V37.1902H27.1656V68.2595H22.1046V37.1902H16.2001V33.0888H33.0701Z" fill="currentColor"/>
@@ -115,11 +119,19 @@ function ToolboxLogoMark({ className }: { className?: string }) {
 
 function SidebarLogo({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 py-px">
+    <Link
+      href={SIDEBAR_LOGO_HOME_HREF}
+      className={cn(
+        "inline-flex items-center gap-2 rounded-[var(--radius-sm)] py-px",
+        "outline-none transition-opacity hover:opacity-90",
+        "focus-visible:ring-2 focus-visible:ring-[color:var(--sidebar-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sidebar)]"
+      )}
+      aria-label="Go to Inventory"
+    >
       {children ?? (
         <ToolboxLogoMark className="h-10 w-auto text-primary" />
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -477,7 +489,7 @@ function SidebarNavItem({
   const activeClasses =
     "bg-sidebar-accent font-medium text-sidebar-accent-foreground";
   const inactiveClasses =
-    "bg-transparent text-[color:var(--theme-text-secondary)] hover:bg-[color:var(--sidebar-nav-item-hover-bg)] hover:text-foreground";
+    "bg-transparent text-[color:var(--theme-text-secondary)] hover:bg-sidebar-accent hover:font-medium hover:text-sidebar-accent-foreground";
 
   if (item.href) {
     return (
@@ -724,62 +736,65 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex h-full flex-col border-r border-border bg-sidebar isolate",
+        "relative isolate flex h-full flex-col border-r border-border bg-neutral-50 dark:bg-sidebar",
         "transition-[width] duration-300 ease-out motion-reduce:transition-none",
         className
       )}
       style={{ width: isCollapsed ? collapsedWidth : expandedWidth }}
       aria-label="Main navigation"
     >
-      <SidebarHeader
-        logo={logo}
-        collapsed={isCollapsed}
-        showFoldButton={showFoldButton}
-        collapsible={collapsible}
-        onToggleCollapse={handleToggleCollapse}
-      />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <SidebarUserBar user={user} collapsed={isCollapsed} />
-        {showTopProductSwitcher && products && activeProductId && (
-          <SidebarProductSwitcher
+      <SidebarLineFieldPattern />
+      <div className="relative z-[1] flex h-full min-h-0 flex-1 flex-col">
+        <SidebarHeader
+          logo={logo}
+          collapsed={isCollapsed}
+          showFoldButton={showFoldButton}
+          collapsible={collapsible}
+          onToggleCollapse={handleToggleCollapse}
+        />
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <SidebarUserBar user={user} collapsed={isCollapsed} />
+          {showTopProductSwitcher && products && activeProductId && (
+            <SidebarProductSwitcher
+              products={products}
+              activeProductId={activeProductId}
+              onProductChange={onProductChange}
+              collapsed={isCollapsed}
+            />
+          )}
+          {mainSections.map((section, index) => (
+            <SidebarNavSection
+              key={section.title ?? `main-${index}`}
+              section={section}
+              collapsed={isCollapsed}
+              onItemClick={onNavItemClick}
+              paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
+              paddingBottom={
+                index === mainSections.length - 1
+                  ? "var(--spacing-8)"
+                  : undefined
+              }
+            />
+          ))}
+          {settingsSections.map((section, index) => (
+            <SidebarNavSection
+              key={section.title ?? `settings-${index}`}
+              section={section}
+              collapsed={isCollapsed}
+              onItemClick={onNavItemClick}
+              paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
+            />
+          ))}
+        </div>
+        {showFooterProductToggle && products && activeProductId && !isCollapsed ? (
+          <SidebarProductFooterToggle
             products={products}
             activeProductId={activeProductId}
             onProductChange={onProductChange}
-            collapsed={isCollapsed}
           />
-        )}
-        {mainSections.map((section, index) => (
-          <SidebarNavSection
-            key={section.title ?? `main-${index}`}
-            section={section}
-            collapsed={isCollapsed}
-            onItemClick={onNavItemClick}
-            paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
-            paddingBottom={
-              index === mainSections.length - 1
-                ? "var(--spacing-8)"
-                : undefined
-            }
-          />
-        ))}
-        {settingsSections.map((section, index) => (
-          <SidebarNavSection
-            key={section.title ?? `settings-${index}`}
-            section={section}
-            collapsed={isCollapsed}
-            onItemClick={onNavItemClick}
-            paddingTop={index === 0 ? "var(--spacing-8)" : undefined}
-          />
-        ))}
+        ) : null}
+        <SidebarFooter onLogOut={onLogOut} collapsed={isCollapsed} />
       </div>
-      {showFooterProductToggle && products && activeProductId && !isCollapsed ? (
-        <SidebarProductFooterToggle
-          products={products}
-          activeProductId={activeProductId}
-          onProductChange={onProductChange}
-        />
-      ) : null}
-      <SidebarFooter onLogOut={onLogOut} collapsed={isCollapsed} />
     </aside>
   );
 }

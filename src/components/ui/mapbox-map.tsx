@@ -48,6 +48,10 @@ interface MapboxMapProps {
    * dangling while the style is empty (avoids crashes from `queryRenderedFeatures` / `setFeatureState`).
    */
   onBeforeStyleChange?: (map: mapboxgl.Map) => void;
+  /**
+   * When set, replaces the default zoom in / zoom out buttons (compass and `extraControls` unchanged).
+   */
+  replaceDefaultZoomControls?: ReactNode;
 }
 
 interface CameraState {
@@ -87,6 +91,7 @@ export function MapboxMap({
   mutedMonochromeDark = false,
   onMapReady,
   onBeforeStyleChange,
+  replaceDefaultZoomControls,
 }: MapboxMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -261,21 +266,25 @@ export function MapboxMap({
         ) : (
           <span className="min-w-0 shrink" aria-hidden="true" />
         )}
-        <div className="pointer-events-auto flex flex-col gap-2">
-          <MapControlButton
-            aria-label="Zoom in"
-            onClick={handleZoomIn}
-            disabled={!isLoaded || !canZoomIn}
-          >
-            <Plus className="size-5" strokeWidth={1.9} />
-          </MapControlButton>
-          <MapControlButton
-            aria-label="Zoom out"
-            onClick={handleZoomOut}
-            disabled={!isLoaded || !canZoomOut}
-          >
-            <Minus className="size-5" strokeWidth={1.9} />
-          </MapControlButton>
+        <div className="pointer-events-auto flex flex-col items-end gap-2">
+          {replaceDefaultZoomControls ?? (
+            <>
+              <MapControlButton
+                aria-label="Zoom in"
+                onClick={handleZoomIn}
+                disabled={!isLoaded || !canZoomIn}
+              >
+                <Plus className="size-5" strokeWidth={1.9} />
+              </MapControlButton>
+              <MapControlButton
+                aria-label="Zoom out"
+                onClick={handleZoomOut}
+                disabled={!isLoaded || !canZoomOut}
+              >
+                <Minus className="size-5" strokeWidth={1.9} />
+              </MapControlButton>
+            </>
+          )}
           <MapControlButton
             aria-label={isCompassActive ? "Reset map orientation" : "Map is facing north"}
             aria-pressed={isCompassActive}

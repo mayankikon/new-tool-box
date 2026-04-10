@@ -207,7 +207,7 @@
   --chart-4: oklch(0.586 0.215 16.6);
   --chart-5: oklch(0.541 0.25 292.0);
   --radius: var(--radius-md);
-  --theme-background-sidebar: #FAFAFA;
+  --theme-background-sidebar: var(--neutral-50);
   --sidebar: var(--theme-background-sidebar);
   --sidebar-foreground: var(--theme-text-primary);
   --sidebar-primary: var(--theme-background-button-primary-default);
@@ -233,6 +233,9 @@
     var(--theme-text-tertiary) 88%,
     white 12%
   );
+
+  /* Sidebar account selector chip (dealership / user row) */
+  --theme-background-account-selector: var(--neutral-50);
 
   --inline-tip-default-bg: var(--neutral-50);
   --inline-tip-default-accent: var(--neutral-500);

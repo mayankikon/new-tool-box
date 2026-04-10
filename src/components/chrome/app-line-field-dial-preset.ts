@@ -7,7 +7,8 @@ export const appLineFieldPattern: LineFieldPatternSnapshot = {
     thickness: 1.2,
     topOpacity: 0.18,
     bottomOpacity: 0.15,
-    tint: "#d7dde4",
+    /** Neutral gray pinstripes on `neutral-50` (same family as `--neutral-300`–`--neutral-400`). */
+    tint: "#c4c4c4",
     blur: 0,
     lift: 0,
   },

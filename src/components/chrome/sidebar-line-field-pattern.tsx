@@ -2,21 +2,19 @@
 
 import { appLineFieldPattern } from "@/components/chrome/app-line-field-dial-preset";
 import { LineFieldPatternLayers } from "@/components/chrome/line-field-pattern-layers";
-import { useGroovedPanelPreference } from "@/components/chrome/grooved-panel-preference";
 import { useAppShellDarkAppearance } from "@/components/chrome/use-app-shell-dark-appearance";
 
 /**
- * Line field overlay for **design playground** previews (main app shell uses a flat page
- * background; the **sidebar** uses {@link SidebarLineFieldPattern}).
+ * Horizontal line field for the **app sidebar only** (main column stays flat `neutral-50`).
+ * Dark shell matches sidebar chrome during hydration (same idea as the former main-column grooved path).
  */
-export function AppMainLineFieldPattern() {
-  const { groovedPanelEnabled } = useGroovedPanelPreference();
+export function SidebarLineFieldPattern() {
   const isDarkAppearance = useAppShellDarkAppearance();
 
   return (
     <LineFieldPatternLayers
       pattern={appLineFieldPattern}
-      forceDarkAppearance={groovedPanelEnabled && isDarkAppearance}
+      forceDarkAppearance={isDarkAppearance}
     />
   );
 }
