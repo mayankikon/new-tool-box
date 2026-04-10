@@ -3,6 +3,8 @@
 import { Cartographic, Math as CesiumMath } from "@cesium/engine";
 import type { Viewer } from "@cesium/widgets";
 import {
+  ChevronLeft,
+  ChevronRight,
   Minus,
   Pentagon,
   Plus,
@@ -43,6 +45,7 @@ const MAX_SURFACE_HEIGHT_M = 400_000;
 const APPLIED_MAP_TUNING = {
   camera: {
     tilt: 40,
+    /** Degrees clockwise from north; primary 3D oblique framing. */
     compassDirection: 279,
   },
   geofence: {
@@ -61,7 +64,14 @@ const APPLIED_MAP_TUNING = {
   },
 } as const;
 
+/** One click on the compass controls rotates the 3D camera heading by this amount (degrees). */
+const COMPASS_STEP_DEG = 15;
+
 const EARTH_CIRCUMFERENCE_M = 40_075_016.686;
+
+function normalizeHeadingDeg(deg: number): number {
+  return ((deg % 360) + 360) % 360;
+}
 
 /** Sample WGS84 pins around the default Grapevine, TX framing — same design-system assets as Components → Map Markers. */
 const PREVIEW_3D_MAP_MARKERS: readonly GoogleMapsPreview3dMarker[] = [
@@ -140,7 +150,7 @@ interface Pending3dView {
 
 /**
  * Toggle 2D satellite (Maps JavaScript API) and photorealistic 3D (Cesium + Map Tiles API).
- * Custom 3D controls: zoom +/-, compass row, tilt +/-.
+ * Custom 3D controls: zoom +/-, compass ±15°, tilt presets.
  */
 export function GoogleMapsPreview() {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -167,6 +177,8 @@ export function GoogleMapsPreview() {
   const [pitchDeg, setPitchDeg] = useState(0);
   /** Eye height above ellipsoid — drives zoom button enable/disable. */
   const [surfaceHeightM, setSurfaceHeightM] = useState(0);
+  /** Camera heading in degrees [0, 360), clockwise from north — 3D only, from camera sync. */
+  const [headingDeg, setHeadingDeg] = useState(0);
 
   const [geofencePanelOpen, setGeofencePanelOpen] = useState(true);
   const [geofenceDrawing, setGeofenceDrawing] = useState(false);
@@ -371,6 +383,9 @@ export function GoogleMapsPreview() {
         viewerRef.current = viewer;
         setPitchDeg(CesiumMath.toDegrees(viewer.camera.pitch));
         setSurfaceHeightM(Cartographic.fromCartesian(viewer.camera.position).height);
+        setHeadingDeg(
+          Math.round(normalizeHeadingDeg(CesiumMath.toDegrees(viewer.camera.heading))),
+        );
         setCesiumStatus("ready");
       } catch (error: unknown) {
         if (cancelled) return;
@@ -398,6 +413,7 @@ export function GoogleMapsPreview() {
       const c = viewer.camera;
       setPitchDeg(CesiumMath.toDegrees(c.pitch));
       setSurfaceHeightM(Cartographic.fromCartesian(c.position).height);
+      setHeadingDeg(Math.round(normalizeHeadingDeg(CesiumMath.toDegrees(c.heading))));
     };
 
     viewer.camera.changed.addEventListener(sync);
@@ -418,6 +434,7 @@ export function GoogleMapsPreview() {
     map.setTilt(APPLIED_MAP_TUNING.camera.tilt);
   }, [mapMode]);
 
+  /** When entering 3D (or Cesium becomes ready in 3D), snap heading to the design-system default; preserve pitch. */
   useEffect(() => {
     const viewer = viewerRef.current;
     if (viewer == null || viewer.isDestroyed() || mapMode !== "3d" || cesiumStatus !== "ready") return;
@@ -425,7 +442,7 @@ export function GoogleMapsPreview() {
     c.setView({
       orientation: {
         heading: CesiumMath.toRadians(APPLIED_MAP_TUNING.camera.compassDirection),
-        pitch: CesiumMath.toRadians(-APPLIED_MAP_TUNING.camera.tilt),
+        pitch: c.pitch,
         roll: c.roll,
       },
     });
@@ -506,6 +523,20 @@ export function GoogleMapsPreview() {
       orientation: {
         heading: c.heading,
         pitch: newPitch,
+        roll: c.roll,
+      },
+    });
+  }, []);
+
+  const handleRotateHeading = useCallback((direction: -1 | 1) => {
+    const viewer = viewerRef.current;
+    if (viewer == null || viewer.isDestroyed()) return;
+    const c = viewer.camera;
+    const deltaRad = CesiumMath.toRadians(COMPASS_STEP_DEG * direction);
+    c.setView({
+      orientation: {
+        heading: c.heading + deltaRad,
+        pitch: c.pitch,
         roll: c.roll,
       },
     });
@@ -754,7 +785,41 @@ export function GoogleMapsPreview() {
           ) : (
             <div />
           )}
-          <div className="pointer-events-auto flex flex-col gap-2">
+          <div className="pointer-events-auto flex flex-col items-end gap-2">
+            {cesiumStatus === "ready" ? (
+              <div className="rounded-[8px] border border-border bg-card/95 px-2.5 py-2 shadow-sm backdrop-blur-sm dark:bg-card/90">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Heading ·{" "}
+                  <span className="tabular-nums font-semibold text-foreground">{headingDeg}°</span>
+                </p>
+                <div className="mt-1.5 flex gap-1" role="group" aria-label={`Rotate heading by ${COMPASS_STEP_DEG} degrees`}>
+                  <button
+                    type="button"
+                    onClick={() => handleRotateHeading(-1)}
+                    aria-label={`Turn ${COMPASS_STEP_DEG} degrees left`}
+                    className={cn(
+                      "flex h-9 min-w-[2.75rem] items-center justify-center gap-0.5 rounded-md px-2 text-[11px] font-semibold transition-colors",
+                      "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <ChevronLeft className="size-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+                    −{COMPASS_STEP_DEG}°
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRotateHeading(1)}
+                    aria-label={`Turn ${COMPASS_STEP_DEG} degrees right`}
+                    className={cn(
+                      "flex h-9 min-w-[2.75rem] items-center justify-center gap-0.5 rounded-md px-2 text-[11px] font-semibold transition-colors",
+                      "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    +{COMPASS_STEP_DEG}°
+                    <ChevronRight className="size-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <MapControlButton
               aria-label={geofenceMapReady ? "Open geofence controls" : "Geofence controls unavailable"}
               onClick={() => {

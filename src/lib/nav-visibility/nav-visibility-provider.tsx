@@ -27,14 +27,16 @@ const NavVisibilityContext = createContext<NavVisibilityContextValue | null>(
   null,
 );
 
+const EMPTY_NAV_VISIBILITY: NavVisibilityData = { hiddenItems: {} };
+
 export function NavVisibilityProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<NavVisibilityData>(() =>
-    loadNavVisibility(),
-  );
+  const [data, setData] = useState<NavVisibilityData>(EMPTY_NAV_VISIBILITY);
 
   const refresh = useCallback(() => setData(loadNavVisibility()), []);
 
   useEffect(() => {
+    setData(loadNavVisibility());
+
     window.addEventListener(NAV_VISIBILITY_CHANGED_EVENT, refresh);
     window.addEventListener("storage", refresh);
     return () => {
