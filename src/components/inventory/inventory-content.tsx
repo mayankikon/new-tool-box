@@ -19,6 +19,7 @@ import {
   Sparkles,
   Hourglass,
   Timer,
+  ChevronDown,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import mapboxgl from "mapbox-gl";
@@ -28,6 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { DropdownButton } from "@/components/ui/dropdown-button";
 import { MapboxMap, MapControlButton } from "@/components/ui/mapbox-map";
+import { InventoryMapZoomControls } from "@/components/inventory/inventory-map-zoom-controls";
 import { BoundaryIcon } from "@/components/icons/boundary-icon";
 import {
   DropdownMenu,
@@ -882,8 +884,13 @@ function reconcileInventoryVehicleHtmlMarkers(
     hideInventoryVehicleHoverPopup();
     return;
   }
-  /** Always chip when HTML markers are shown (zoom ≥ pin threshold). A pin “tier” here caused image→pin→image during easeTo zoom ramps and fly arcs. */
-  const markerMode = "chip" as const;
+  /**
+   * Tier-colored shield pins from the HTML threshold until `INVENTORY_MAP_VEHICLE_IMAGE_ZOOM` (18.5);
+   * photo chips at/above that zoom so images stay legible. Selection fly uses `easeTo` (not `flyTo`) so
+   * the camera does not dip through zoom bands mid-animation and thrash pin↔chip.
+   */
+  const markerMode: "chip" | "pin" =
+    zoom >= INVENTORY_MAP_VEHICLE_IMAGE_ZOOM ? "chip" : "pin";
 
   const bounds = map.getBounds();
   if (!bounds) {
@@ -2370,16 +2377,29 @@ function InventoryMapGeofenceDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <FilterButton
-            label="All Geofences"
-            leadIcon={
-              <BoundaryIcon className="size-4 text-primary" aria-hidden />
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            leadingIcon={
+              <BoundaryIcon
+                className="size-4 text-black dark:text-foreground"
+                aria-hidden
+              />
             }
-            showChevron
-            selected={false}
-            size="lg"
-            className={cn("h-9 min-h-9 shrink-0", triggerClassName)}
-          />
+            trailingIcon={
+              <ChevronDown
+                className="size-4 text-black dark:text-foreground"
+                aria-hidden
+              />
+            }
+            className={cn(
+              "shrink-0 text-black [&_svg]:text-black dark:text-foreground dark:[&_svg]:text-foreground",
+              triggerClassName
+            )}
+          >
+            All Geofences
+          </Button>
         }
       />
       <DropdownMenuContent align="start" className="w-56">
@@ -3258,6 +3278,12 @@ export function InventoryContent({
                 mapAppearance === "light" ? "#ddd5cc" : "#1a1f26"
               }
               mutedMonochromeDark={false}
+              replaceDefaultZoomControls={
+                <InventoryMapZoomControls
+                  map={spotlightMap}
+                  prefersReducedMotion={Boolean(prefersReducedMotion)}
+                />
+              }
               extraControls={
                 <>
                   {!isListPanelOpen ? (

@@ -7,7 +7,8 @@ export const GROOVED_PANEL_LIGHT_BRUSH = {
   groovePitchPx: 4,
   grooveLineThicknessPx: 2,
   panelGradientTopHex: "#fafafa",
-  panelGradientBottomHex: "#f5f5f5",
+  /** Design-system `neutral-100` — pairs with `neutral-50` top stop. */
+  panelGradientBottomHex: "#f4f4f4",
   baseGradientDepth: 0,
   darkMetal: "carbon" as const,
   lightPanelBase: "whiteGroove" as const,

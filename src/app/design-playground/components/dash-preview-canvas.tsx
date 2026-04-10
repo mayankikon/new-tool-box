@@ -155,7 +155,7 @@ function buildLightWhiteGrooveStyle(
   const pitch = clamp(groovePitchPx, 2, 48);
   const { period, gapEnd } = grooveHorizontalRepeat(pitch, grooveLineThicknessPx);
   const topHex = normalizePanelHex(panelGradientTopHex, "#fafafa");
-  const bottomHex = normalizePanelHex(panelGradientBottomHex, "#f5f5f5");
+  const bottomHex = normalizePanelHex(panelGradientBottomHex, "#f4f4f4");
   return {
     backgroundColor: topHex,
     backgroundImage: `
